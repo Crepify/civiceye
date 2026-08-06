@@ -110,7 +110,7 @@ export function Login() {
     setBusy(true);
     try {
       await resendConfirmation(email);
-      toast.success('Confirmation resent', 'Check your inbox (and spam).');
+      toast.success('Confirmation resent', 'Check your inbox — and your spam folder!');
     } catch (err) {
       console.error('[CivicEye] resend error:', err);
       setError(prettyAuthError(err));
@@ -213,23 +213,27 @@ export function Login() {
               ) : null}
 
               {confirmSent ? (
-                <div className="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs leading-relaxed text-sky-800 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
+                <div className="mb-4 rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
                   <div className="flex items-start gap-2">
-                    <MailWarning className="mt-0.5 h-4 w-4 shrink-0" />
+                    <MailWarning className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                     <div>
-                      <strong>Confirmation email sent to {email}.</strong> Click the link inside it,
-                      then sign in below.
+                      <p className="font-bold">
+                        Confirmation email sent to {email} — check your inbox <span className="underline">and your spam folder</span>.
+                      </p>
+                      <p className="mt-1.5 text-amber-700 dark:text-amber-300">
+                        Amrita mail sometimes flags these as spam, so look for a message from{' '}
+                        <strong>Supabase</strong> in Spam / Junk, and click the confirmation link.
+                      </p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <button
                           onClick={() => void handleResend()}
                           disabled={busy}
-                          className="rounded-lg bg-sky-600 px-2.5 py-1 font-bold text-white transition-colors hover:bg-sky-700"
+                          className="rounded-lg bg-amber-500 px-2.5 py-1 font-bold text-white transition-colors hover:bg-amber-600"
                         >
                           Resend confirmation
                         </button>
-                        <span className="text-sky-700 dark:text-sky-300">
-                          No email? Check spam — or the free email limit (~3/hr). See{' '}
-                          <code className="font-semibold">SMTP_SETUP.md</code>.
+                        <span className="text-amber-700 dark:text-amber-300">
+                          Free email limit applies (~30/hour per project).
                         </span>
                       </div>
                     </div>
@@ -365,9 +369,18 @@ export function Login() {
         <div className="mt-6 flex items-start gap-2 rounded-2xl border border-slate-200/70 bg-white/60 p-4 text-xs text-slate-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
           <span>
-            Amrita students & staff: signing in with your <strong>@…amrita.edu</strong> email
+            Amrita students &amp; staff: signing in with your <strong>@…amrita.edu</strong> email
             switches the app to <strong>Amrita Eye</strong> — reports are pushed straight to campus
             staff.
+          </span>
+        </div>
+
+        <div className="mt-3 flex items-start gap-2 rounded-2xl border border-amber-300/60 bg-amber-50 p-4 text-xs leading-relaxed text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+          <MailWarning className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+          <span>
+            <strong>Confirmation emails</strong> are sent by Supabase — if you don&apos;t see one
+            after signing up, check your <strong>spam / junk folder</strong> (Amrita mail often
+            flags these). Look for a message from <strong>Supabase</strong> and click the link.
           </span>
         </div>
       </motion.div>
@@ -456,19 +469,17 @@ function prettyAuthError(err: unknown): string {
 
   // Supabase sometimes returns an empty "{}" when the email step fails.
   if (!text || text === '{}' || text === 'null' || text === 'undefined') {
-    return 'Sign-up could not be completed. This usually means the confirmation email could not be sent — please set up free SMTP (see SMTP_SETUP.md) or check your internet connection.';
+    return 'Sign-up could not be completed. This usually means the confirmation email could not be sent — it may be a temporary network issue or the email rate limit. Please try again in a little while.';
   }
 
   if (/invalid login credentials/i.test(text)) return 'Incorrect email or password.';
   if (/already registered/i.test(text))
     return 'An account with this email already exists — try signing in instead.';
   if (/email not confirmed/i.test(text))
-    return 'Please confirm your email first — check your inbox (and spam) for the link we sent.';
+    return 'Please confirm your email first — check your inbox AND your spam/junk folder (Amrita mail often flags these) for the link we sent.';
   if (/rate limit/i.test(text))
-    return 'Too many attempts for this email — Supabase limits free sends to a few per hour. Please wait up to an hour, or set up a free SMTP (see SMTP_SETUP.md).';
+    return 'Too many attempts — Supabase limits built-in email sends to about 30/hour per project. Please wait a bit and try again.';
   if (/user already exists/i.test(text))
     return 'An account with this email already exists — try signing in instead.';
-  if (/email provider/i.test(text) || /SMTP/i.test(text) || /smtp/i.test(text))
-    return 'Email sending is not configured yet. Follow SMTP_SETUP.md to enable free SMTP, then try again.';
   return text;
 }

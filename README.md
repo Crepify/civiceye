@@ -87,9 +87,10 @@ VITE_GOOGLE_MAPS_API_KEY=your_key_here
 > 🔑 The key is read at build time via `import.meta.env` — it must be prefixed with `VITE_`.
 
 See **[ENVIRONMENT.md](./ENVIRONMENT.md)**, **[DEPLOYMENT.md](./DEPLOYMENT.md)** and
-**[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** for full details. For reliable confirmation /
-magic-link emails (Supabase's built-in sender is capped at ~3/hr), follow the free SMTP
-guide in **[SMTP_SETUP.md](./SMTP_SETUP.md)**.
+**[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** for full details. Email uses Supabase's
+built-in sender (~30/hr) — confirmation emails may land in spam, so the login page warns
+users to check their junk folder. Optional: **[SMTP_SETUP.md](./SMTP_SETUP.md)** for a
+free custom SMTP (own sender name + more capacity).
 
 ---
 

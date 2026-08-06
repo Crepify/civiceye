@@ -1,12 +1,12 @@
-# 📧 Free SMTP setup (fixes "no verification email" + rate limits)
+# 📧 Optional: Free SMTP setup (for your own sender name + more capacity)
 
-Supabase's **built-in email sender is capped at ~2–3 emails per hour per project**. That's
-why confirmation / magic-link emails stop arriving and sign-ups start failing with
-"too many attempts" (the limit resets hourly, not minutely).
+**You don't need this to run the app** — it uses Supabase's built-in email by default
+(~30 emails/hour, and confirmation emails may land in spam — the login page warns users
+to check their junk folder).
 
-**Connecting a free SMTP provider removes that cap** and lets you send branded emails
-from your own address. Pick one of the options below — **Option A (Resend) is the
-easiest to start with** and the full walkthrough is below.
+This guide is for when you want your **own sender address** (e.g. `Amrita Eye
+<noreply@yourdomain.com>`) and a higher send limit. Pick an option below — **Option A
+(Resend)** is the easiest.
 
 ---
 
@@ -130,3 +130,45 @@ Or sign up a brand-new account → confirm → signed in.
 | Amrita email never arrives | Some college mail systems block external mail — check spam/quarantine; test the flow with a personal email first. |
 | Still `{}` / rate-limit errors | Wait for the hourly window to reset, then sign up fresh — with SMTP on it will succeed. |
 | Magic link says "invalid link" | Make sure `auth/callback` is in **Authentication → URL Configuration → Redirect URLs**, and `VITE_APP_URL` matches your domain. |
+
+---
+
+## Free domain setup (Option 2 — full guide)
+
+The testing restriction means `onboarding@resend.dev` can only send to the email you
+registered with Resend. To send to ANYONE, verify a domain and use it as the sender.
+
+> ⚠️ `is-a.dev` does NOT work for this: Resend needs a DKIM record on a sub-label
+> (`resend._domainkey.yourdomain`), which is-a.dev can't create. Use deSEC / eu.org /
+> a bought domain instead.
+
+### Pick a domain
+
+| Option | Cost | Setup time | Notes |
+| --- | --- | --- | --- |
+| **deSEC → `yourname.dedyn.io`** | Free | ~10 min, instant | Full DNS incl. sub-labels — recommended free option |
+| **eu.org → `yourname.eu.org`** | Free | Days (approval) | Full DNS |
+| **Bought .com** | $8–12/yr | 10 min | Best email deliverability (free subdomains hit spam filters more) |
+
+### Steps
+
+1. **resend.com → Domains → Add Domain** → enter e.g. `civiceye.dedyn.io` → pick region → Add.
+   Resend now lists the DNS records: TXT (verification), TXT (SPF `v=spf1 include:amazonses.com ~all`),
+   TXT (DKIM, name `resend._domainkey`), optional MX. **Copy them all.**
+2. **desec.io → Register** → **Register subdomain** → type `civiceye` → you get `civiceye.dedyn.io`.
+3. In deSEC, **Add record** for each Resend record:
+   - TXT `@` = SPF value
+   - TXT (name Resend gave) = verification value
+   - TXT `resend._domainkey` = DKIM `p=…` value
+   - (optional) MX priority 10 → `feedback-smtp.us-east-1.amazonses.com`
+4. Back in **Resend → Domains** → wait for **all green** (minutes–~1h).
+5. **Supabase → Authentication → SMTP Settings** → Sender email: `noreply@civiceye.dedyn.io`,
+   Sender name: `Amrita Eye` → **Save** → **Send test email** (test Gmail first).
+6. Supabase → **Authentication → Users → ⋯ → Resend confirmation** on your Amrita email.
+   (Some college mail servers block external mail — check spam/quarantine; test with Gmail first.)
+
+### Why free subdomains can still hit spam
+
+Gmail/Outlook weigh sender reputation; `.dedyn.io`/`.eu.org` suffixes start with lower
+trust than a real domain. SPF + DKIM (which Resend sets up) help a lot. For a serious
+launch, a ~$10/yr domain is the reliable upgrade.

@@ -53,14 +53,19 @@ For **Vercel**: Project → Settings → Environment Variables → add both (wit
 > ⚠️ The **anon key is public by design** — your data is protected by Row Level
 > Security (RLS), not by the key. Never use the `service_role` key on the frontend.
 
-## 4.5 Email delivery & rate limits (IMPORTANT — fixes "no verification link")
+## 4.5 Email delivery (default: Supabase's built-in sender)
 
-Supabase's **built-in email sender is capped at ~2–3 emails per hour** per project.
-Once you hit that, confirmation/magic-link emails silently stop being sent and sign-ups
-start failing with "rate limit" errors **even after waiting a minute** (the cap is
-*per hour*, not per minute).
+The app uses **Supabase's built-in email** — no SMTP required. The free plan allows
+roughly **30 emails/hour** per project. Confirmation / magic-link / reset emails come
+from **Supabase** (`noreply@supabase.co`).
 
-**Fix — connect a free custom SMTP** (recommended, removes the cap):
+> ⚠️ **These emails often land in the recipient's SPAM/JUNK folder** — especially on
+> institutional mail like Amrita's. The login page shows a prominent warning, and the
+> "Resend confirmation" button is right there. Users should look for a message from
+> **Supabase** in spam.
+
+**Optional upgrade — connect a free custom SMTP** (Resend) if you want your own sender
+name/domain and more capacity:
 
 1. Create a free account at **https://resend.com** (100 emails/day free) → copy your API key.
 2. In Resend, add your domain or use the shared `onboarding@resend.dev` for testing.
@@ -74,8 +79,8 @@ start failing with "rate limit" errors **even after waiting a minute** (the cap 
 instantly (the app auto-detects this and skips the "check your inbox" step).
 
 **Raise the auth rate limits** if needed: **Authentication → Rate Limits** (e.g. sign-up
-60/hr → 600/hr). Custom SMTP limits apply regardless, so the SMTP step is the real fix.
-Full free-SMTP walkthrough: **`SMTP_SETUP.md`**.
+60/hr → 600/hr). With the built-in sender the email-send cap (~30/hr) applies, so spread
+sign-ups out. Full free-SMTP walkthrough (optional): **`SMTP_SETUP.md`**.
 
 **Reviews:** the review system (users review reports + agree/disagree) is part of
 `schema.sql` — if you already ran it before the reviews were added, just run the
