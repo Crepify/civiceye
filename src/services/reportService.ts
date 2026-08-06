@@ -1,5 +1,6 @@
 import type { Profile, Report, ReportStatus, VoteType } from '@/types';
 import { supabase } from '@/lib/supabase';
+import type { BrandId } from '@/types';
 
 /**
  * Real report database backed by Supabase Postgres.
@@ -7,6 +8,8 @@ import { supabase } from '@/lib/supabase';
  * Mirrors the shape the frontend expects (`Report`) so pages didn't have
  * to change when we moved off the mock JSON. All reads are public; all
  * writes require an authenticated user (see supabase/schema.sql + RLS).
+ * Reports carry a `scope` ('city' | 'campus') so Amrita Eye only sees
+ * campus posts.
  */
 
 export interface ReportRow {
@@ -19,6 +22,7 @@ export interface ReportRow {
   category: Report['category'];
   severity: Report['severity'];
   status: ReportStatus;
+  scope: 'city' | 'campus';
   lat: number;
   lng: number;
   location_name: string | null;
@@ -44,6 +48,7 @@ export function mapRow(row: ReportRow): Report {
     category: row.category,
     severity: row.severity,
     status: row.status,
+    scope: row.scope,
     image: row.photo_url ?? '',
     upvotes: row.upvotes,
     downvotes: row.downvotes,
@@ -59,13 +64,12 @@ export function mapRow(row: ReportRow): Report {
 }
 
 export const reportService = {
-  /** All reports, newest first. */
-  async getAll(): Promise<Report[]> {
+  /** All reports, newest first — optionally scoped to city or campus. */
+  async getAll(scope?: 'city' | 'campus' | 'all'): Promise<Report[]> {
     if (!supabase) return [];
-    const { data, error } = await supabase
-      .from('reports')
-      .select('*')
-      .order('created_at', { ascending: false });
+    let query = supabase.from('reports').select('*');
+    if (scope === 'city' || scope === 'campus') query = query.eq('scope', scope);
+    const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
     return (data as ReportRow[]).map(mapRow);
   },
@@ -92,6 +96,7 @@ export const reportService = {
     photoUrl: string;
     author: string;
     userId: string;
+    scope: 'city' | 'campus';
     ai?: unknown;
   }): Promise<Report> {
     if (!supabase) throw new Error('Supabase is not configured.');
@@ -104,6 +109,7 @@ export const reportService = {
         description: input.description,
         category: input.category,
         severity: input.severity,
+        scope: input.scope,
         lat: input.coordinates.lat,
         lng: input.coordinates.lng,
         location_name: input.locationName,
@@ -150,6 +156,13 @@ export const reportService = {
     const { error } = await supabase.from('reports').update({ status }).eq('id', id);
     if (error) throw error;
   },
+
+  /** Admin: permanently take down a post. */
+  async remove(id: string): Promise<void> {
+    if (!supabase) return;
+    const { error } = await supabase.from('reports').delete().eq('id', id);
+    if (error) throw error;
+  },
 };
 
 /** Resolve a report's public display name from the logged-in profile. */
@@ -157,3 +170,9 @@ export function displayName(profile: Profile | null): string {
   if (!profile) return 'Anonymous citizen';
   return profile.full_name?.trim() || profile.email.split('@')[0] || 'Anonymous citizen';
 }
+
+/** Brand → report scope for filtering + creation. */
+export function scopeForBrand(brand: BrandId): 'city' | 'campus' {
+  return brand === 'amrita' ? 'campus' : 'city';
+}
+

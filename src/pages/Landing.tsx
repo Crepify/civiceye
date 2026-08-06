@@ -12,29 +12,37 @@ import {
   Zap,
 } from 'lucide-react';
 import { useReports } from '@/hooks/useReports';
+import { useBrand } from '@/hooks/useBrand';
 import { SectionHeading } from '@/components/SectionHeading';
 import { FeatureCard } from '@/components/FeatureCard';
 import { Reveal } from '@/components/Reveal';
 import { StatCard } from '@/components/StatCard';
+import { MapView } from '@/components/map/MapView';
 import { FEATURES, HOW_IT_WORKS } from '@/data/features';
 import { CommunityReviews } from '@/components/CommunityReviews';
 import { CATEGORIES } from '@/data/categories';
-import { FallbackMapView } from '@/components/map/FallbackMapView';
 import { compactNumber } from '@/utils/format';
 
 /** Landing page. */
 export function Landing() {
   const { reports } = useReports();
+  const { isAmrita } = useBrand();
+
+  // Only show the active brand's reports (city vs campus).
+  const scoped = useMemo(
+    () => reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city')),
+    [reports, isAmrita],
+  );
 
   const stats = useMemo(() => {
-    const verified = reports.filter((r) => r.verified).length;
-    const resolved = reports.filter((r) => r.status === 'resolved').length;
-    const critical = reports.filter((r) => r.severity === 'critical').length;
-    const totalVotes = reports.reduce((s, r) => s + r.upvotes, 0);
-    return { total: reports.length, verified, resolved, critical, totalVotes };
-  }, [reports]);
+    const verified = scoped.filter((r) => r.verified).length;
+    const resolved = scoped.filter((r) => r.status === 'resolved').length;
+    const critical = scoped.filter((r) => r.severity === 'critical').length;
+    const totalVotes = scoped.reduce((s, r) => s + r.upvotes, 0);
+    return { total: scoped.length, verified, resolved, critical, totalVotes };
+  }, [scoped]);
 
-  const showcase = useMemo(() => reports.slice(0, 40), [reports]);
+  const showcase = useMemo(() => scoped.slice(0, 40), [scoped]);
 
   return (
     <>
@@ -149,7 +157,7 @@ export function Landing() {
               <div className="absolute -inset-6 rounded-[2.5rem] brand-panel blur-2xl" />
               <div className="card relative overflow-hidden !rounded-3xl p-2 shadow-glow">
                 <div className="pointer-events-none relative h-[320px] overflow-hidden rounded-2xl sm:h-[400px]">
-                  <FallbackMapView
+                  <MapView
                     reports={showcase}
                     center={{ lat: 12.97, lng: 77.6 }}
                     zoom={12}
@@ -157,9 +165,7 @@ export function Landing() {
                     selectedId={null}
                     onSelect={() => undefined}
                     heatmap
-                    pinDropping={false}
-                    onPinDrop={() => undefined}
-                    droppedPin={null}
+                    className="h-full w-full"
                   />
                   {/* Decorative scanline */}
                   <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500 via-emerald-500 to-primary-500 opacity-60" />
@@ -342,7 +348,7 @@ export function Landing() {
               <div className="hidden lg:block">
                 <div className="card overflow-hidden !rounded-2xl p-1.5">
                   <div className="pointer-events-none h-64 overflow-hidden rounded-xl">
-                    <FallbackMapView
+                    <MapView
                       reports={showcase.slice(0, 24)}
                       center={{ lat: 12.935, lng: 77.624 }}
                       zoom={13}
@@ -350,9 +356,7 @@ export function Landing() {
                       selectedId={null}
                       onSelect={() => undefined}
                       heatmap
-                      pinDropping={false}
-                      onPinDrop={() => undefined}
-                      droppedPin={null}
+                      className="h-full w-full"
                     />
                   </div>
                 </div>

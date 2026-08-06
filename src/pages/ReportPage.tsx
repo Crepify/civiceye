@@ -37,7 +37,7 @@ import { requestLocation } from '@/services/geoService';
 import { mockReverseGeocode } from '@/services/geocodeService';
 import { publishPhoto } from '@/services/syncService';
 import { uploadReportPhoto } from '@/lib/storage';
-import { displayName } from '@/services/reportService';
+import { displayName, scopeForBrand } from '@/services/reportService';
 import { formatCoords } from '@/utils/format';
 import { cn } from '@/utils/cn';
 
@@ -89,6 +89,7 @@ function ReportWizard() {
   const { user, profile } = useAuth();
   const { isAmrita } = useBrand();
   const availableCategories = getAvailableCategories(isAmrita);
+  const reportScope = scopeForBrand(isAmrita ? 'amrita' : 'civiceye');
   const [uploading, setUploading] = useState(false);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
@@ -177,6 +178,7 @@ function ReportWizard() {
         photoUrl,
         author: displayName(profile),
         userId: user.id,
+        scope: reportScope,
         ai: {
           confidence: draft.analysis.confidence,
           objects: draft.analysis.objects,

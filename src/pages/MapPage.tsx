@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Flame, Layers, ListFilter, ShieldCheck, Thermometer } from 'lucide-react';
 import type { CategoryId, Coordinates, ReportStatus, Severity } from '@/types';
 import { useReports } from '@/hooks/useReports';
+import { useBrand } from '@/hooks/useBrand';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { MapView } from '@/components/map/MapView';
@@ -35,6 +36,7 @@ const ALL = (list: unknown[]) => list.length === 0;
 /** Interactive map page: search, filters, heatmap, legend and report list. */
 export function MapPage() {
   const { reports } = useReports();
+  const { isAmrita } = useBrand();
   const [filters, setFilters] = useLocalStorage<MapFilters>(
     'civiceye:map-filters',
     DEFAULT_FILTERS,
@@ -51,7 +53,9 @@ export function MapPage() {
 
   const visibleReports = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
+    const wantedScope = isAmrita ? 'campus' : 'city';
     return reports.filter((r) => {
+      if (r.scope !== wantedScope) return false;
       if (!ALL(filters.categories) && !filters.categories.includes(r.category)) return false;
       if (!ALL(filters.severities) && !filters.severities.includes(r.severity)) return false;
       if (!ALL(filters.status) && !filters.status.includes(r.status)) return false;
@@ -63,7 +67,7 @@ export function MapPage() {
       }
       return true;
     });
-  }, [reports, filters, debouncedSearch]);
+  }, [reports, filters, debouncedSearch, isAmrita]);
 
   // Keep the selection valid as filters change.
   useEffect(() => {

@@ -1,17 +1,61 @@
 -- ===================================================================
 -- Amrita Eye / CivicEye — Supabase schema
 -- Run this in your Supabase project: SQL Editor → New query → Run
--- SAFE TO RE-RUN: every object is guarded with IF NOT EXISTS /
--- DROP POLICY IF EXISTS, so you can run the whole file again anytime.
+-- SAFE TO RE-RUN: every object is guarded (IF NOT EXISTS /
+-- DROP POLICY IF EXISTS / DO blocks), so run the whole file anytime.
 --
--- MIGRATION (only if you ran the schema before the "security" category):
--- Run this once to allow the new campus "Suspicious Activity" category:
---   alter table public.reports drop constraint reports_category_check;
---   alter table public.reports add constraint reports_category_check
---     check (category in ('pothole','broken-road','garbage','sidewalk',
---       'manhole','fallen-tree','street-light','water-leakage','sewage',
---       'illegal-dumping','traffic-signal','accident','security','other'));
+-- If you already ran an older version of this file, the ALTER/DO
+-- statements below add the new columns/tables without breaking data.
 -- ===================================================================
+
+-- ---------- MIGRATIONS for databases created before this version ----
+alter table if exists public.reports add column if not exists scope text not null default 'city';
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'reports_scope_check') then
+    alter table public.reports add constraint reports_scope_check check (scope in ('city','campus'));
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'reports_category_check') then
+    alter table public.reports add constraint reports_category_check check (category in
+      ('pothole','broken-road','garbage','sidewalk','manhole','fallen-tree',
+       'street-light','water-leakage','sewage','illegal-dumping',
+       'traffic-signal','accident','security','other'));
+  end if;
+end $$;
+
+-- ---------- ADMINS (configurable — see src/data/admins.ts too) ------
+-- Add future admins by inserting a row here (or editing the app config).
+create table if not exists public.admin_users (
+  email    text primary key,
+  brand    text not null default 'both',   -- 'civiceye' | 'amrita' | 'both'
+  added_at timestamptz not null default now()
+);
+
+insert into public.admin_users (email, brand) values
+  ('architrenjeev@gmail.com', 'civiceye'),
+  ('bl.ai.u4aid26006@bl.students.amrita.edu', 'amrita')
+on conflict (email) do nothing;
+
+-- Every @amrita.edu address that is NOT a *.students.* address is a
+-- teacher/staff account → automatically an Amrita admin.
+create or replace function public.is_admin()
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select
+    exists (
+      select 1 from public.admin_users a
+      where lower(a.email) = lower(coalesce(auth.jwt()->>'email', ''))
+    )
+    or (
+      lower(coalesce(auth.jwt()->>'email', '')) like '%@amrita.edu'
+      and lower(coalesce(auth.jwt()->>'email', '')) not like '%.students.%'
+    );
+$$;
+
+alter table public.admin_users enable row level security;
+-- No public policies: only the security-definer is_admin() reads it.
 
 -- ---------- Profiles (one row per auth user) ------------------------
 create table if not exists public.profiles (
@@ -68,6 +112,7 @@ create table if not exists public.reports (
   severity      text not null default 'medium' check (severity in ('low','medium','high','critical')),
   status        text not null default 'pending' check (status in
     ('pending','verified','in-progress','resolved','rejected')),
+  scope         text not null default 'city' check (scope in ('city','campus')),
   lat           double precision not null,
   lng           double precision not null,
   location_name text,
@@ -86,6 +131,7 @@ create table if not exists public.reports (
 create index if not exists reports_status_idx  on public.reports (status);
 create index if not exists reports_category_idx on public.reports (category);
 create index if not exists reports_created_idx on public.reports (created_at desc);
+create index if not exists reports_scope_idx   on public.reports (scope);
 
 alter table public.reports enable row level security;
 
@@ -98,8 +144,10 @@ create policy "reports auth insert"   on public.reports for insert with check (a
 drop policy if exists "reports auth update"   on public.reports;
 create policy "reports auth update"   on public.reports for update using (auth.uid() is not null);
 
-drop policy if exists "reports owner delete"  on public.reports;
-create policy "reports owner delete"  on public.reports for delete using (auth.uid() = user_id);
+-- Owners delete their own; admins (is_admin) can take down any post.
+drop policy if exists "reports delete"  on public.reports;
+create policy "reports delete"  on public.reports for delete
+  using (auth.uid() = user_id or public.is_admin());
 
 -- Keep updated_at fresh
 create or replace function public.touch_updated_at()
@@ -167,6 +215,31 @@ begin
   return to_jsonb(v_row);
 end;
 $$;
+
+-- ---------- Flags (civilians report inappropriate posts) ------------
+create table if not exists public.report_flags (
+  id            uuid primary key default gen_random_uuid(),
+  report_id     uuid not null references public.reports(id) on delete cascade,
+  user_id       uuid references auth.users(id) on delete set null,
+  flagger_email text not null,
+  reason        text not null,
+  note          text,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists report_flags_report_idx on public.report_flags (report_id, created_at desc);
+
+alter table public.report_flags enable row level security;
+
+-- Any signed-in user can add a flag; admins can read & clear them.
+drop policy if exists "flags insert" on public.report_flags;
+create policy "flags insert" on public.report_flags for insert with check (auth.uid() is not null);
+
+drop policy if exists "flags select" on public.report_flags;
+create policy "flags select" on public.report_flags for select using (auth.uid() is not null);
+
+drop policy if exists "flags delete" on public.report_flags;
+create policy "flags delete" on public.report_flags for delete using (auth.uid() is not null);
 
 -- ---------- Storage bucket for report photos ------------------------
 insert into storage.buckets (id, name, public)
@@ -258,5 +331,7 @@ $$;
 -- Providers (for magic links + confirmations), then add redirect
 -- URLs:  http://localhost:5173/auth/callback  and
 --         https://<your-app>.vercel.app/auth/callback
--- For reliable email, follow SMTP_SETUP.md (free SMTP = no hourly cap).
+-- Email uses Supabase's built-in sender (~30/hr); confirmation emails
+-- often land in spam — the login page warns users. Optional custom
+-- SMTP: see SMTP_SETUP.md.
 -- ===================================================================

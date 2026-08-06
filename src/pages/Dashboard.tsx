@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import type { Report, Severity } from '@/types';
 import { useReports } from '@/hooks/useReports';
+import { useBrand } from '@/hooks/useBrand';
 import { useToast } from '@/hooks/useToast';
 import { useNotifications } from '@/hooks/useNotifications';
 import { DashboardCard } from '@/components/DashboardCard';
@@ -40,37 +41,44 @@ const SEVERITY_HEX: Record<Severity, string> = {
 export function Dashboard() {
   const { reports, loading, markResolved, assignToAuthority, rejectAsAuthority, refresh } =
     useReports();
+  const { isAmrita } = useBrand();
   const toast = useToast();
   const notifications = useNotifications();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // Only show reports for the active brand (city vs campus).
+  const scopedReports = useMemo(
+    () => reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city')),
+    [reports, isAmrita],
+  );
+
   const stats = useMemo(() => {
-    const open = reports.filter((r) => r.status === 'pending' || r.status === 'in-progress').length;
-    const resolved = reports.filter((r) => r.status === 'resolved').length;
-    const pending = reports.filter((r) => r.status === 'pending').length;
-    const verified = reports.filter((r) => r.verified).length;
-    const critical = reports.filter((r) => r.severity === 'critical').length;
+    const open = scopedReports.filter((r) => r.status === 'pending' || r.status === 'in-progress').length;
+    const resolved = scopedReports.filter((r) => r.status === 'resolved').length;
+    const pending = scopedReports.filter((r) => r.status === 'pending').length;
+    const verified = scopedReports.filter((r) => r.verified).length;
+    const critical = scopedReports.filter((r) => r.severity === 'critical').length;
     return { open, resolved, pending, verified, critical };
-  }, [reports]);
+  }, [scopedReports]);
 
   const categoryBreakdown = useMemo(
     () =>
       CATEGORIES.map((c) => ({
         category: c,
-        count: reports.filter((r) => r.category === c.id).length,
+        count: scopedReports.filter((r) => r.category === c.id).length,
       }))
         .filter((c) => c.count > 0)
         .sort((a, b) => b.count - a.count),
-    [reports],
+    [scopedReports],
   );
 
   const severityBreakdown = useMemo(
     () =>
       (Object.keys(SEVERITY_META) as Severity[]).map((s) => ({
         severity: s,
-        count: reports.filter((r) => r.severity === s).length,
+        count: scopedReports.filter((r) => r.severity === s).length,
       })),
-    [reports],
+    [scopedReports],
   );
 
   /** Weekly activity trend (bucketed from real report dates). */
@@ -80,7 +88,7 @@ export function Dashboard() {
     for (let w = 7; w >= 0; w--) {
       const end = now - (w - 1) * 7 * 86400000;
       const start = now - w * 7 * 86400000;
-      const count = reports.filter((r) => {
+      const count = scopedReports.filter((r) => {
         const t = new Date(r.date).getTime();
         return t >= start && t < end;
       }).length;
@@ -90,11 +98,11 @@ export function Dashboard() {
       });
     }
     return weeks;
-  }, [reports]);
+  }, [scopedReports]);
 
   const topAreas = useMemo(() => {
     const map = new Map<string, { count: number; critical: number }>();
-    for (const r of reports) {
+    for (const r of scopedReports) {
       const area = r.locationName;
       const entry = map.get(area) ?? { count: 0, critical: 0 };
       entry.count += 1;
@@ -105,11 +113,11 @@ export function Dashboard() {
       .map(([area, v]) => ({ area, ...v }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
-  }, [reports]);
+  }, [scopedReports]);
 
   const recent = useMemo(
-    () => [...reports].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 10),
-    [reports],
+    () => [...scopedReports].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 10),
+    [scopedReports],
   );
 
   /** Build + download a plain-text ward report. */
@@ -344,7 +352,7 @@ export function Dashboard() {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-3xl font-extrabold text-slate-900 dark:text-white">
-                  {reports.length}
+                  {scopedReports.length}
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                   total
@@ -408,7 +416,7 @@ export function Dashboard() {
           className="lg:col-span-2"
         >
           <MapView
-            reports={reports}
+            reports={scopedReports}
             selectedId={selectedId}
             onSelect={setSelectedId}
             heatmap

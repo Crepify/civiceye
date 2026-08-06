@@ -64,6 +64,8 @@ export interface Report {
   assignedTo?: string;
   /** Owning auth user id (uuid), when logged in. */
   userId?: string;
+  /** Which product this report belongs to: 'city' (CivicEye) or 'campus' (Amrita Eye). */
+  scope: 'city' | 'campus';
 }
 
 /** A user profile (mirrors the `profiles` table). */

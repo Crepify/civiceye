@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, GraduationCap, LogOut, Menu, Plus, User } from 'lucide-react';
+import { ChevronRight, GraduationCap, LogOut, Menu, Plus, ShieldCheck, User } from 'lucide-react';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { Drawer } from './Drawer';
 import { NotificationBell } from './NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
+import { useBrand } from '@/hooks/useBrand';
+import { isAdminEmail } from '@/data/admins';
 import { cn } from '@/utils/cn';
 
 const NAV_LINKS = [
@@ -27,7 +29,9 @@ export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, isAmrita, signOut } = useAuth();
+  const { brand } = useBrand();
   const profileRef = useRef<HTMLDivElement>(null);
+  const isAdmin = isAdminEmail(user?.email, brand);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -116,6 +120,22 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-2">
+            {isAdmin ? (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  cn(
+                    'flex h-9 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-bold transition-all',
+                    isActive
+                      ? 'border-primary-500 bg-primary-500/10 text-primary-700 dark:border-primary-400/50 dark:text-primary-300'
+                      : 'border-slate-200 bg-white/70 text-slate-600 hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-300',
+                  )
+                }
+              >
+                <ShieldCheck className="h-4 w-4" />
+                <span className="hidden sm:inline">Admin</span>
+              </NavLink>
+            ) : null}
             <NotificationBell />
             <ThemeToggle />
 

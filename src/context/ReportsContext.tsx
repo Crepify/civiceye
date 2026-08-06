@@ -16,7 +16,10 @@ interface ReportsContextValue {
   /** True when a mutation is in flight. */
   mutating: boolean;
   error: string | null;
-  refresh: () => Promise<void>;
+  /** Refresh from Supabase, optionally filtered to a brand scope. */
+  refresh: (scope?: 'city' | 'campus' | 'all') => Promise<void>;
+  /** Admin: permanently remove a report. */
+  removeReport: (id: string) => Promise<void>;
   getById: (idOrCode: string) => Report | undefined;
   addReport: (input: Parameters<typeof reportService.create>[0]) => Promise<Report>;
   vote: (id: string, voteType: VoteType) => Promise<Report | undefined>;
@@ -37,18 +40,21 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    try {
-      setLoading(true);
-      const list = await reportService.getAll();
-      setReports(list);
-      setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load reports.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const refresh = useCallback(
+    async (scope?: 'city' | 'campus' | 'all') => {
+      try {
+        setLoading(true);
+        const list = await reportService.getAll(scope ?? 'all');
+        setReports(list);
+        setError(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load reports.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     void refresh();
@@ -94,6 +100,7 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
       assignToAuthority: (id, authorityId) =>
         run(() => reportService.markInProgress(id, authorityId)),
       rejectAsAuthority: (id) => run(() => reportService.rejectReport(id)),
+      removeReport: (id) => run(() => reportService.remove(id)),
     }),
     [reports, loading, mutating, error, refresh, run],
   );

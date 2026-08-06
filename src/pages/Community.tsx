@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDownUp, ArrowUpDown, Inbox, ListFilter } from 'lucide-react';
 import type { CategoryId, Report, ReportStatus, Severity, SortKey } from '@/types';
 import { useReports } from '@/hooks/useReports';
+import { useBrand } from '@/hooks/useBrand';
 import { useDebounce } from '@/hooks/useDebounce';
 import { PageHeader } from '@/components/PageHeader';
 import { SearchBar } from '@/components/SearchBar';
@@ -60,6 +61,7 @@ function sortReports(list: Report[], sort: SortKey): Report[] {
 /** Community reports feed: search, filter, sort, paginate. */
 export function Community() {
   const { reports, loading } = useReports();
+  const { isAmrita } = useBrand();
   const [filters, setFilters] = useState<CommunityFilters>(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortKey>('newest');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -69,7 +71,9 @@ export function Community() {
 
   const filtered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
+    const wantedScope = isAmrita ? 'campus' : 'city';
     return reports.filter((r) => {
+      if (r.scope !== wantedScope) return false;
       if (filters.categories.length && !filters.categories.includes(r.category)) return false;
       if (filters.severities.length && !filters.severities.includes(r.severity)) return false;
       if (filters.status.length && !filters.status.includes(r.status)) return false;
@@ -80,7 +84,7 @@ export function Community() {
       }
       return true;
     });
-  }, [reports, filters, debouncedSearch]);
+  }, [reports, filters, debouncedSearch, isAmrita]);
 
   const sorted = useMemo(() => sortReports(filtered, sort), [filtered, sort]);
   const page = sorted.slice(0, visibleCount);

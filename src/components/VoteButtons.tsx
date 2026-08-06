@@ -5,6 +5,7 @@ import type { Report } from '@/types';
 import { useReports } from '@/hooks/useReports';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
+import { FlagButton } from './FlagButton';
 import { compactNumber } from '@/utils/format';
 import { cn } from '@/utils/cn';
 
@@ -139,6 +140,9 @@ export function VoteButtons({ report, compact = false, className }: VoteButtonsP
         <ThumbsDown className="h-4 w-4" />
         Reject
       </button>
+
+      <span className="mx-1 hidden h-5 w-px bg-slate-200 dark:bg-white/10 sm:block" />
+      <FlagButton reportId={report.id} />
 
       {verified ? (
         <span className="flex items-center gap-1 rounded-xl bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
