@@ -1,6 +1,8 @@
 -- ===================================================================
 -- Amrita Eye / CivicEye — Supabase schema
 -- Run this in your Supabase project: SQL Editor → New query → Run
+-- SAFE TO RE-RUN: every object is guarded with IF NOT EXISTS /
+-- DROP POLICY IF EXISTS, so you can run the whole file again anytime.
 -- ===================================================================
 
 -- ---------- Profiles (one row per auth user) ------------------------
@@ -14,7 +16,10 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "profiles public read" on public.profiles;
 create policy "profiles public read" on public.profiles for select using (true);
+
+drop policy if exists "profiles own update" on public.profiles;
 create policy "profiles own update"  on public.profiles for update using (auth.uid() = id);
 
 -- Auto-create a profile row when a user signs up
@@ -76,12 +81,16 @@ create index if not exists reports_created_idx on public.reports (created_at des
 
 alter table public.reports enable row level security;
 
--- Anyone (logged in or not) can read reports
+drop policy if exists "reports public read"   on public.reports;
 create policy "reports public read"   on public.reports for select using (true);
--- Only authenticated users can create reports
+
+drop policy if exists "reports auth insert"   on public.reports;
 create policy "reports auth insert"   on public.reports for insert with check (auth.uid() is not null);
--- Prototype: any authenticated user can update (tighten for staff-only later)
+
+drop policy if exists "reports auth update"   on public.reports;
 create policy "reports auth update"   on public.reports for update using (auth.uid() is not null);
+
+drop policy if exists "reports owner delete"  on public.reports;
 create policy "reports owner delete"  on public.reports for delete using (auth.uid() = user_id);
 
 -- Keep updated_at fresh
@@ -106,6 +115,7 @@ create table if not exists public.report_votes (
 );
 
 alter table public.report_votes enable row level security;
+drop policy if exists "votes auth all" on public.report_votes;
 create policy "votes auth all" on public.report_votes for all using (auth.uid() = user_id);
 
 -- Atomic vote: inserts one-per-user, updates counters, auto-verifies
@@ -176,8 +186,13 @@ create index if not exists reviews_report_idx on public.reviews (report_id, crea
 
 alter table public.reviews enable row level security;
 
+drop policy if exists "reviews public read"  on public.reviews;
 create policy "reviews public read"  on public.reviews for select using (true);
+
+drop policy if exists "reviews auth insert"  on public.reviews;
 create policy "reviews auth insert"  on public.reviews for insert with check (auth.uid() is not null);
+
+drop policy if exists "reviews owner delete" on public.reviews;
 create policy "reviews owner delete" on public.reviews for delete using (auth.uid() = user_id);
 
 -- One vote (agree/disagree) per user per review
@@ -190,6 +205,7 @@ create table if not exists public.review_votes (
 );
 
 alter table public.review_votes enable row level security;
+drop policy if exists "review_votes auth all" on public.review_votes;
 create policy "review_votes auth all" on public.review_votes for all using (auth.uid() = user_id);
 
 -- Atomic agree/disagree vote (one per user, updates counters)
