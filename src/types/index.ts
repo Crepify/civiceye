@@ -17,6 +17,7 @@ export type CategoryId =
   | 'illegal-dumping'
   | 'traffic-signal'
   | 'accident'
+  | 'security'
   | 'other';
 
 /** Perceived severity used by both citizens and authorities. */

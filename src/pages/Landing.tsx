@@ -97,9 +97,9 @@ export function Landing() {
                 transition={{ duration: 0.55, delay: 0.16 }}
                 className="mt-6 max-w-xl text-base leading-relaxed text-slate-500 dark:text-slate-400 sm:text-lg"
               >
-                Spot a pothole, a dark street or an open manhole? Snap it, pin it, and let your
-                neighbours + local authorities take it from there. Crowdsourced civic reporting,
-                visualised live on a map.
+                New to the city, or lived here for years? Someone's already flagged the pothole,
+                the dark street, the flooded junction. Spot something yourself? Snap it, pin it,
+                and let your neighbours + local authorities take it from there.
               </motion.p>
 
               <motion.div
@@ -146,7 +146,7 @@ export function Landing() {
               transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="relative"
             >
-              <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-primary-500/20 via-transparent to-emerald-500/20 blur-2xl" />
+              <div className="absolute -inset-6 rounded-[2.5rem] brand-panel blur-2xl" />
               <div className="card relative overflow-hidden !rounded-3xl p-2 shadow-glow">
                 <div className="pointer-events-none relative h-[320px] overflow-hidden rounded-2xl sm:h-[400px]">
                   <FallbackMapView
@@ -220,7 +220,7 @@ export function Landing() {
               label="Active reports"
               value={stats.total}
               sub="in the prototype database"
-              gradient="from-primary-500 to-violet-600"
+              gradient="brand-grad-1"
               index={0}
             />
             <StatCard
@@ -228,7 +228,7 @@ export function Landing() {
               label="Verified reports"
               value={stats.verified}
               sub="confirmed by neighbours"
-              gradient="from-emerald-500 to-teal-600"
+              gradient="brand-grad-2"
               index={1}
             />
             <StatCard
@@ -236,7 +236,7 @@ export function Landing() {
               label="Resolved"
               value={stats.resolved}
               sub="marked fixed by authorities"
-              gradient="from-sky-500 to-blue-600"
+              gradient="brand-grad-3"
               index={2}
             />
             <StatCard
@@ -244,7 +244,7 @@ export function Landing() {
               label="Citizen votes"
               value={compactNumber(stats.totalVotes)}
               sub="community validation"
-              gradient="from-amber-500 to-orange-600"
+              gradient="brand-grad-4"
               index={3}
             />
           </div>
@@ -262,7 +262,7 @@ export function Landing() {
           {HOW_IT_WORKS.map((step, i) => (
             <Reveal key={step.step} delay={i * 0.08}>
               <div className="card relative h-full p-5 transition-transform duration-300 hover:-translate-y-1">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-emerald-500 text-base font-extrabold text-white shadow-glow">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl brand-grad-1 text-base font-extrabold text-white shadow-glow">
                   {step.step}
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">{step.title}</h3>

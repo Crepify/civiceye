@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, Lightbulb, MapPin, ShieldCheck, Target, Users } from 'lucide-react';
+import { Compass, GraduationCap, Heart, Lightbulb, MapPin, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { SectionHeading } from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
@@ -7,42 +7,47 @@ import { Logo } from '@/components/Logo';
 
 const VALUES = [
   {
-    icon: Target,
-    title: 'Citizens first',
-    text: 'Every feature exists to make reporting faster, fairer and more transparent for the people who live with these problems daily.',
+    icon: GraduationCap,
+    title: 'Born in the hostel',
+    text: 'We were students new to a city we knew nothing about. CivicEye exists so the next fresher never has to learn a pothole the hard way.',
+  },
+  {
+    icon: Compass,
+    title: 'City knowledge, shared',
+    text: 'Broken lights, dark streets, flooded junctions — the things locals know and newcomers don\u2019t. We make that knowledge visible to everyone.',
   },
   {
     icon: ShieldCheck,
-    title: 'Verified, not vague',
-    text: 'Community confirmations turn anecdote into evidence. Authorities get organised, trustworthy data instead of scattered complaints.',
-  },
-  {
-    icon: Users,
-    title: 'Everyone is a sensor',
-    text: 'A million phones are a million sensors. Together we see the city the way no single agency can.',
+    title: 'Verified by neighbours',
+    text: 'Reports are confirmed by the people who live there. Numbers and community votes decide what gets fixed first — no one decides alone.',
   },
   {
     icon: Lightbulb,
-    title: 'Fix things, visibly',
-    text: 'When a report goes from Pending → Verified → In progress → Resolved, everyone can see it. Progress becomes public.',
+    title: 'Progress you can see',
+    text: 'When a report goes Pending \u2192 Verified \u2192 In progress \u2192 Resolved, everyone can watch it. Fixing things visibly builds trust.',
   },
 ];
 
 const TIMELINE = [
   {
-    year: '2025',
-    title: 'The idea',
-    text: 'A pothole on a commute becomes a 3-week headache. We started CivicEye to shorten that cycle.',
+    date: '1 August 2026',
+    title: 'The idea is born',
+    text: 'Living in hostels in a brand-new city, we realised no one tells you where the potholes are, which streets go dark at night, or which junctions flood after rain. You find out by getting hurt. We decided to fix that.',
   },
   {
-    year: '2026',
-    title: 'The prototype',
-    text: 'This hackathon build ships a full product experience — map, AI analysis, community validation and authority tools.',
+    date: 'August 2026',
+    title: 'The first build',
+    text: 'The very first version of CivicEye — a shared map where anyone can report what\u2019s broken, dark, flooded or unsafe, and neighbours can verify it. Real logins, real reports, live on a map.',
   },
   {
-    year: '2026+',
+    date: 'Ongoing',
+    title: 'Campus & city rollout',
+    text: 'Amrita Eye brings the same idea inside campuses — water leaks, broken lights, suspicious activity — straight to the people who keep the campus safe.',
+  },
+  {
+    date: 'Next',
     title: 'The mission',
-    text: 'Partner with ward offices, integrate with civic work orders, and scale city by city.',
+    text: 'Help anyone new to a place — students, freshers, new residents — and the people already living there, understand the neighbourhood before trouble finds them.',
   },
 ];
 
@@ -52,8 +57,8 @@ export function About() {
     <>
       <PageHeader
         eyebrow="About CivicEye"
-        title="Making cities better, one report at a time"
-        description="CivicEye is a citizen-powered platform that turns everyday observations into organised, verifiable civic data — and hands it to the people who can fix it."
+        title="Know your place before it bites"
+        description="CivicEye is a shared, living map of what\u2019s broken, dark, flooded or unsafe in your city and campus — reported and verified by the people who live it, so newcomers and locals alike know where they\u2019re going."
       />
 
       <section className="section-pad py-16 sm:py-20">
@@ -62,46 +67,48 @@ export function About() {
             <SectionHeading
               align="left"
               eyebrow="Our story"
-              title="From one pothole to a movement"
+              title="From a hostel room to a safer city"
               className="mb-6"
             />
             <div className="space-y-4 text-slate-500 dark:text-slate-400">
               <p>
-                Every city has the same story: a dangerous pothole, a dark street, an open manhole —
-                reported over and over, with no single place keeping track. Complaints get lost in
-                helplines, spread across apps, or simply forgotten.
+                Every year, thousands of students move to a new city and spend four years there
+                knowing almost nothing about it. Where are the potholes that swallow bike wheels?
+                Which streets have no lights at night? Which junction floods every monsoon? The
+                answers exist — scattered across the memory of people who've lived there a long
+                time. Newcomers just don't have access to them.
               </p>
               <p>
-                CivicEye fixes that by giving every citizen a one-minute reporting flow and giving
-                every ward office one organised dashboard. Reports are validated by neighbours,
-                prioritised by severity, and mapped live so everyone can see what\u2019s happening
-                where.
+                CivicEye started in the hostel as exactly that missing knowledge — a place where
+                anyone can report what they see and neighbours can confirm it, so the whole map of
+                "what to avoid" and "what to fix" is built together, one report at a time.
               </p>
               <p>
-                We believe that when citizens and authorities share the same picture of the city,
-                things get fixed — faster, and more fairly.
+                It's for students and citizens who are new to a place, and for the people who live
+                nearby — so a broken street light or a pothole costs you a scare instead of an
+                accident, and a future headache turns into a fixed report.
               </p>
             </div>
           </Reveal>
 
           <Reveal direction="left" className="flex justify-center">
             <div className="relative">
-              <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-primary-500/20 to-emerald-500/20 blur-2xl" />
+              <div className="absolute -inset-6 rounded-[2.5rem] brand-panel blur-2xl" />
               <div className="card relative max-w-md p-8 text-center">
                 <div className="flex justify-center">
                   <Logo iconOnly />
                 </div>
                 <p className="mt-5 text-2xl font-extrabold text-slate-900 dark:text-white">
-                  100+ reports
+                  Made by students, for students
                 </p>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  in the prototype database
+                  and for anyone new to their neighbourhood
                 </p>
                 <div className="mt-6 grid grid-cols-3 gap-3 text-center">
                   {[
-                    ['13', 'categories'],
-                    ['24/7', 'reporting'],
-                    ['100%', 'open data'],
+                    ['1 Aug', '2026'],
+                    ['4 yrs', 'of college life'],
+                    ['100%', 'community-built'],
                   ].map(([v, l]) => (
                     <div key={l} className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
                       <p className="text-lg font-extrabold text-primary-600 dark:text-primary-400">
@@ -124,7 +131,7 @@ export function About() {
             {VALUES.map((v, i) => (
               <Reveal key={v.title} delay={i * 0.08}>
                 <div className="card h-full p-6">
-                  <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-emerald-500 text-white">
+                  <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl brand-grad-1 text-white">
                     <v.icon className="h-5 w-5" />
                   </div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">{v.title}</h3>
@@ -139,20 +146,20 @@ export function About() {
       </section>
 
       <section className="section-pad py-16 sm:py-20">
-        <SectionHeading eyebrow="Timeline" title="Where we\u2019ve been, where we\u2019re going" />
+        <SectionHeading eyebrow="Timeline" title="How this started" />
         <div className="mx-auto max-w-3xl">
           {TIMELINE.map((t, i) => (
-            <Reveal key={t.year} delay={i * 0.1}>
+            <Reveal key={t.date} delay={i * 0.1}>
               <div className="relative flex gap-6 pb-10 last:pb-0">
                 {i < TIMELINE.length - 1 ? (
-                  <span className="absolute left-[15px] top-9 h-full w-0.5 bg-gradient-to-b from-primary-400 to-emerald-400/40" />
+                  <span className="absolute left-[15px] top-9 h-full w-0.5 bg-gradient-to-b from-primary-400 to-accent-400/40" />
                 ) : null}
-                <span className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-emerald-500 text-[10px] font-bold text-white shadow-glow">
+                <span className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full brand-grad-1 text-[10px] font-bold text-white shadow-glow">
                   {i + 1}
                 </span>
                 <div className="card flex-1 p-5">
                   <p className="text-xs font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">
-                    {t.year}
+                    {t.date}
                   </p>
                   <h3 className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
                     {t.title}
@@ -172,11 +179,11 @@ export function About() {
           <div className="relative overflow-hidden rounded-3xl brand-cta p-10 text-center shadow-glow sm:p-14">
             <MapPin className="mx-auto mb-4 h-10 w-10 text-white/80" />
             <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
-              Spot something broken in your city?
+              New to the neighbourhood?
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-white/80 sm:text-base">
-              It takes under a minute to file a report — and the community + authorities can act on
-              it.
+              See what the people around you already know — and add what you spot. It takes under a
+              minute.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               <Link

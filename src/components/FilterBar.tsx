@@ -1,5 +1,6 @@
 import { Check, SlidersHorizontal } from 'lucide-react';
-import { CATEGORIES, SEVERITY_META, STATUS_META } from '@/data/categories';
+import { getAvailableCategories, SEVERITY_META, STATUS_META } from '@/data/categories';
+import { useBrand } from '@/hooks/useBrand';
 import type { ReportFilters, ReportStatus, Severity } from '@/types';
 import { cn } from '@/utils/cn';
 
@@ -20,6 +21,8 @@ function toggleIn<T extends string>(list: T[], value: T): T[] {
  * a "verified only" switch. Used by the map and community pages.
  */
 export function FilterBar({ filters, onChange, className }: FilterBarProps) {
+  const { isAmrita } = useBrand();
+  const categories = getAvailableCategories(isAmrita);
   const update = (patch: Partial<ReportFilters>) => onChange({ ...filters, ...patch });
 
   return (
@@ -33,7 +36,7 @@ export function FilterBar({ filters, onChange, className }: FilterBarProps) {
       <div>
         <p className="mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Category</p>
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
+          {categories.map((c) => {
             const active = filters.categories.includes(c.id);
             return (
               <button

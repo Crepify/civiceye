@@ -20,7 +20,8 @@ import {
   Target,
 } from 'lucide-react';
 import type { AnalysisResult, CategoryId, Coordinates, ReportDraft, Severity } from '@/types';
-import { CATEGORIES, SEVERITY_META, categoryById } from '@/data/categories';
+import { getAvailableCategories, SEVERITY_META, categoryById } from '@/data/categories';
+import { useBrand } from '@/hooks/useBrand';
 import { CATEGORY_ICONS } from '@/components/categoryIcons';
 import { Stepper } from '@/components/Stepper';
 import { ImageUploader } from '@/components/ImageUploader';
@@ -86,6 +87,8 @@ function ReportWizard() {
   const toast = useToast();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { isAmrita } = useBrand();
+  const availableCategories = getAvailableCategories(isAmrita);
   const [uploading, setUploading] = useState(false);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
@@ -267,7 +270,7 @@ function ReportWizard() {
                 {/* STEP 1 — Category */}
                 {step === 0 ? (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {CATEGORIES.map((c) => {
+                    {availableCategories.map((c) => {
                       const Icon = CATEGORY_ICONS[c.id];
                       const active = draft.category === c.id;
                       return (
@@ -497,6 +500,8 @@ function AnalysisResultCard({
   onCategoryChange: (category: CategoryId) => void;
   onSeverityChange: (severity: Severity) => void;
 }) {
+  const { isAmrita } = useBrand();
+  const availableCategories = getAvailableCategories(isAmrita);
   const confidencePct = Math.round(analysis.confidence * 100);
   return (
     <div className="space-y-4">
@@ -522,7 +527,7 @@ function AnalysisResultCard({
                 className="input-base appearance-none"
                 aria-label="Detected category"
               >
-                {CATEGORIES.map((c) => (
+                {availableCategories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.label}
                   </option>
@@ -971,7 +976,7 @@ function PhoneCapture({ sessionId }: { sessionId: string }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-5 py-10">
       <div className="w-full max-w-sm text-center">
-        <span className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-emerald-500 text-white shadow-glow">
+        <span className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl brand-grad-1 text-white shadow-glow">
           <Camera className="h-7 w-7" />
         </span>
         <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Capture evidence</h1>

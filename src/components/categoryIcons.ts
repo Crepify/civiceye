@@ -5,6 +5,7 @@ import {
   Footprints,
   Lightbulb,
   Route,
+  ShieldAlert,
   Siren,
   TrafficCone,
   Trash2,
@@ -30,5 +31,6 @@ export const CATEGORY_ICONS: Record<CategoryId, LucideIcon> = {
   'illegal-dumping': Truck,
   'traffic-signal': TrafficCone,
   accident: Siren,
+  security: ShieldAlert,
   other: Wrench,
 };

@@ -10,7 +10,7 @@ export function NotFound() {
         initial={{ scale: 0, rotate: -20 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: 'spring', stiffness: 200, damping: 16 }}
-        className="relative mb-8 flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-primary-500 to-emerald-500 shadow-glow"
+        className="relative mb-8 flex h-28 w-28 items-center justify-center rounded-3xl brand-grad-1 shadow-glow"
       >
         <Compass className="h-12 w-12 text-white" />
         <motion.span

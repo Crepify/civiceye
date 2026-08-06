@@ -91,6 +91,7 @@ const DETECTION_LABELS: Record<CategoryId, string[]> = {
   'illegal-dumping': ['debris dump', 'construction rubble', 'illegal waste'],
   'traffic-signal': ['dark signal', 'damaged signal', 'stuck light'],
   accident: ['collision', 'damaged vehicle', 'crash debris'],
+  security: ['unattended bag', 'restricted area intrusion', 'suspicious person'],
   other: ['structure damage', 'public hazard'],
 };
 

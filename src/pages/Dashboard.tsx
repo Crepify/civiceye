@@ -242,7 +242,7 @@ export function Dashboard() {
                 label="Open reports"
                 value={stats.open}
                 delta={4}
-                gradient="from-primary-500 to-violet-600"
+                gradient="brand-grad-1"
                 index={0}
               />
               <DashboardCard
@@ -250,7 +250,7 @@ export function Dashboard() {
                 label="Pending review"
                 value={stats.pending}
                 delta={-8}
-                gradient="from-amber-500 to-orange-600"
+                gradient="brand-grad-2"
                 index={1}
               />
               <DashboardCard
@@ -258,7 +258,7 @@ export function Dashboard() {
                 label="Verified"
                 value={stats.verified}
                 delta={12}
-                gradient="from-emerald-500 to-teal-600"
+                gradient="brand-grad-3"
                 index={2}
               />
               <DashboardCard
@@ -266,7 +266,7 @@ export function Dashboard() {
                 label="Resolved"
                 value={stats.resolved}
                 delta={6}
-                gradient="from-sky-500 to-blue-600"
+                gradient="brand-grad-4"
                 index={3}
               />
             </>

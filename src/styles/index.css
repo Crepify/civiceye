@@ -169,6 +169,42 @@
     );
   }
 
+  /* Brand-aware icon-tile gradients — indigo→emerald (CivicEye) /
+     red→yellow (Amrita). Used by stat cards, feature cards, dashboards. */
+  .brand-grad-1 {
+    background-image: linear-gradient(135deg, rgb(var(--c-primary-500)), rgb(var(--c-accent-500)));
+  }
+  .brand-grad-2 {
+    background-image: linear-gradient(135deg, rgb(var(--c-primary-600)), rgb(var(--c-accent-400)));
+  }
+  .brand-grad-3 {
+    background-image: linear-gradient(135deg, rgb(var(--c-accent-500)), rgb(var(--c-primary-600)));
+  }
+  .brand-grad-4 {
+    background-image: linear-gradient(135deg, rgb(var(--c-primary-700)), rgb(var(--c-primary-500)));
+  }
+  .brand-grad-5 {
+    background-image: linear-gradient(135deg, rgb(var(--c-primary-600)), rgb(var(--c-primary-400)));
+  }
+  .brand-grad-6 {
+    background-image: linear-gradient(135deg, rgb(var(--c-accent-600)), rgb(var(--c-primary-500)));
+  }
+
+  /* Amrita mode: verified / low-severity badges shift from green to gold
+     so the palette reads red + yellow, not green/teal. */
+  html.amrita .bg-emerald-500\/10 {
+    background-color: rgb(var(--c-accent-500) / 0.15);
+  }
+  html.amrita .text-emerald-600 {
+    color: rgb(var(--c-accent-600));
+  }
+  html.amrita .bg-teal-500\/10 {
+    background-color: rgb(var(--c-accent-500) / 0.15);
+  }
+  html.amrita .text-teal-600 {
+    color: rgb(var(--c-accent-600));
+  }
+
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
   }

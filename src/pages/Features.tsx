@@ -84,7 +84,7 @@ export function Features() {
                 }`}
               >
                 <div className="lg:[direction:ltr]">
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-emerald-500 text-white shadow-soft">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl brand-grad-1 text-white shadow-soft">
                     <d.icon className="h-6 w-6" />
                   </div>
                   <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">

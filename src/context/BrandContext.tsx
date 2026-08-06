@@ -4,6 +4,8 @@ import type { BrandId } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { BRAND_META } from '@/data/brands';
 import type { BrandMeta } from '@/data/brands';
+import logoCivicEye from '@/assets/logo.svg';
+import logoAmrita from '@/assets/logo-amrita.svg';
 
 const STORAGE_KEY = 'civiceye:brand';
 
@@ -37,11 +39,18 @@ export function BrandProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAmrita, user?.id, loading]);
 
-  /* Apply the brand class + document title. */
+  /* Apply the brand class + document title + favicon. */
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle('amrita', brand === 'amrita');
     document.title = BRAND_META[brand].appName;
+
+    // Swap the browser-tab icon: indigo pin for CivicEye, red pin for Amrita Eye.
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon) {
+      favicon.setAttribute('href', brand === 'amrita' ? logoAmrita : logoCivicEye);
+    }
+
     try {
       window.localStorage.setItem(STORAGE_KEY, brand);
     } catch {

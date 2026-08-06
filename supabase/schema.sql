@@ -3,6 +3,14 @@
 -- Run this in your Supabase project: SQL Editor → New query → Run
 -- SAFE TO RE-RUN: every object is guarded with IF NOT EXISTS /
 -- DROP POLICY IF EXISTS, so you can run the whole file again anytime.
+--
+-- MIGRATION (only if you ran the schema before the "security" category):
+-- Run this once to allow the new campus "Suspicious Activity" category:
+--   alter table public.reports drop constraint reports_category_check;
+--   alter table public.reports add constraint reports_category_check
+--     check (category in ('pothole','broken-road','garbage','sidewalk',
+--       'manhole','fallen-tree','street-light','water-leakage','sewage',
+--       'illegal-dumping','traffic-signal','accident','security','other'));
 -- ===================================================================
 
 -- ---------- Profiles (one row per auth user) ------------------------
@@ -56,7 +64,7 @@ create table if not exists public.reports (
   category      text not null check (category in
     ('pothole','broken-road','garbage','sidewalk','manhole','fallen-tree',
      'street-light','water-leakage','sewage','illegal-dumping',
-     'traffic-signal','accident','other')),
+     'traffic-signal','accident','security','other')),
   severity      text not null default 'medium' check (severity in ('low','medium','high','critical')),
   status        text not null default 'pending' check (status in
     ('pending','verified','in-progress','resolved','rejected')),

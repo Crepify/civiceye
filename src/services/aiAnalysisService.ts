@@ -74,6 +74,7 @@ const OBJECT_POOL: Record<CategoryId, string[]> = {
   'illegal-dumping': ['construction debris', 'bricks', 'rubble pile', 'vacant plot'],
   'traffic-signal': ['signal housing', 'dark lamps', 'damaged casing', 'hanging wires'],
   accident: ['damaged car body', 'crash debris', 'stopped traffic', 'collision marks'],
+  security: ['unattended bag', 'person in restricted area', 'unusual activity', 'forced entry marks'],
   other: ['public structure', 'damage marks', 'metal parts', 'wear & tear'],
 };
 

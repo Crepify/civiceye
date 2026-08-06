@@ -15,6 +15,10 @@ export interface CategoryMeta {
   image: string;
   /** URL hash used for anchor links on the report page. */
   anchor: string;
+  /** Hidden from campus (Amrita Eye) pickers — e.g. road accidents. */
+  excludeOnCampus?: boolean;
+  /** Only shown in campus (Amrita Eye) mode — campus-specific threats. */
+  campusOnly?: boolean;
 }
 
 /**
@@ -133,6 +137,7 @@ export const CATEGORIES: CategoryMeta[] = [
     bg: 'bg-rose-500/10',
     image: '/reports/illegal-dumping.jpg',
     anchor: 'illegal-dumping',
+    excludeOnCampus: true,
   },
   {
     id: 'traffic-signal',
@@ -144,6 +149,7 @@ export const CATEGORIES: CategoryMeta[] = [
     bg: 'bg-violet-500/10',
     image: '/reports/traffic-signal.svg',
     anchor: 'traffic-signal',
+    excludeOnCampus: true,
   },
   {
     id: 'accident',
@@ -155,6 +161,19 @@ export const CATEGORIES: CategoryMeta[] = [
     bg: 'bg-rose-500/10',
     image: '/reports/accident.svg',
     anchor: 'accident',
+    excludeOnCampus: true,
+  },
+  {
+    id: 'security',
+    label: 'Suspicious Activity',
+    short: 'Security',
+    description: 'Unusual or unsafe activity on campus — unattended bags, strangers in restricted areas, anything that feels off. Security responds fast.',
+    gradient: 'from-red-600 to-rose-800',
+    text: 'text-rose-600',
+    bg: 'bg-rose-500/10',
+    image: '/reports/security.svg',
+    anchor: 'security',
+    campusOnly: true,
   },
   {
     id: 'other',
@@ -172,6 +191,20 @@ export const CATEGORIES: CategoryMeta[] = [
 /** Lookup helpers */
 export const categoryById = (id: CategoryId): CategoryMeta =>
   CATEGORIES.find((c) => c.id === id) ?? CATEGORIES[CATEGORIES.length - 1];
+
+/**
+ * Brand-aware category list.
+ * - CivicEye: full list minus campus-only items (e.g. suspicious activity).
+ * - Amrita Eye (campus): full list minus city-only items (accidents,
+ *   illegal dumping, traffic signals) — campus-relevant threats only.
+ */
+export function getAvailableCategories(isAmrita: boolean): CategoryMeta[] {
+  return CATEGORIES.filter((c) => {
+    if (isAmrita && c.excludeOnCampus) return false;
+    if (!isAmrita && c.campusOnly) return false;
+    return true;
+  });
+}
 
 export const SEVERITY_META: Record<
   Severity,

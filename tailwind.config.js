@@ -21,6 +21,13 @@ export default {
           900: 'rgb(var(--c-primary-900) / <alpha-value>)',
           950: 'rgb(var(--c-primary-950) / <alpha-value>)',
         },
+        // Brand accent — emerald for CivicEye, warm yellow for Amrita.
+        accent: {
+          300: 'rgb(var(--c-accent-300) / <alpha-value>)',
+          400: 'rgb(var(--c-accent-400) / <alpha-value>)',
+          500: 'rgb(var(--c-accent-500) / <alpha-value>)',
+          600: 'rgb(var(--c-accent-600) / <alpha-value>)',
+        },
         surface: {
           light: '#ffffff',
           dark: '#0b1120',
