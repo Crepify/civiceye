@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Flame, Layers, ListFilter, ShieldCheck, Thermometer } from 'lucide-react';
-import type { CategoryId, Coordinates, ReportStatus, Severity } from '@/types';
+import type { CategoryId, Coordinates, ReportStatus, Severity, ScopeFilter } from '@/types';
 import { useReports } from '@/hooks/useReports';
 import { useBrand } from '@/hooks/useBrand';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -21,6 +21,7 @@ interface MapFilters {
   status: ReportStatus[];
   verifiedOnly: boolean;
   search: string;
+  scope: ScopeFilter;
 }
 
 const DEFAULT_FILTERS: MapFilters = {
@@ -29,6 +30,7 @@ const DEFAULT_FILTERS: MapFilters = {
   status: [],
   verifiedOnly: false,
   search: '',
+  scope: 'all',
 };
 
 const ALL = (list: unknown[]) => list.length === 0;
@@ -37,10 +39,10 @@ const ALL = (list: unknown[]) => list.length === 0;
 export function MapPage() {
   const { reports } = useReports();
   const { isAmrita } = useBrand();
-  const [filters, setFilters] = useLocalStorage<MapFilters>(
-    'civiceye:map-filters',
-    DEFAULT_FILTERS,
-  );
+  const [filters, setFilters] = useLocalStorage<MapFilters>('civiceye:map-filters', {
+    ...DEFAULT_FILTERS,
+    scope: isAmrita ? 'campus' : 'city',
+  });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [heatmap, setHeatmap] = useLocalStorage<boolean>('civiceye:map-heatmap', false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -53,9 +55,8 @@ export function MapPage() {
 
   const visibleReports = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
-    const wantedScope = isAmrita ? 'campus' : 'city';
     return reports.filter((r) => {
-      if (r.scope !== wantedScope) return false;
+      if (filters.scope !== 'all' && r.scope !== filters.scope) return false;
       if (!ALL(filters.categories) && !filters.categories.includes(r.category)) return false;
       if (!ALL(filters.severities) && !filters.severities.includes(r.severity)) return false;
       if (!ALL(filters.status) && !filters.status.includes(r.status)) return false;
@@ -67,7 +68,7 @@ export function MapPage() {
       }
       return true;
     });
-  }, [reports, filters, debouncedSearch, isAmrita]);
+  }, [reports, filters, debouncedSearch]);
 
   // Keep the selection valid as filters change.
   useEffect(() => {
@@ -89,14 +90,16 @@ export function MapPage() {
     filters.severities.length > 0 ||
     filters.status.length > 0 ||
     filters.verifiedOnly ||
-    filters.search.trim().length > 0;
+    filters.search.trim().length > 0 ||
+    filters.scope !== (isAmrita ? 'campus' : 'city');
   filters.categories.length > 0 ||
     filters.severities.length > 0 ||
     filters.status.length > 0 ||
     filters.verifiedOnly ||
     filters.search.trim().length > 0;
 
-  const clearFilters = () => setFilters(DEFAULT_FILTERS);
+  const clearFilters = () =>
+    setFilters({ ...DEFAULT_FILTERS, scope: isAmrita ? 'campus' : 'city' });
 
   return (
     <div className="flex h-[calc(100vh-var(--nav-height))] flex-col pt-[var(--nav-height)]">

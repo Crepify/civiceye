@@ -163,6 +163,13 @@ export const reportService = {
     const { error } = await supabase.from('reports').delete().eq('id', id);
     if (error) throw error;
   },
+
+  /** Admin: move a report between City (CivicEye) and Campus (Amrita Eye). */
+  async updateScope(id: string, scope: 'city' | 'campus'): Promise<void> {
+    if (!supabase) return;
+    const { error } = await supabase.from('reports').update({ scope }).eq('id', id);
+    if (error) throw error;
+  },
 };
 
 /** Resolve a report's public display name from the logged-in profile. */

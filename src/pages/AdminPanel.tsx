@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCheck, Flag, Inbox, ShieldCheck, Trash2, UserRound, Users } from 'lucide-react';
+import { CheckCheck, Flag, Inbox, School, ShieldCheck, Trash2, UserRound, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useBrand } from '@/hooks/useBrand';
 import { useToast } from '@/hooks/useToast';
@@ -19,7 +19,7 @@ export function AdminPanel() {
   const { user } = useAuth();
   const { brand } = useBrand();
   const toast = useToast();
-  const { reports, loading, removeReport } = useReports();
+  const { reports, loading, removeReport, setScope } = useReports();
 
   const isAdmin = isAdminEmail(user?.email, brand);
   const [flags, setFlags] = useState<FlagModel[]>([]);
@@ -95,6 +95,18 @@ export function AdminPanel() {
       await loadFlags();
     } catch (err) {
       toast.error('Could not take down', err instanceof Error ? err.message : 'Try again.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleScope = async (id: string, to: 'city' | 'campus') => {
+    setBusy(`scope-${id}`);
+    try {
+      await setScope(id, to);
+      toast.success(to === 'campus' ? 'Marked as campus' : 'Marked as city', 'Report moved.');
+    } catch (err) {
+      toast.error('Could not update scope', err instanceof Error ? err.message : 'Try again.');
     } finally {
       setBusy(null);
     }
@@ -239,6 +251,92 @@ export function AdminPanel() {
               })}
             </div>
           )}
+        </div>
+
+        {/* Scope manager: mark reports as campus */}
+        <div className="mt-10">
+          <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+            <School className="h-4.5 w-4.5 text-primary-500" />
+            Mark reports as campus
+          </h2>
+          <p className="mb-3 text-xs text-slate-400">
+            Move reports between the city feed (CivicEye) and the campus feed (Amrita Eye). Campus
+            reports are only visible to Amrita accounts.
+          </p>
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200/70 text-[11px] uppercase tracking-widest text-slate-400 dark:border-white/10">
+                    <th className="pb-3 pr-4 font-bold">Report</th>
+                    <th className="pb-3 pr-4 font-bold">Scope</th>
+                    <th className="pb-3 font-bold">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={3} className="py-3">
+                        <div className="skeleton h-8 w-full" />
+                      </td>
+                    </tr>
+                  ) : reports.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="py-8 text-center text-xs text-slate-400">
+                        No reports yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    [...reports]
+                      .sort((a, b) => (a.date < b.date ? 1 : -1))
+                      .slice(0, 15)
+                      .map((r) => (
+                        <tr
+                          key={r.id}
+                          className="border-b border-slate-100 transition-colors hover:bg-slate-50/60 dark:border-white/5 dark:hover:bg-white/[0.03]"
+                        >
+                          <td className="py-3 pr-4">
+                            <p className="max-w-[260px] truncate font-semibold text-slate-700 dark:text-slate-200">
+                              {r.title}
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              {r.author} · {r.locationName}
+                            </p>
+                          </td>
+                          <td className="py-3 pr-4">
+                            <span
+                              className={cn(
+                                'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase',
+                                r.scope === 'campus'
+                                  ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400'
+                                  : 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
+                              )}
+                            >
+                              {r.scope === 'campus' ? 'Campus' : 'City'}
+                            </span>
+                          </td>
+                          <td className="py-3">
+                            <button
+                              onClick={() => void handleScope(r.id, r.scope === 'campus' ? 'city' : 'campus')}
+                              disabled={busy === `scope-${r.id}`}
+                              className={cn(
+                                'flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all disabled:opacity-40',
+                                r.scope === 'campus'
+                                  ? 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300'
+                                  : 'border-primary-200 bg-primary-500/10 text-primary-700 hover:bg-primary-500/20 dark:border-primary-400/30 dark:text-primary-300',
+                              )}
+                            >
+                              <School className="h-3.5 w-3.5" />
+                              {r.scope === 'campus' ? 'Mark as city' : 'Mark as campus'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* Users (student details) */}

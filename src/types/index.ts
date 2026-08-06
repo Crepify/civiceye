@@ -166,6 +166,11 @@ export interface ReportFilters {
   status: ReportStatus[];
   verifiedOnly: boolean;
   search: string;
+  /** Scope filter — 'all' shows everything, otherwise city or campus only. */
+  scope: ScopeFilter;
 }
+
+/** What scope a feed is filtered to. */
+export type ScopeFilter = 'all' | 'city' | 'campus';
 
 export type SortKey = 'newest' | 'oldest' | 'votes' | 'confirms' | 'severity';

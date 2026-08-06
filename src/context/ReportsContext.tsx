@@ -20,6 +20,8 @@ interface ReportsContextValue {
   refresh: (scope?: 'city' | 'campus' | 'all') => Promise<void>;
   /** Admin: permanently remove a report. */
   removeReport: (id: string) => Promise<void>;
+  /** Admin: move a report between City and Campus scope. */
+  setScope: (id: string, scope: 'city' | 'campus') => Promise<void>;
   getById: (idOrCode: string) => Report | undefined;
   addReport: (input: Parameters<typeof reportService.create>[0]) => Promise<Report>;
   vote: (id: string, voteType: VoteType) => Promise<Report | undefined>;
@@ -101,6 +103,7 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
         run(() => reportService.markInProgress(id, authorityId)),
       rejectAsAuthority: (id) => run(() => reportService.rejectReport(id)),
       removeReport: (id) => run(() => reportService.remove(id)),
+      setScope: (id, scope) => run(() => reportService.updateScope(id, scope)),
     }),
     [reports, loading, mutating, error, refresh, run],
   );

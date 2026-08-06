@@ -85,10 +85,11 @@ export function Navbar() {
             scrolled ? 'glass-strong mx-3 shadow-soft sm:mx-auto' : 'bg-transparent',
           )}
         >
-          <Logo to="/" />
+          <Logo to="/" className="flex-1" />
 
-          {/* Desktop links — centered so adding/removing badges never shifts them */}
-          <ul className="hidden flex-1 items-center justify-center gap-1 lg:flex">
+          {/* Desktop links — flanked by two equal-width sides (logo & actions)
+              so they always sit dead-center, no matter what appears on the right. */}
+          <ul className="hidden items-center gap-1 lg:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.to}>
                 <NavLink
@@ -119,13 +120,15 @@ export function Navbar() {
             ))}
           </ul>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-1 items-center justify-end gap-2">
             {isAdmin ? (
               <NavLink
                 to="/admin"
+                title="Admin panel"
+                aria-label="Admin panel"
                 className={({ isActive }) =>
                   cn(
-                    'flex h-9 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-bold transition-all',
+                    'flex h-9 w-9 items-center justify-center rounded-xl border transition-all',
                     isActive
                       ? 'border-primary-500 bg-primary-500/10 text-primary-700 dark:border-primary-400/50 dark:text-primary-300'
                       : 'border-slate-200 bg-white/70 text-slate-600 hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-300',
@@ -133,7 +136,6 @@ export function Navbar() {
                 }
               >
                 <ShieldCheck className="h-4 w-4" />
-                <span className="hidden sm:inline">Admin</span>
               </NavLink>
             ) : null}
             <NotificationBell />

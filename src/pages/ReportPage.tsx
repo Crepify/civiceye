@@ -37,7 +37,8 @@ import { requestLocation } from '@/services/geoService';
 import { mockReverseGeocode } from '@/services/geocodeService';
 import { publishPhoto } from '@/services/syncService';
 import { uploadReportPhoto } from '@/lib/storage';
-import { displayName, scopeForBrand } from '@/services/reportService';
+import { displayName } from '@/services/reportService';
+import { CAMPUS_CONFIG, isInsideCampus } from '@/data/campus';
 import { formatCoords } from '@/utils/format';
 import { cn } from '@/utils/cn';
 
@@ -89,7 +90,6 @@ function ReportWizard() {
   const { user, profile } = useAuth();
   const { isAmrita } = useBrand();
   const availableCategories = getAvailableCategories(isAmrita);
-  const reportScope = scopeForBrand(isAmrita ? 'amrita' : 'civiceye');
   const [uploading, setUploading] = useState(false);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
@@ -97,7 +97,15 @@ function ReportWizard() {
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
+  const [chosenScope, setChosenScope] = useState<'city' | 'campus' | null>(null);
   const timerRef = useRef<number | null>(null);
+
+  // Auto-detect: if the report's coordinates are inside the campus, it's
+  // recommended to campus students/staff (scope = campus). The user can
+  // override via `chosenScope`.
+  const insideCampus = draft.coordinates ? isInsideCampus(draft.coordinates) : false;
+  const detectedScope: 'city' | 'campus' = insideCampus ? 'campus' : 'city';
+  const finalScope = chosenScope ?? detectedScope;
 
   const update = (patch: Partial<ReportDraft>) => setDraft((d) => ({ ...d, ...patch }));
 
@@ -178,7 +186,7 @@ function ReportWizard() {
         photoUrl,
         author: displayName(profile),
         userId: user.id,
-        scope: reportScope,
+        scope: finalScope,
         ai: {
           confidence: draft.analysis.confidence,
           objects: draft.analysis.objects,
@@ -359,6 +367,10 @@ function ReportWizard() {
                   <LocationStep
                     coordinates={draft.coordinates}
                     locationName={draft.locationName}
+                    insideCampus={insideCampus}
+                    finalScope={finalScope}
+                    chosenScope={chosenScope}
+                    onScopeChange={setChosenScope}
                     onCoordinates={async (coords) => {
                       update({ coordinates: coords, locationName: mockReverseGeocode(coords) });
                     }}
@@ -370,7 +382,7 @@ function ReportWizard() {
                 {step === 4 ? <DetailsStep draft={draft} onChange={update} /> : null}
 
                 {/* STEP 6 — Review */}
-                {step === 5 ? <ReviewStep draft={draft} /> : null}
+                {step === 5 ? <ReviewStep draft={draft} finalScope={finalScope} /> : null}
 
                 {/* Nav buttons */}
                 <div className="mt-8 flex items-center justify-between">
@@ -628,11 +640,19 @@ function AnalysisResultCard({
 function LocationStep({
   coordinates,
   locationName,
+  insideCampus,
+  finalScope,
+  chosenScope,
+  onScopeChange,
   onCoordinates,
   onLocationName,
 }: {
   coordinates: Coordinates | null;
   locationName: string;
+  insideCampus: boolean;
+  finalScope: 'city' | 'campus';
+  chosenScope: 'city' | 'campus' | null;
+  onScopeChange: (s: 'city' | 'campus' | null) => void;
   onCoordinates: (coords: Coordinates) => void;
   onLocationName: (name: string) => void;
 }) {
@@ -711,6 +731,73 @@ function LocationStep({
             />
           </div>
         </div>
+
+        {/* Campus detection / recommendation */}
+        {coordinates ? (
+          <div
+            className={cn(
+              'mt-4 flex items-start gap-3 rounded-2xl border p-4',
+              insideCampus
+                ? 'border-primary-300 bg-primary-500/5 dark:border-primary-400/30'
+                : 'border-slate-200 bg-white/60 dark:border-white/10 dark:bg-white/[0.02]',
+            )}
+          >
+            <span
+              className={cn(
+                'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
+                insideCampus ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'bg-slate-400/10 text-slate-500',
+              )}
+            >
+              <MapPin className="h-4 w-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                {insideCampus ? (
+                  <>
+                    📍 This location is inside <span className="text-primary-600 dark:text-primary-400">{CAMPUS_CONFIG.name}</span>
+                  </>
+                ) : (
+                  <>This location is outside the campus</>
+                )}
+              </p>
+              <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                {insideCampus
+                  ? 'It will be recommended to campus students & staff so they can act on it quickly. You can change this below.'
+                  : 'It will be shared with the city community. Only reports inside the campus boundary are recommended to campus students & staff.'}
+              </p>
+              {insideCampus ? (
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => onScopeChange(null)}
+                    className={cn(
+                      'rounded-lg border px-3 py-1.5 text-xs font-bold transition-all',
+                      chosenScope === null
+                        ? 'border-primary-500 bg-primary-500 text-white'
+                        : 'border-primary-300 bg-white text-primary-700 hover:bg-primary-500/10 dark:border-primary-400/40 dark:bg-transparent dark:text-primary-300',
+                    )}
+                  >
+                    ✓ Mark as campus (recommended)
+                  </button>
+                  <button
+                    onClick={() => onScopeChange('city')}
+                    className={cn(
+                      'rounded-lg border px-3 py-1.5 text-xs font-bold transition-all',
+                      chosenScope === 'city'
+                        ? 'border-slate-700 bg-slate-700 text-white'
+                        : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100 dark:border-white/20 dark:bg-transparent dark:text-slate-300',
+                    )}
+                  >
+                    Post to city instead
+                  </button>
+                </div>
+              ) : null}
+              <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                {finalScope === 'campus' ? 'Campus report' : 'City report'} · shared with{' '}
+                {finalScope === 'campus' ? 'campus students & staff' : 'the city community'}
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200/70 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
           <Info className="mt-0.5 h-4 w-4 shrink-0" />
@@ -808,7 +895,7 @@ function DetailsStep({
 /* Review                                                              */
 /* ------------------------------------------------------------------ */
 
-function ReviewStep({ draft }: { draft: ReportDraft }) {
+function ReviewStep({ draft, finalScope }: { draft: ReportDraft; finalScope: 'city' | 'campus' }) {
   const category = categoryById(draft.category);
   const severity = draft.analysis?.severity ?? 'medium';
   const sevMeta = SEVERITY_META[severity];
@@ -859,6 +946,10 @@ function ReviewStep({ draft }: { draft: ReportDraft }) {
           <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
             <Camera className="h-4 w-4 text-primary-500" />
             Photo attached
+          </div>
+          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+            <MapPin className="h-4 w-4 text-primary-500" />
+            {finalScope === 'campus' ? 'Campus report' : 'City report'}
           </div>
         </div>
         <p className="flex items-center gap-2 text-xs text-slate-400">

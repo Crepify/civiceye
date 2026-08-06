@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDownUp, ArrowUpDown, Inbox, ListFilter } from 'lucide-react';
-import type { CategoryId, Report, ReportStatus, Severity, SortKey } from '@/types';
+import type { CategoryId, Report, ReportStatus, Severity, SortKey, ScopeFilter } from '@/types';
 import { useReports } from '@/hooks/useReports';
 import { useBrand } from '@/hooks/useBrand';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -20,6 +20,7 @@ interface CommunityFilters {
   status: ReportStatus[];
   verifiedOnly: boolean;
   search: string;
+  scope: ScopeFilter;
 }
 
 const DEFAULT_FILTERS: CommunityFilters = {
@@ -28,6 +29,7 @@ const DEFAULT_FILTERS: CommunityFilters = {
   status: [],
   verifiedOnly: false,
   search: '',
+  scope: 'all',
 };
 
 const SORTS: { key: SortKey; label: string }[] = [
@@ -62,7 +64,10 @@ function sortReports(list: Report[], sort: SortKey): Report[] {
 export function Community() {
   const { reports, loading } = useReports();
   const { isAmrita } = useBrand();
-  const [filters, setFilters] = useState<CommunityFilters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<CommunityFilters>({
+    ...DEFAULT_FILTERS,
+    scope: isAmrita ? 'campus' : 'city',
+  });
   const [sort, setSort] = useState<SortKey>('newest');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -71,9 +76,8 @@ export function Community() {
 
   const filtered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
-    const wantedScope = isAmrita ? 'campus' : 'city';
     return reports.filter((r) => {
-      if (r.scope !== wantedScope) return false;
+      if (filters.scope !== 'all' && r.scope !== filters.scope) return false;
       if (filters.categories.length && !filters.categories.includes(r.category)) return false;
       if (filters.severities.length && !filters.severities.includes(r.severity)) return false;
       if (filters.status.length && !filters.status.includes(r.status)) return false;
@@ -84,7 +88,7 @@ export function Community() {
       }
       return true;
     });
-  }, [reports, filters, debouncedSearch, isAmrita]);
+  }, [reports, filters, debouncedSearch]);
 
   const sorted = useMemo(() => sortReports(filtered, sort), [filtered, sort]);
   const page = sorted.slice(0, visibleCount);
@@ -171,7 +175,7 @@ export function Community() {
                 action={
                   <button
                     onClick={() => {
-                      setFilters(DEFAULT_FILTERS);
+                      setFilters({ ...DEFAULT_FILTERS, scope: isAmrita ? 'campus' : 'city' });
                       resetPagination();
                     }}
                     className="btn-secondary"
