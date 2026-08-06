@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Traffic accident scene">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#881337"/>
+      <stop offset="0.55" stop-color="#be123c"/>
+      <stop offset="1" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#fda4af" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#fda4af" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#glow)"/>
+  <g stroke="#fecdd3" stroke-opacity="0.14" stroke-width="1">
+    <line x1="0" y1="125" x2="800" y2="125"/><line x1="0" y1="250" x2="800" y2="250"/>
+    <line x1="0" y1="375" x2="800" y2="375"/>
+    <line x1="160" y1="0" x2="160" y2="500"/><line x1="320" y1="0" x2="320" y2="500"/>
+    <line x1="480" y1="0" x2="480" y2="500"/><line x1="640" y1="0" x2="640" y2="500"/>
+  </g>
+  <g transform="translate(400 250)" stroke="#fff1f2" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M-110 -40 h80 a26 26 0 0 1 26 26 v74"/>
+    <path d="M30 -40 h80 a26 26 0 0 1 26 26 v74"/>
+    <path d="M-110 60 h210 a26 26 0 0 1 26 26 v34"/>
+  </g>
+  <g transform="translate(400 250)" fill="#fff1f2">
+    <circle cx="-70" cy="46" r="13"/>
+    <circle cx="70" cy="46" r="13"/>
+  </g>
+  <g transform="translate(400 262)">
+    <path d="M-52 34 q-26 -30 12 -44 q46 -14 62 18 l30 4 q-6 16 -24 12 l-14 26 q-24 4 -34 -10 l-32 -6z" fill="#fecdd3" fill-opacity="0.35"/>
+    <path d="M52 34 q26 -30 -12 -44 q-46 -14 -62 18" fill="#fecdd3" fill-opacity="0.2"/>
+  </g>
+  <circle cx="130" cy="110" r="3" fill="#ffffff" opacity="0.5"/>
+  <circle cx="680" cy="400" r="2.5" fill="#ffffff" opacity="0.4"/>
+  <circle cx="640" cy="90" r="2" fill="#ffffff" opacity="0.35"/>
+</svg>
