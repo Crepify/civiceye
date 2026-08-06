@@ -83,7 +83,7 @@ export function Contact() {
               </ul>
             </div>
 
-            <div className="card relative overflow-hidden bg-gradient-to-br from-primary-600 to-emerald-600 p-6 text-white">
+            <div className="card relative overflow-hidden brand-cta p-6 text-white">
               <h3 className="text-base font-bold">For authorities</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-white/85">
                 Ward officers and agencies: request a demo dashboard for your jurisdiction.

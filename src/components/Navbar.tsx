@@ -7,7 +7,6 @@ import { ThemeToggle } from './ThemeToggle';
 import { Drawer } from './Drawer';
 import { NotificationBell } from './NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
-import { useBrand } from '@/hooks/useBrand';
 import { cn } from '@/utils/cn';
 
 const NAV_LINKS = [
@@ -28,7 +27,6 @@ export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, isAmrita, signOut } = useAuth();
-  const { isAmrita: brandIsAmrita } = useBrand();
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -85,8 +83,8 @@ export function Navbar() {
         >
           <Logo to="/" />
 
-          {/* Desktop links */}
-          <ul className="hidden items-center gap-1 lg:flex">
+          {/* Desktop links — centered so adding/removing badges never shifts them */}
+          <ul className="hidden flex-1 items-center justify-center gap-1 lg:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.to}>
                 <NavLink
@@ -118,12 +116,6 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-2">
-            {brandIsAmrita ? (
-              <span className="hidden items-center gap-1.5 rounded-full bg-primary-500/10 px-3 py-1.5 text-[11px] font-bold text-primary-700 dark:text-primary-300 sm:flex">
-                <GraduationCap className="h-3.5 w-3.5" />
-                Amrita Eye
-              </span>
-            ) : null}
             <NotificationBell />
             <ThemeToggle />
 

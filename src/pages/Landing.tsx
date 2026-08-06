@@ -58,12 +58,12 @@ export function Landing() {
           <motion.div
             animate={{ y: [0, -24, 0], x: [0, 16, 0] }}
             transition={{ duration: 14, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-            className="absolute -left-24 top-24 h-72 w-72 rounded-full bg-primary-400/20 blur-3xl"
+            className="absolute -left-24 top-24 h-72 w-72 rounded-full brand-glow-a blur-3xl"
           />
           <motion.div
             animate={{ y: [0, 28, 0], x: [0, -20, 0] }}
             transition={{ duration: 18, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-            className="absolute -right-20 top-40 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl"
+            className="absolute -right-20 top-40 h-80 w-80 rounded-full brand-glow-b blur-3xl"
           />
         </div>
 
@@ -317,7 +317,7 @@ export function Landing() {
       {/* ------------------------------------------------ Map CTA */}
       <section className="section-pad pb-16 sm:pb-24">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-700 via-primary-600 to-emerald-600 p-10 shadow-glow sm:p-16">
+          <div className="relative overflow-hidden rounded-3xl brand-cta p-10 shadow-glow sm:p-16">
             <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
             <div className="relative grid items-center gap-8 lg:grid-cols-2">
               <div>

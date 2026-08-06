@@ -169,7 +169,7 @@ export function About() {
 
       <section className="section-pad pb-20">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-emerald-600 p-10 text-center shadow-glow sm:p-14">
+          <div className="relative overflow-hidden rounded-3xl brand-cta p-10 text-center shadow-glow sm:p-14">
             <MapPin className="mx-auto mb-4 h-10 w-10 text-white/80" />
             <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
               Spot something broken in your city?

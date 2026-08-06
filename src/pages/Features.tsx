@@ -104,7 +104,7 @@ export function Features() {
                 </div>
                 <div className="lg:[direction:ltr]">
                   <div className="relative">
-                    <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary-500/15 to-emerald-500/15 blur-xl" />
+                    <div className="absolute -inset-4 rounded-[2rem] brand-panel blur-xl" />
                     <img
                       src={
                         i === 0
@@ -150,7 +150,7 @@ export function Features() {
 
       <section className="section-pad pb-20">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-primary-600 p-10 text-center shadow-glow-emerald sm:p-14">
+          <div className="relative overflow-hidden rounded-3xl brand-cta p-10 text-center shadow-glow-emerald sm:p-14">
             <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
               Ready to make your street safer?
             </h2>

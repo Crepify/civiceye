@@ -11,23 +11,31 @@
     color-scheme: light;
     --nav-height: 4.25rem;
 
-    /* CivicEye palette — indigo (default) */
-    --c-primary-50: 238 242 255;
-    --c-primary-100: 224 231 255;
-    --c-primary-200: 199 210 254;
-    --c-primary-300: 165 180 252;
-    --c-primary-400: 129 140 248;
-    --c-primary-500: 99 102 241;
-    --c-primary-600: 79 70 229;
-    --c-primary-700: 67 56 202;
-    --c-primary-800: 55 48 163;
-    --c-primary-900: 49 46 129;
-    --c-primary-950: 30 27 75;
-  }
+  /* CivicEye palette — indigo (default) */
+  --c-primary-50: 238 242 255;
+  --c-primary-100: 224 231 255;
+  --c-primary-200: 199 210 254;
+  --c-primary-300: 165 180 252;
+  --c-primary-400: 129 140 248;
+  --c-primary-500: 99 102 241;
+  --c-primary-600: 79 70 229;
+  --c-primary-700: 67 56 202;
+  --c-primary-800: 55 48 163;
+  --c-primary-900: 49 46 129;
+  --c-primary-950: 30 27 75;
+
+  /* Secondary "accent" — emerald for CivicEye, amber/yellow for Amrita */
+  --c-accent-300: 110 231 183;
+  --c-accent-400: 52 211 153;
+  --c-accent-500: 16 185 129;
+  --c-accent-600: 5 150 105;
+}
 
   /* Amrita Eye palette — Amrita red (light theme keeps white, dark keeps
-     black, yellow is used for brand accents). Activated by html.amrita. */
-  html.amrita {
+     black, yellow is used for brand accents). Activated by html.amrita,
+     or locally by any .amrita wrapper (e.g. the login page). */
+  html.amrita,
+  .amrita {
     --c-primary-50: 255 241 243;
     --c-primary-100: 255 228 233;
     --c-primary-200: 255 205 216;
@@ -39,6 +47,12 @@
     --c-primary-800: 120 0 30;
     --c-primary-900: 90 0 25;
     --c-primary-950: 60 0 15;
+
+    /* Accent becomes warm yellow */
+    --c-accent-300: 252 211 77;
+    --c-accent-400: 251 191 36;
+    --c-accent-500: 245 158 11;
+    --c-accent-600: 217 119 6;
   }
 
   html.dark {
@@ -108,7 +122,8 @@
   }
 
   /* Amrita Eye accent: red → gold gradient instead of indigo → emerald */
-  html.amrita .text-gradient {
+  html.amrita .text-gradient,
+  .amrita .text-gradient {
     background-image: linear-gradient(
       to right,
       rgb(var(--c-primary-600)),
@@ -121,8 +136,37 @@
     @apply bg-gradient-to-br from-primary-500 via-primary-600 to-emerald-500;
   }
 
-  html.amrita .logo-mark {
+  html.amrita .logo-mark,
+  .amrita .logo-mark {
     background-image: linear-gradient(to bottom right, rgb(228 0 43), rgb(190 0 40), #f59e0b);
+  }
+
+  /* Brand-aware glow blobs — red + yellow in Amrita mode */
+  .brand-glow-a {
+    background-color: rgb(var(--c-primary-400) / 0.2);
+  }
+
+  .brand-glow-b {
+    background-color: rgb(var(--c-accent-400) / 0.2);
+  }
+
+  /* Brand-aware CTA banner gradient — indigo→emerald / red→yellow */
+  .brand-cta {
+    background-image: linear-gradient(
+      135deg,
+      rgb(var(--c-primary-800)) 0%,
+      rgb(var(--c-primary-600)) 55%,
+      rgb(var(--c-accent-500)) 130%
+    );
+  }
+
+  /* Soft brand-tinted panel behind images */
+  .brand-panel {
+    background-image: linear-gradient(
+      to bottom right,
+      rgb(var(--c-primary-500) / 0.15),
+      rgb(var(--c-accent-500) / 0.15)
+    );
   }
 
   .btn {

@@ -126,7 +126,7 @@ export function ImageUploader({ value, onChange, className }: ImageUploaderProps
         className,
       )}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500/15 to-emerald-500/15 text-primary-600 dark:text-primary-400">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl brand-panel text-primary-600 dark:text-primary-400">
         <ImagePlus className="h-7 w-7" />
       </div>
       <div>

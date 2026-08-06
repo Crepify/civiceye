@@ -144,8 +144,8 @@ export function Login() {
     <div className="flex min-h-screen items-center justify-center px-4 pb-16 pt-24">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary-50/80 via-white to-white dark:from-primary-950/30 dark:via-slate-950 dark:to-slate-950" />
-        <div className="absolute -left-24 top-24 h-72 w-72 rounded-full bg-primary-400/15 blur-3xl" />
-        <div className="absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-amber-400/15 blur-3xl" />
+        <div className="brand-glow-a absolute -left-24 top-24 h-72 w-72 rounded-full blur-3xl" />
+        <div className="brand-glow-b absolute -right-20 bottom-10 h-80 w-80 rounded-full blur-3xl" />
       </div>
 
       <motion.div
