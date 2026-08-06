@@ -8,6 +8,7 @@ import {
   LogIn,
   Mail,
   MailCheck,
+  MailWarning,
   ShieldCheck,
   Sparkles,
   UserPlus,
@@ -29,7 +30,7 @@ type Mode = 'signin' | 'signup' | 'magic';
  * - Logging in with an @…amrita.edu email activates the Amrita Eye brand.
  */
 export function Login() {
-  const { configured, loading, signInWithPassword, signUp, signInWithMagicLink, resetPassword } =
+  const { configured, loading, signInWithPassword, signUp, signInWithMagicLink, resendConfirmation, resetPassword } =
     useAuth();
   const toast = useToast();
   const navigate = useNavigate();
@@ -94,8 +95,25 @@ export function Login() {
         setSentMagic(true);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Something went wrong.';
-      setError(prettyAuthError(message));
+      console.error('[CivicEye] auth error:', err);
+      setError(prettyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!emailValid(email)) {
+      setError('Enter your email first, then resend.');
+      return;
+    }
+    setBusy(true);
+    try {
+      await resendConfirmation(email);
+      toast.success('Confirmation resent', 'Check your inbox (and spam).');
+    } catch (err) {
+      console.error('[CivicEye] resend error:', err);
+      setError(prettyAuthError(err));
     } finally {
       setBusy(false);
     }
@@ -196,10 +214,26 @@ export function Login() {
 
               {confirmSent ? (
                 <div className="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs leading-relaxed text-sky-800 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
-                  <strong>Confirmation email sent to {email}.</strong> Click the link inside it, then
-                  sign in below. No email? Check <strong>spam</strong> — or your project may have hit
-                  Supabase&apos;s free email limit (~2–3/hour). See{' '}
-                  <code className="font-semibold">SUPABASE_SETUP.md</code> for SMTP setup.
+                  <div className="flex items-start gap-2">
+                    <MailWarning className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div>
+                      <strong>Confirmation email sent to {email}.</strong> Click the link inside it,
+                      then sign in below.
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <button
+                          onClick={() => void handleResend()}
+                          disabled={busy}
+                          className="rounded-lg bg-sky-600 px-2.5 py-1 font-bold text-white transition-colors hover:bg-sky-700"
+                        >
+                          Resend confirmation
+                        </button>
+                        <span className="text-sky-700 dark:text-sky-300">
+                          No email? Check spam — or the free email limit (~3/hr). See{' '}
+                          <code className="font-semibold">SMTP_SETUP.md</code>.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : null}
 
@@ -407,14 +441,34 @@ function SupabaseSetupScreen() {
   );
 }
 
-/* Map cryptic Supabase errors to friendly messages. */
-function prettyAuthError(message: string): string {
-  if (/invalid login credentials/i.test(message)) return 'Incorrect email or password.';
-  if (/already registered/i.test(message))
+/* Map cryptic Supabase errors to friendly messages. Never show raw "{}". */
+function prettyAuthError(err: unknown): string {
+  // Pull a string out of anything (Error, object, string, undefined).
+  let raw = '';
+  if (typeof err === 'string') raw = err;
+  else if (err instanceof Error) raw = err.message;
+  else if (err && typeof err === 'object') {
+    const maybe = (err as { message?: unknown }).message;
+    raw = typeof maybe === 'string' ? maybe : JSON.stringify(err);
+  }
+
+  const text = raw.trim();
+
+  // Supabase sometimes returns an empty "{}" when the email step fails.
+  if (!text || text === '{}' || text === 'null' || text === 'undefined') {
+    return 'Sign-up could not be completed. This usually means the confirmation email could not be sent — please set up free SMTP (see SMTP_SETUP.md) or check your internet connection.';
+  }
+
+  if (/invalid login credentials/i.test(text)) return 'Incorrect email or password.';
+  if (/already registered/i.test(text))
     return 'An account with this email already exists — try signing in instead.';
-  if (/email not confirmed/i.test(message))
+  if (/email not confirmed/i.test(text))
     return 'Please confirm your email first — check your inbox (and spam) for the link we sent.';
-  if (/rate limit/i.test(message))
-    return 'Too many attempts for this email — Supabase limits free sends to a few per hour. Please wait up to an hour, or set up a free SMTP (see SUPABASE_SETUP.md).';
-  return message;
+  if (/rate limit/i.test(text))
+    return 'Too many attempts for this email — Supabase limits free sends to a few per hour. Please wait up to an hour, or set up a free SMTP (see SMTP_SETUP.md).';
+  if (/user already exists/i.test(text))
+    return 'An account with this email already exists — try signing in instead.';
+  if (/email provider/i.test(text) || /SMTP/i.test(text) || /smtp/i.test(text))
+    return 'Email sending is not configured yet. Follow SMTP_SETUP.md to enable free SMTP, then try again.';
+  return text;
 }

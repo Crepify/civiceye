@@ -28,6 +28,8 @@ interface AuthContextValue {
     fullName: string,
   ) => Promise<{ session: Session | null }>;
   signInWithMagicLink: (email: string) => Promise<void>;
+  /** Resend the sign-up confirmation email for an existing (unconfirmed) user. */
+  resendConfirmation: (email: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -132,6 +134,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   }, []);
 
+  const resendConfirmation = useCallback(async (email: string) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
+    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    if (error) throw error;
+  }, []);
+
   const resetPassword = useCallback(async (email: string) => {
     if (!supabase) throw new Error('Supabase is not configured.');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -162,6 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithPassword,
       signUp,
       signInWithMagicLink,
+      resendConfirmation,
       resetPassword,
       updatePassword,
       signOut,
@@ -173,6 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithPassword,
       signUp,
       signInWithMagicLink,
+      resendConfirmation,
       resetPassword,
       updatePassword,
       signOut,
