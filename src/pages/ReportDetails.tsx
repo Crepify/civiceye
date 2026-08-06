@@ -21,6 +21,7 @@ import { VoteButtons } from '@/components/VoteButtons';
 import { ReportCard } from '@/components/ReportCard';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { EmptyState } from '@/components/EmptyState';
+import { ReviewSection } from '@/components/ReviewSection';
 import { formatCoords, formatDateTime, timeAgo } from '@/utils/format';
 import { cn } from '@/utils/cn';
 
@@ -193,6 +194,9 @@ export function ReportDetails() {
                 </div>
               </div>
             </div>
+
+            {/* Community reviews */}
+            <ReviewSection reportId={report.id} />
 
             {/* Related reports */}
             {related.length > 0 ? (

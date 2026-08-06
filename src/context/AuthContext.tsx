@@ -21,7 +21,12 @@ interface AuthContextValue {
   profile: Profile | null;
   isAmrita: boolean;
   signInWithPassword: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  /** Returns the session if email confirmation is disabled (instant sign-in). */
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+  ) => Promise<{ session: Session | null }>;
   signInWithMagicLink: (email: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
@@ -106,12 +111,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     if (!supabase) throw new Error('Supabase is not configured.');
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: fullName } },
     });
     if (error) throw error;
+    // When "Confirm email" is off, Supabase returns a session immediately.
+    return { session: data.session ?? null };
   }, []);
 
   const signInWithMagicLink = useCallback(async (email: string) => {

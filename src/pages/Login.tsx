@@ -43,6 +43,7 @@ export function Login() {
   const [busy, setBusy] = useState(false);
   const [sentMagic, setSentMagic] = useState(false);
   const [sentReset, setSentReset] = useState(false);
+  const [confirmSent, setConfirmSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const validate = () => {
@@ -78,10 +79,16 @@ export function Login() {
         toast.success('Welcome back! 👋', 'You are signed in.');
         navigate(next);
       } else if (mode === 'signup') {
-        await signUp(email, password, fullName);
-        toast.success('Account created!', 'Check your inbox to confirm your email, then sign in.');
-        setMode('signin');
-        setPassword('');
+        const { session } = await signUp(email, password, fullName);
+        if (session) {
+          // "Confirm email" is off in this project — straight in.
+          toast.success('Account created! 🎉', 'You are signed in.');
+          navigate(next);
+        } else {
+          setConfirmSent(true);
+          setMode('signin');
+          setPassword('');
+        }
       } else {
         await signInWithMagicLink(email);
         setSentMagic(true);
@@ -167,6 +174,7 @@ export function Login() {
                       setError(null);
                       setSentMagic(false);
                       setSentReset(false);
+                      setConfirmSent(false);
                     }}
                     className={
                       mode === key
@@ -183,6 +191,15 @@ export function Login() {
               {error ? (
                 <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400">
                   {error}
+                </div>
+              ) : null}
+
+              {confirmSent ? (
+                <div className="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs leading-relaxed text-sky-800 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
+                  <strong>Confirmation email sent to {email}.</strong> Click the link inside it, then
+                  sign in below. No email? Check <strong>spam</strong> — or your project may have hit
+                  Supabase&apos;s free email limit (~2–3/hour). See{' '}
+                  <code className="font-semibold">SUPABASE_SETUP.md</code> for SMTP setup.
                 </div>
               ) : null}
 
@@ -394,9 +411,10 @@ function SupabaseSetupScreen() {
 function prettyAuthError(message: string): string {
   if (/invalid login credentials/i.test(message)) return 'Incorrect email or password.';
   if (/already registered/i.test(message))
-    return 'An account with this email already exists — try signing in.';
+    return 'An account with this email already exists — try signing in instead.';
   if (/email not confirmed/i.test(message))
-    return 'Please confirm your email first (check your inbox).';
-  if (/rate limit/i.test(message)) return 'Too many attempts — please wait a minute and try again.';
+    return 'Please confirm your email first — check your inbox (and spam) for the link we sent.';
+  if (/rate limit/i.test(message))
+    return 'Too many attempts for this email — Supabase limits free sends to a few per hour. Please wait up to an hour, or set up a free SMTP (see SUPABASE_SETUP.md).';
   return message;
 }

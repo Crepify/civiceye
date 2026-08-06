@@ -81,6 +81,20 @@ export type BrandId = 'civiceye' | 'amrita';
 /** Vote types supported by the `vote_on_report` RPC. */
 export type VoteType = 'up' | 'down' | 'confirm' | 'reject';
 
+/** A user-written review on a report, with agree/disagree tallies. */
+export interface Review {
+  id: string;
+  reportId: string | null;
+  userId: string | null;
+  authorName: string;
+  content: string;
+  agrees: number;
+  disagrees: number;
+  date: string;
+  /** Populated when reviews are fetched with their report (landing). */
+  reportTitle?: string;
+}
+
 /** A report still being drafted inside the multi-step wizard. */
 export interface ReportDraft {
   category: CategoryId;

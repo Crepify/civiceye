@@ -17,7 +17,7 @@ import { FeatureCard } from '@/components/FeatureCard';
 import { Reveal } from '@/components/Reveal';
 import { StatCard } from '@/components/StatCard';
 import { FEATURES, HOW_IT_WORKS } from '@/data/features';
-import { TESTIMONIALS } from '@/data/testimonials';
+import { CommunityReviews } from '@/components/CommunityReviews';
 import { CATEGORIES } from '@/data/categories';
 import { FallbackMapView } from '@/components/map/FallbackMapView';
 import { compactNumber } from '@/utils/format';
@@ -311,43 +311,8 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ------------------------------------------------ Testimonials */}
-      <section className="section-pad py-16 sm:py-24">
-        <SectionHeading
-          eyebrow="Testimonials"
-          title="Loved by the people who use it"
-          description="Citizens, volunteers and agencies are already seeing streets change."
-        />
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {TESTIMONIALS.map((t, i) => (
-            <Reveal key={t.name} delay={(i % 3) * 0.1}>
-              <figure className="card flex h-full flex-col p-6">
-                <div className="mb-4 flex gap-0.5 text-amber-400" aria-label="5 out of 5 stars">
-                  {Array.from({ length: 5 }, (_, s) => (
-                    <svg key={s} viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                      <path d="M9.05 2.93c.3-.92 1.6-.92 1.9 0l1.2 3.68a1 1 0 0 0 .95.69h3.87c.97 0 1.37 1.24.59 1.81l-3.13 2.28a1 1 0 0 0-.36 1.12l1.2 3.68c.3.92-.76 1.68-1.54 1.11l-3.13-2.28a1 1 0 0 0-1.18 0l-3.13 2.28c-.78.57-1.84-.2-1.54-1.11l1.2-3.68a1 1 0 0 0-.36-1.12L2.4 9.11c-.78-.57-.38-1.81.6-1.81h3.86a1 1 0 0 0 .95-.69l1.24-3.68z" />
-                    </svg>
-                  ))}
-                </div>
-                <blockquote className="flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  “{t.quote}”
-                </blockquote>
-                <figcaption className="mt-5 flex items-center gap-3">
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${t.gradient} text-sm font-bold text-white`}
-                  >
-                    {t.initials}
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">{t.name}</p>
-                    <p className="text-xs text-slate-400">{t.role}</p>
-                  </div>
-                </figcaption>
-              </figure>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+      {/* ------------------------------------------------ Community reviews */}
+      <CommunityReviews />
 
       {/* ------------------------------------------------ Map CTA */}
       <section className="section-pad pb-16 sm:pb-24">

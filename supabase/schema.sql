@@ -156,8 +156,83 @@ values ('report-photos', 'report-photos', true)
 on conflict (id) do nothing;
 
 -- ===================================================================
+-- REVIEW SYSTEM
+-- Users review reports; other users agree/disagree with each review.
+-- ===================================================================
+
+create table if not exists public.reviews (
+  id          uuid primary key default gen_random_uuid(),
+  report_id   uuid references public.reports(id) on delete cascade,
+  user_id     uuid references auth.users(id) on delete set null,
+  author_name text not null default 'Anonymous',
+  content     text not null check (char_length(content) between 2 and 600),
+  agrees      int not null default 0,
+  disagrees   int not null default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists reviews_report_idx on public.reviews (report_id, created_at desc);
+
+alter table public.reviews enable row level security;
+
+create policy "reviews public read"  on public.reviews for select using (true);
+create policy "reviews auth insert"  on public.reviews for insert with check (auth.uid() is not null);
+create policy "reviews owner delete" on public.reviews for delete using (auth.uid() = user_id);
+
+-- One vote (agree/disagree) per user per review
+create table if not exists public.review_votes (
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  review_id  uuid not null references public.reviews(id) on delete cascade,
+  vote_type  text not null check (vote_type in ('agree','disagree')),
+  created_at timestamptz not null default now(),
+  primary key (user_id, review_id)
+);
+
+alter table public.review_votes enable row level security;
+create policy "review_votes auth all" on public.review_votes for all using (auth.uid() = user_id);
+
+-- Atomic agree/disagree vote (one per user, updates counters)
+create or replace function public.vote_on_review(p_review uuid, p_vote text)
+returns jsonb
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_user     uuid := auth.uid();
+  v_inserted boolean := false;
+  v_row      public.reviews%rowtype;
+begin
+  if v_user is null then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+
+  begin
+    insert into public.review_votes (user_id, review_id, vote_type)
+    values (v_user, p_review, p_vote);
+    v_inserted := true;
+  exception when unique_violation then
+    v_inserted := false;
+  end;
+
+  if v_inserted then
+    update public.reviews set
+      agrees     = agrees + (p_vote = 'agree')::int,
+      disagrees  = disagrees + (p_vote = 'disagree')::int,
+      updated_at = now()
+    where id = p_review
+    returning * into v_row;
+  else
+    select * into v_row from public.reviews where id = p_review;
+  end if;
+
+  return to_jsonb(v_row);
+end;
+$$;
+
+-- ===================================================================
 -- After running this: enable "Email" provider in Authentication →
 -- Providers (for magic links + confirmations), then add redirect
 -- URLs:  http://localhost:5173/auth/callback  and
 --         https://<your-app>.vercel.app/auth/callback
+-- For reliable email, follow SMTP_SETUP.md (free SMTP = no hourly cap).
 -- ===================================================================

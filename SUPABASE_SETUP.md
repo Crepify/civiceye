@@ -53,6 +53,40 @@ For **Vercel**: Project → Settings → Environment Variables → add both (wit
 > ⚠️ The **anon key is public by design** — your data is protected by Row Level
 > Security (RLS), not by the key. Never use the `service_role` key on the frontend.
 
+## 4.5 Email delivery & rate limits (IMPORTANT — fixes "no verification link")
+
+Supabase's **built-in email sender is capped at ~2–3 emails per hour** per project.
+Once you hit that, confirmation/magic-link emails silently stop being sent and sign-ups
+start failing with "rate limit" errors **even after waiting a minute** (the cap is
+*per hour*, not per minute).
+
+**Fix — connect a free custom SMTP** (recommended, removes the cap):
+
+1. Create a free account at **https://resend.com** (100 emails/day free) → copy your API key.
+2. In Resend, add your domain or use the shared `onboarding@resend.dev` for testing.
+3. Supabase → **Project Settings → Authentication → SMTP Settings** → toggle **Enable custom SMTP**:
+   - Host: `smtp.resend.com`, Port: `465`, User: `resend`, Pass: your Resend API key
+   - Sender: e.g. `Amrita Eye <onboarding@resend.dev>`
+4. Save, then resend a confirmation from **Authentication → Users → ⋯ → Resend confirmation**.
+
+**During development** you can also just turn email confirmation OFF:
+**Authentication → Providers → Email → "Confirm email" = off** → new sign-ups log in
+instantly (the app auto-detects this and skips the "check your inbox" step).
+
+**Raise the auth rate limits** if needed: **Authentication → Rate Limits** (e.g. sign-up
+60/hr → 600/hr). Custom SMTP limits apply regardless, so the SMTP step is the real fix.
+Full free-SMTP walkthrough: **`SMTP_SETUP.md`**.
+
+**Reviews:** the review system (users review reports + agree/disagree) is part of
+`schema.sql` — if you already ran it before the reviews were added, just run the
+"REVIEW SYSTEM" section of the file (tables + `vote_on_review` function).
+
+## 4.6 "Remember me" / stay signed in
+
+Sessions are persisted in the browser (`persistSession` is on by default and now explicit
+in `src/lib/supabase.ts`), so a device stays signed in across visits until the user signs
+out. Nothing to configure — just don't clear browser storage.
+
 ## 5. Restart & verify
 
 ```bash

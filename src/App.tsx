@@ -33,6 +33,32 @@ export default function App() {
     location.pathname.startsWith('/auth/callback') ||
     location.pathname.startsWith('/reset');
 
+  // Everything else requires a signed-in user (login-first app).
+  const gatedRoutes = (
+    <Routes location={location}>
+      <Route path="/" element={<Landing />} />
+      <Route path="/features" element={<Features />} />
+      <Route path="/map" element={<MapPage />} />
+      <Route path="/live" element={<LiveDetection />} />
+      <Route path="/report" element={<ReportPage />} />
+      <Route path="/report/:id" element={<ReportDetails />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/community" element={<Community />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+
+  const authRoutes = (
+    <Routes location={location}>
+      <Route path="/login" element={<Login />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/reset" element={<ResetPassword />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+
   return (
     <div className="flex min-h-screen flex-col">
       {!isAuthPage ? <Navbar /> : null}
@@ -45,29 +71,7 @@ export default function App() {
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-1 flex-col"
         >
-          <Routes location={location}>
-            <Route path="/" element={<Landing />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/live" element={<LiveDetection />} />
-            <Route
-              path="/report"
-              element={
-                <RequireAuth>
-                  <ReportPage />
-                </RequireAuth>
-              }
-            />
-            <Route path="/report/:id" element={<ReportDetails />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/reset" element={<ResetPassword />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {isAuthPage ? authRoutes : <RequireAuth>{gatedRoutes}</RequireAuth>}
         </motion.main>
       </AnimatePresence>
       {!isAuthPage ? <Footer /> : null}
