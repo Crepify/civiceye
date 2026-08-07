@@ -27,7 +27,7 @@ export function loadGoogleMaps(): Promise<typeof google> {
     const loader = new Loader({
       apiKey: API_KEY,
       version: 'weekly',
-      libraries: ['places', 'visualization', 'marker'],
+      libraries: ['places', 'marker'],
     });
     loaderPromise = loader.load();
   }

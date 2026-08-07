@@ -29,15 +29,6 @@ const SEVERITY_HEX: Record<Severity, string> = {
   critical: '#f43f5e',
 };
 
-const HEAT_GRADIENT = [
-  'rgba(16, 185, 129, 0)',
-  'rgba(16, 185, 129, 0.5)',
-  'rgba(245, 158, 11, 0.6)',
-  'rgba(249, 115, 22, 0.7)',
-  'rgba(244, 63, 94, 0.85)',
-  'rgba(225, 29, 72, 0.95)',
-];
-
 /** Custom pin icon as an SVG data URL. */
 function pinIcon(severity: Severity, selected: boolean, verified: boolean): google.maps.Icon {
   const color = SEVERITY_HEX[severity];
@@ -53,9 +44,6 @@ function pinIcon(severity: Severity, selected: boolean, verified: boolean): goog
     anchor: new google.maps.Point(size / 2, size),
   };
 }
-
-/** Minimal typed surface for the deprecated (but working) heatmap layer. */
-type HeatmapLayerLike = { setMap(map: google.maps.Map | null): void };
 
 /** Cluster renderer — a severity-aware counter bubble. */
 class ClusterRenderer implements Renderer {
@@ -99,7 +87,7 @@ export function GoogleMapView({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const clustererRef = useRef<MarkerClusterer | null>(null);
-  const heatmapRef = useRef<HeatmapLayerLike | null>(null);
+  const heatCirclesRef = useRef<google.maps.Circle[]>([]);
   const infoRef = useRef<google.maps.InfoWindow | null>(null);
   const infoRootRef = useRef<ReturnType<typeof createRoot> | null>(null);
   const droppedPinRef = useRef<google.maps.Marker | null>(null);
@@ -155,7 +143,8 @@ export function GoogleMapView({
       cancelled = true;
       readyRef.current = false;
       clustererRef.current?.setMap(null);
-      heatmapRef.current?.setMap(null);
+      heatCirclesRef.current.forEach((c) => c.setMap(null));
+      heatCirclesRef.current = [];
       infoRef.current?.close();
       map = null;
       mapRef.current = null;
@@ -209,37 +198,38 @@ export function GoogleMapView({
     };
   }, [reports, selectedId, onSelect]);
 
-  // Heatmap layer.
+  // Heatmap — custom overlay (the old google.maps.visualization.HeatmapLayer
+  // was removed in Maps API v3.65, so we draw overlapping severity-tinted
+  // circles instead: denser/hotter areas show more opacity, like a heatmap).
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    heatmapRef.current?.setMap(null);
-    if (!heatmap) {
-      heatmapRef.current = null;
-      return;
-    }
+    // Clear previous circles.
+    heatCirclesRef.current.forEach((c) => c.setMap(null));
+    heatCirclesRef.current = [];
 
-    // Resolve lazily — `google` only exists once the API has loaded.
-    const HeatmapLayerCtor = google.maps.visualization.HeatmapLayer as unknown as new (
-      opts: Record<string, unknown>,
-    ) => HeatmapLayerLike;
+    if (!heatmap || reports.length === 0) return;
 
-    heatmapRef.current = new HeatmapLayerCtor({
-      data: reports.map((r) => ({
-        location: new google.maps.LatLng(r.coordinates.lat, r.coordinates.lng),
-        weight: SEVERITY_META[r.severity].weight,
-      })),
-      map,
-      radius: 42,
-      opacity: 0.65,
-      dissipating: true,
-      gradient: HEAT_GRADIENT,
+    heatCirclesRef.current = reports.map((r) => {
+      const weight = SEVERITY_META[r.severity].weight;
+      const color = SEVERITY_HEX[r.severity];
+      return new google.maps.Circle({
+        map,
+        center: { lat: r.coordinates.lat, lng: r.coordinates.lng },
+        radius: 22 + weight * 20, // metres
+        fillColor: color,
+        fillOpacity: 0.1 + weight * 0.06,
+        strokeColor: color,
+        strokeOpacity: 0.3,
+        strokeWeight: 1,
+        zIndex: 1,
+      });
     });
 
     return () => {
-      heatmapRef.current?.setMap(null);
-      heatmapRef.current = null;
+      heatCirclesRef.current.forEach((c) => c.setMap(null));
+      heatCirclesRef.current = [];
     };
   }, [reports, heatmap]);
 
