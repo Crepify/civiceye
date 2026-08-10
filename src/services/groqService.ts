@@ -50,24 +50,31 @@ JSON schema:
 function parseModelJson(text: string): Record<string, unknown> {
   let cleaned = text.trim();
   cleaned = cleaned.replace(/^```(?:json)?/i, '').replace(/```$/, '');
-  // Qwen models emit a <think> reasoning block before the answer.
-  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '');
-  // If any leading prose exists before the JSON, skip it.
-  const start = cleaned.indexOf('{');
-  const end = cleaned.lastIndexOf('}');
-  if (start === -1 || end === -1) throw new Error('Model returned no JSON.');
+
+  // Find the JSON object anywhere (even if the model put prose around it).
+  let start = cleaned.indexOf('{');
+  let end = cleaned.lastIndexOf('}');
+  if (start === -1 || end === -1) {
+    // Fallback: look inside the <think> block too (model sometimes
+    // interleaves the answer there when truncated).
+    cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, (m) => m);
+    start = cleaned.indexOf('{');
+    end = cleaned.lastIndexOf('}');
+    if (start === -1 || end === -1) {
+      throw new Error('Model returned no JSON.');
+    }
+  }
+
   try {
     return JSON.parse(cleaned.slice(start, end + 1)) as Record<string, unknown>;
   } catch {
-    // Fallback: try extracting just the first JSON object.
+    // Fallback: extract just the first balanced JSON object.
     const first = cleaned.slice(start);
-    const depthScan = first.split('');
     let depth = 0;
     let objEnd = -1;
-    for (let i = 0; i < depthScan.length; i++) {
-      const ch = depthScan[i];
-      if (ch === '{') depth++;
-      else if (ch === '}') {
+    for (let i = 0; i < first.length; i++) {
+      if (first[i] === '{') depth++;
+      else if (first[i] === '}') {
         depth--;
         if (depth === 0) {
           objEnd = i + 1;
@@ -102,7 +109,7 @@ function toQuality(value: unknown): AnalysisResult['imageQuality'] {
   return 'clear';
 }
 
-/** Run REAL analysis via Groq's Llama 3.2 vision model. Throws on failure. */
+/** Run REAL analysis via Groq's qwen vision model, with one retry. */
 export async function analyzePhotoWithGroq(
   photo: string,
   coordinates: Coordinates | null,
@@ -114,45 +121,60 @@ export async function analyzePhotoWithGroq(
   const mime = match[1];
   const b64 = match[2];
 
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: PROMPT },
-            { type: 'image_url', image_url: { url: `data:${mime};base64,${b64}` } },
-          ],
-        },
-      ],
-      temperature: 0.2,
-      max_tokens: 700,
-      // NOTE: we intentionally do NOT use response_format json_object —
-      // qwen models emit a <think> block and strict JSON validation
-      // rejects it with "json_validate_failed". Our parser strips the
-      // think block and extracts the JSON object itself.
-    }),
-  });
+  const callOnce = async (): Promise<Record<string, unknown>> => {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: PROMPT },
+              { type: 'image_url', image_url: { url: `data:${mime};base64,${b64}` } },
+            ],
+          },
+        ],
+        temperature: 0.2,
+        max_tokens: 900,
+        // NOTE: we intentionally do NOT use response_format json_object —
+        // qwen models emit a <think> block and strict JSON validation
+        // rejects it with "json_validate_failed". Our parser extracts it.
+      }),
+    });
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    if (res.status === 429) throw new Error('Groq rate limited (429).');
-    throw new Error(`Groq error ${res.status}: ${body.slice(0, 200)}`);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      if (res.status === 429) throw new Error('Groq rate limited (429).');
+      throw new Error(`Groq error ${res.status}: ${body.slice(0, 200)}`);
+    }
+
+    const data = (await res.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const text = data.choices?.[0]?.message?.content;
+    if (!text) throw new Error('Groq returned no content.');
+    return parseModelJson(text);
+  };
+
+  // The qwen model sometimes returns only a think block (no JSON) when
+  // truncated — retry once before giving up.
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = await callOnce();
+  } catch (err) {
+    if (err instanceof Error && /no JSON/i.test(err.message)) {
+      await new Promise((r) => setTimeout(r, 600));
+      parsed = await callOnce();
+    } else {
+      throw err;
+    }
   }
 
-  const data = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Groq returned no content.');
-
-  const parsed = parseModelJson(text);
   const category = toCategoryId(parsed.category);
   const quality = toQuality(parsed.imageQuality);
   const objects = Array.isArray(parsed.objects)
