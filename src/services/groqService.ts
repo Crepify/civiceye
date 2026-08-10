@@ -31,7 +31,9 @@ const CATEGORY_ENUM = [
 ];
 
 const PROMPT = `You are a civic inspection AI for an app that detects problems in photos.
-Analyze the attached image.
+Analyze the attached image and reply with ONLY ONE JSON OBJECT.
+Do NOT think out loud. Do NOT include markdown, explanations or extra text. Output the JSON only.
+
 1) IMAGE QUALITY: return one of "clear" | "blurry" | "unclear" | "low-light".
    Be honest: blurry = out of focus/motion blur; unclear = subject too far or obstructed; low-light = too dark.
 2) DETECTION: if a civic issue is visible, classify into one of:
@@ -40,16 +42,9 @@ Analyze the attached image.
     water-leakage, sewage, illegal-dumping, traffic-signal, accident=collision/crash,
     security=suspicious activity, other=anything else). If nothing clear, use "other" with low confidence.
 3) SEVERITY: low | medium | high | critical.
-Reply with ONLY JSON (no markdown):
-{
-  "category": "<one of the above>",
-  "confidence": <0.0 to 1.0>,
-  "severity": "low|medium|high|critical",
-  "objects": ["<visible objects>"],
-  "summary": "<2-3 sentence factual description, only what is visible>",
-  "imageQuality": "clear|blurry|unclear|low-light",
-  "qualityNote": "<short reason>"
-}`;
+
+JSON schema:
+{"category":"<one of the above>","confidence":<0.0 to 1.0>,"severity":"low|medium|high|critical","objects":["<visible objects>"],"summary":"<2-3 sentence factual description, only what is visible>","imageQuality":"clear|blurry|unclear|low-light","qualityNote":"<short reason>"}`;
 
 /** Parse model output defensively (strip markdown fences + think blocks). */
 function parseModelJson(text: string): Record<string, unknown> {
@@ -57,10 +52,32 @@ function parseModelJson(text: string): Record<string, unknown> {
   cleaned = cleaned.replace(/^```(?:json)?/i, '').replace(/```$/, '');
   // Qwen models emit a <think> reasoning block before the answer.
   cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  // If any leading prose exists before the JSON, skip it.
   const start = cleaned.indexOf('{');
   const end = cleaned.lastIndexOf('}');
   if (start === -1 || end === -1) throw new Error('Model returned no JSON.');
-  return JSON.parse(cleaned.slice(start, end + 1)) as Record<string, unknown>;
+  try {
+    return JSON.parse(cleaned.slice(start, end + 1)) as Record<string, unknown>;
+  } catch {
+    // Fallback: try extracting just the first JSON object.
+    const first = cleaned.slice(start);
+    const depthScan = first.split('');
+    let depth = 0;
+    let objEnd = -1;
+    for (let i = 0; i < depthScan.length; i++) {
+      const ch = depthScan[i];
+      if (ch === '{') depth++;
+      else if (ch === '}') {
+        depth--;
+        if (depth === 0) {
+          objEnd = i + 1;
+          break;
+        }
+      }
+    }
+    if (objEnd === -1) throw new Error('Model returned unparseable JSON.');
+    return JSON.parse(first.slice(0, objEnd)) as Record<string, unknown>;
+  }
 }
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
@@ -115,8 +132,11 @@ export async function analyzePhotoWithGroq(
         },
       ],
       temperature: 0.2,
-      max_tokens: 600,
-      response_format: { type: 'json_object' },
+      max_tokens: 700,
+      // NOTE: we intentionally do NOT use response_format json_object —
+      // qwen models emit a <think> block and strict JSON validation
+      // rejects it with "json_validate_failed". Our parser strips the
+      // think block and extracts the JSON object itself.
     }),
   });
 
