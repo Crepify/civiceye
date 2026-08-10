@@ -1,5 +1,6 @@
 import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types';
 import { CATEGORIES, categoryById } from '@/data/categories';
+import { analyzePhotoWithAI, hasGeminiKey } from './geminiService';
 
 /**
  * Mock computer-vision photo analysis.
@@ -149,4 +150,25 @@ export function analyzePhoto(input: AnalysisInput): AnalysisOutput {
 /** Total duration of the animation in ms. */
 export function analysisTotalMs(): number {
   return ANALYSIS_STAGES.reduce((sum, s) => sum + s.duration, 0);
+}
+
+/**
+ * Orchestrator: try the REAL hosted vision model first (Gemini), and
+ * fall back to the built-in mock estimate if no key is set or the API
+ * fails (offline / rate limit). The result is tagged with the engine.
+ */
+export async function runImageAnalysis(
+  photo: string,
+  coordinates: Coordinates | null,
+): Promise<AnalysisOutput> {
+  if (hasGeminiKey) {
+    try {
+      const real = await analyzePhotoWithAI(photo, coordinates);
+      return { ...real, photo };
+    } catch (err) {
+      console.warn('[CivicEye] real AI unavailable, using built-in estimate:', err);
+    }
+  }
+  const mock = analyzePhoto({ photo, coordinates });
+  return { ...mock, engine: 'mock' as const };
 }

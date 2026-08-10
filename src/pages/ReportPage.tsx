@@ -32,7 +32,7 @@ import { Loader } from '@/components/Loader';
 import { useReports } from '@/hooks/useReports';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
-import { ANALYSIS_STAGES, analysisTotalMs, analyzePhoto } from '@/services/aiAnalysisService';
+import { ANALYSIS_STAGES, analysisTotalMs, runImageAnalysis } from '@/services/aiAnalysisService';
 import { requestLocation } from '@/services/geoService';
 import { mockReverseGeocode } from '@/services/geocodeService';
 import { publishPhoto } from '@/services/syncService';
@@ -122,15 +122,25 @@ function ReportWizard() {
       if (progress >= 1 && timerRef.current) {
         window.clearInterval(timerRef.current);
         timerRef.current = null;
-        const result = analyzePhoto({
-          photo: draft.photo as string,
-          coordinates: draft.coordinates,
-        });
-        update({ analysis: result, category: result.category });
-        toast.success(
-          'AI analysis complete',
-          'Category, severity and description were auto-detected.',
-        );
+        void (async () => {
+          const result = await runImageAnalysis(
+            draft.photo as string,
+            draft.coordinates,
+          );
+          update({ analysis: result, category: result.category });
+          if (result.imageQuality && result.imageQuality !== 'clear') {
+            toast.warning(
+              'Photo may be unclear',
+              result.qualityNote ??
+                'The AI suggests retaking the photo for a more accurate detection.',
+            );
+          } else {
+            toast.success(
+              'AI analysis complete',
+              'Category, severity and description were auto-detected.',
+            );
+          }
+        })();
       }
     }, 90);
     return () => {
@@ -191,7 +201,8 @@ function ReportWizard() {
           confidence: draft.analysis.confidence,
           objects: draft.analysis.objects,
           summary: draft.analysis.description,
-          model: 'mock-vision-v2.4',
+          model: draft.analysis.engine === 'gemini' ? 'gemini-2.0-flash' : 'mock-vision-v2.4',
+          imageQuality: draft.analysis.imageQuality ?? null,
           disclaimer:
             'AI confidence is an estimate and may be inaccurate. Verify the issue before acting.',
         },
@@ -627,6 +638,30 @@ function AnalysisResultCard({
             be inaccurate. Please verify the issue with your own eyes before reporting or acting on
             it.
           </span>
+        </p>
+        {analysis.imageQuality && analysis.imageQuality !== 'clear' ? (
+          <p className="mt-3 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs leading-relaxed text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+            <Camera className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              <strong>⚠️ Photo looks{' '}
+                {analysis.imageQuality === 'low-light' ? 'too dark' : analysis.imageQuality}.</strong>{' '}
+              {analysis.qualityNote ??
+                'The AI may not have detected the issue accurately. Consider retaking the photo in good lighting and holding the camera steady.'}
+            </span>
+          </p>
+        ) : null}
+        <p className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          {analysis.engine === 'gemini' ? (
+            <>
+              <Sparkles className="h-3.5 w-3.5 text-primary-500" />
+              Analysed by Gemini Vision (real model)
+            </>
+          ) : (
+            <>
+              <Info className="h-3.5 w-3.5" />
+              Built-in estimate — add VITE_GEMINI_API_KEY for real vision
+            </>
+          )}
         </p>
       </div>
     </div>

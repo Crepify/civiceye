@@ -120,6 +120,12 @@ export interface AnalysisResult {
   timestamp: string;
   /** Raw tags produced by the model. */
   tags: string[];
+  /** AI's judgment of photo quality — used to warn when the image is unclear. */
+  imageQuality?: 'clear' | 'blurry' | 'unclear' | 'low-light';
+  /** Human-readable reason for the quality flag. */
+  qualityNote?: string;
+  /** Which engine produced this result. */
+  engine?: 'gemini' | 'mock';
 }
 
 /** A toast notification shown by the ToastProvider. */
