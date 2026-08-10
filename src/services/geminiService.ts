@@ -68,10 +68,11 @@ Reply with ONLY JSON (no markdown, no extra text):
   "qualityNote": "<one short sentence explaining the quality verdict>"
 }`;
 
-/** Parse model output defensively (strip markdown fences, clamp values). */
+/** Parse model output defensively (strip markdown fences + think blocks). */
 function parseModelJson(text: string): Record<string, unknown> {
   let cleaned = text.trim();
   cleaned = cleaned.replace(/^```(?:json)?/i, '').replace(/```$/, '');
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '');
   const start = cleaned.indexOf('{');
   const end = cleaned.lastIndexOf('}');
   if (start === -1 || end === -1) throw new Error('Model returned no JSON.');

@@ -125,7 +125,7 @@ export interface AnalysisResult {
   /** Human-readable reason for the quality flag. */
   qualityNote?: string;
   /** Which engine produced this result. */
-  engine?: 'gemini' | 'mock';
+  engine?: 'gemini' | 'groq' | 'mock';
 }
 
 /** A toast notification shown by the ToastProvider. */

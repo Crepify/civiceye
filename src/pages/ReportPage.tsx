@@ -656,10 +656,15 @@ function AnalysisResultCard({
               <Sparkles className="h-3.5 w-3.5 text-primary-500" />
               Analysed by Gemini Vision (real model)
             </>
+          ) : analysis.engine === 'groq' ? (
+            <>
+              <Sparkles className="h-3.5 w-3.5 text-primary-500" />
+              Analysed by Groq Llama Vision (real model)
+            </>
           ) : (
             <>
               <Info className="h-3.5 w-3.5" />
-              Built-in estimate — add VITE_GEMINI_API_KEY for real vision
+              Built-in estimate — add VITE_GEMINI_API_KEY or VITE_GROQ_API_KEY for real vision
             </>
           )}
         </p>

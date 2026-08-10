@@ -1,6 +1,7 @@
 import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types';
 import { CATEGORIES, categoryById } from '@/data/categories';
 import { analyzePhotoWithAI, hasGeminiKey } from './geminiService';
+import { analyzePhotoWithGroq, hasGroqKey } from './groqService';
 
 /**
  * Mock computer-vision photo analysis.
@@ -153,9 +154,9 @@ export function analysisTotalMs(): number {
 }
 
 /**
- * Orchestrator: try the REAL hosted vision model first (Gemini), and
- * fall back to the built-in mock estimate if no key is set or the API
- * fails (offline / rate limit). The result is tagged with the engine.
+ * Orchestrator: try the REAL hosted vision models first (Gemini → Groq),
+ * falling back to the built-in mock estimate only if both fail (no keys,
+ * offline, or rate limited). Result is tagged with the engine used.
  */
 export async function runImageAnalysis(
   photo: string,
@@ -166,7 +167,15 @@ export async function runImageAnalysis(
       const real = await analyzePhotoWithAI(photo, coordinates);
       return { ...real, photo };
     } catch (err) {
-      console.warn('[CivicEye] real AI unavailable, using built-in estimate:', err);
+      console.warn('[CivicEye] Gemini unavailable:', err);
+    }
+  }
+  if (hasGroqKey) {
+    try {
+      const real = await analyzePhotoWithGroq(photo, coordinates);
+      return { ...real, photo };
+    } catch (err) {
+      console.warn('[CivicEye] Groq unavailable:', err);
     }
   }
   const mock = analyzePhoto({ photo, coordinates });
