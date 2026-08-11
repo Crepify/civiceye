@@ -4,64 +4,58 @@ import { detectBlur } from '@/utils/image';
 /**
  * Roboflow inference client (free tier, no card).
  *
- * The browser CANNOT call Roboflow directly — its serverless endpoint
- * omits `Access-Control-Allow-Origin` in the preflight, so browsers
- * block the request (CORS). Instead we call OUR OWN serverless proxy:
- *   POST /api/roboflow   (Vercel function `api/roboflow.js`, mirrored in
- *                        dev by a vite proxy to serverless.roboflow.com)
- * The proxy forwards to Roboflow server-side (no CORS there) and returns
- * the response unchanged.
+ * The browser cannot call Roboflow directly (their serverless endpoint omits
+ * `Access-Control-Allow-Origin` in the preflight, so browsers block it — CORS).
+ * Instead we call OUR OWN proxy:
+ *   - Cloudflare Worker (VITE_ROBOFLOW_PROXY_URL), preferred, or
+ *   - Vercel function `api/roboflow.js` (mirrored in dev by the vite proxy)
+ * The proxy forwards to Roboflow server-side (no CORS there) and returns the
+ * response unchanged.
  *
  * Body: { image: "<base64>", api_key?: "<key>", model?: "<model/version>" }
- *   - no `model`  → runs the WORKFLOW
- *     (workspace + workflow_id from env, defaulting to
- *      "CivicEye Pothole Reporting Starter")
+ *   - no `model`  → runs the WORKFLOW (workspace + workflow_id from env)
  *   - with `model` → runs a standard detect.roboflow.com model
  *
- * REAL RESPONSE (grounded): the workflow returns
- *   { outputs: [ { output_image: { type: "base64", value: "<annotated jpeg>" } } ] }
- * i.e. only an annotated image — no class/confidence keys. The parser keys
- * off the real output names, never hard-codes them, and reports honestly
- * when the workflow does not expose predictions.
+ * REAL RESPONSE (grounded): the "CivicEye Pothole Reporting Starter" workflow
+ * returns
+ *   { outputs: [ { output_image: {type:"base64",value:"<annotated jpeg>"},
+ *                  predictions: [{ class, confidence, x, y, width, height }] } ] }
+ * Parser keys off real output names and never hard-codes them.
  */
 
 const API_KEY = import.meta.env.VITE_ROBOFLOW_API_KEY?.trim() ?? '';
 const WORKSPACE = import.meta.env.VITE_ROBOFLOW_WORKSPACE?.trim() ?? '';
 const WORKFLOW_ID = import.meta.env.VITE_ROBOFLOW_WORKFLOW_ID?.trim() ?? '';
 const MODEL = import.meta.env.VITE_ROBOFLOW_MODEL?.trim() ?? '';
-/** Optional Cloudflare Worker URL — preferred over the Vercel proxy. */
 const PROXY_URL = import.meta.env.VITE_ROBOFLOW_PROXY_URL?.trim() ?? '';
 
-/**
- * Validate the proxy URL. Catches placeholder junk like
- * "https://roboflow-proxy.<you>.workers.dev" before fetch throws a
- * confusing "Failed to parse URL" error.
- */
+/** True when a full Roboflow target (workflow or model) is configured. */
+export const hasRoboflowKey = Boolean(API_KEY && (WORKSPACE && WORKFLOW_ID ? true : MODEL));
+
+/** Validate a proxy URL — reject placeholders like "<you>". */
 function isValidProxyUrl(url: string): boolean {
   try {
     const u = new URL(url);
-    // Hostname must not contain placeholder chars and must have a dot.
     return /^[a-z0-9.-]+$/i.test(u.hostname) && u.hostname.includes('.') && !u.hostname.includes('<');
   } catch {
     return false;
   }
 }
 
+/** Where the browser sends the request (Worker → Vercel function). */
 export const PROXY_TARGET = PROXY_URL
   ? isValidProxyUrl(PROXY_URL)
     ? `${PROXY_URL.replace(/\/+$/, '')}/`
     : null
   : '/api/roboflow';
 
-export const hasRoboflowKey = Boolean(API_KEY && (WORKSPACE && WORKFLOW_ID ? true : MODEL));
-
-/** Which Roboflow env pieces are present (for diagnostics). */
+/** Diagnostics for the UI/console. */
 export const roboflowConfig = {
   apiKey: Boolean(API_KEY),
   workspace: Boolean(WORKSPACE),
   workflowId: Boolean(WORKFLOW_ID),
   model: Boolean(MODEL),
-  proxyUrl: PROXY_URL ? PROXY_URL : null,
+  proxyUrl: PROXY_URL && isValidProxyUrl(PROXY_URL) ? PROXY_URL : null,
 };
 
 /** Human-readable reason Roboflow is skipped (or null when it will run). */
@@ -77,9 +71,8 @@ export function roboflowStatus(): { ok: boolean; reason: string } {
   };
 }
 
-/** Where the browser sends the request: Worker (if set) else /api/roboflow. */
 const REQUEST_TIMEOUT_MS = 45_000;
-const MAX_ATTEMPTS = 3; // 1 call + 2 retries
+const MAX_ATTEMPTS = 3;
 const BACKOFF_BASE_MS = 500;
 
 /** Typed error for all Roboflow failures. */
@@ -95,7 +88,7 @@ export class RoboflowError extends Error {
 }
 
 /* ------------------------------------------------------------------ */
-/* Low-level HTTP with timeout + retries/backoff                       */
+/* HTTP with timeout + retries                                         */
 /* ------------------------------------------------------------------ */
 
 async function postJsonWithRetry(
@@ -113,7 +106,6 @@ async function postJsonWithRetry(
       signal,
     });
   } catch (err) {
-    // Network / timeout error.
     if (attempt + 1 < MAX_ATTEMPTS) {
       await sleep(BACKOFF_BASE_MS * 2 ** attempt);
       return postJsonWithRetry(url, body, signal, attempt + 1);
@@ -125,7 +117,6 @@ async function postJsonWithRetry(
     );
   }
 
-  // Retry on 429 / 5xx (transient); never on other 4xx.
   if ((res.status === 429 || res.status >= 500) && attempt + 1 < MAX_ATTEMPTS) {
     await sleep(BACKOFF_BASE_MS * 2 ** attempt);
     return postJsonWithRetry(url, body, signal, attempt + 1);
@@ -140,6 +131,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /* Parsing — defensive, keyed on the REAL response shape               */
 /* ------------------------------------------------------------------ */
 
+/** Model class labels → CivicEye categories (normalized: spaces → hyphens). */
 const CLASS_MAP: Record<string, CategoryId> = {
   pothole: 'pothole',
   'pothole-hole': 'pothole',
@@ -155,7 +147,11 @@ const CLASS_MAP: Record<string, CategoryId> = {
   manhole: 'manhole',
   'manhole-cover': 'manhole',
   'fallen-tree': 'fallen-tree',
+  'fallen-tree-branch': 'fallen-tree',
   tree: 'fallen-tree',
+  'tree-branch': 'fallen-tree',
+  'fallen-tree-trunk': 'fallen-tree',
+  'tree-trunk': 'fallen-tree',
   'street-light': 'street-light',
   streetlight: 'street-light',
   'water-leakage': 'water-leakage',
@@ -175,7 +171,7 @@ const CLASS_MAP: Record<string, CategoryId> = {
 };
 
 function mapClass(label: string): CategoryId {
-  const key = label.trim().toLowerCase();
+  const key = label.trim().toLowerCase().replace(/[_\s]+/g, '-');
   return CLASS_MAP[key] ?? 'other';
 }
 
@@ -193,11 +189,7 @@ interface Prediction {
   confidence: number;
 }
 
-/**
- * Recursively find every {class, confidence} object anywhere in the
- * workflow response (works regardless of which output name the workflow
- * uses for its predictions).
- */
+/** Recursively find every {class, confidence} object in the response. */
 export function extractPredictions(node: unknown, out: Prediction[] = []): Prediction[] {
   if (Array.isArray(node)) {
     for (const item of node) extractPredictions(item, out);
@@ -213,12 +205,7 @@ export function extractPredictions(node: unknown, out: Prediction[] = []): Predi
   return out;
 }
 
-/**
- * Find the workflow's image-shaped output: the first { type: 'base64',
- * value: <jpeg> } found in an output entry. Returns a data URL (browser)
- * so the annotated image can be shown in the UI; the raw base64 is never
- * logged.
- */
+/** Find the workflow's image-shaped output (data URL for the UI). */
 export function extractAnnotatedImage(node: unknown): string | null {
   if (Array.isArray(node)) {
     for (const item of node) {
@@ -235,7 +222,6 @@ export function extractAnnotatedImage(node: unknown): string | null {
       typeof obj.value === 'string' &&
       obj.value.length > 0
     ) {
-      // Treat as JPEG (workflow annotates with the same format as input).
       return `data:image/jpeg;base64,${obj.value}`;
     }
     for (const k of Object.keys(obj)) {
@@ -250,15 +236,8 @@ export function extractAnnotatedImage(node: unknown): string | null {
 /* Public API                                                          */
 /* ------------------------------------------------------------------ */
 
-/**
- * Call the Roboflow proxy — a Cloudflare Worker (VITE_ROBOFLOW_PROXY_URL,
- * preferred) or the Vercel function `api/roboflow.js` (or the dev proxy
- * in vite.config.ts). Timeout + retries with backoff. Throws
- * RoboflowError on failure.
- */
-async function callProxy(
-  body: { image: string; api_key?: string; model?: string },
-): Promise<unknown> {
+/** Call the Roboflow proxy (Worker or /api/roboflow). */
+async function callProxy(body: { image: string; api_key?: string; model?: string }): Promise<unknown> {
   if (!PROXY_TARGET) {
     throw new RoboflowError(
       'VITE_ROBOFLOW_PROXY_URL is invalid (looks like a placeholder, e.g. <you>). ' +
@@ -289,17 +268,17 @@ async function callProxy(
 }
 
 /**
- * Analyze a photo with Roboflow via the local proxy. Uses the workflow if
- * workspace+workflow_id are configured, otherwise the standard detect
- * endpoint (VITE_ROBOFLOW_MODEL). Always returns an AnalysisResult
- * (engine: 'roboflow'); if the workflow returns no predictions (image-only
- * outputs), it reports that honestly.
+ * Analyze a photo with Roboflow via the proxy. Workflow if
+ * workspace+workflow_id configured, else the detect endpoint
+ * (VITE_ROBOFLOW_MODEL). Returns an AnalysisResult (engine: 'roboflow');
+ * if the workflow returns no predictions, reports that honestly.
  */
 export async function analyzePhotoWithRoboflow(
   photo: string,
   coordinates: Coordinates | null,
 ): Promise<AnalysisResult & { annotatedImage?: string | null }> {
-  if (!hasRoboflowKey) throw new RoboflowError('Roboflow is not configured (key + workspace/workflow or model).');
+  if (!hasRoboflowKey)
+    throw new RoboflowError('Roboflow is not configured (key + workspace/workflow or model).');
 
   const match = /^data:image\/(?:png|jpeg|jpg|webp|gif);base64,(.+)$/s.exec(photo);
   if (!match) throw new RoboflowError('Unsupported image format.');
@@ -326,7 +305,6 @@ export async function analyzePhotoWithRoboflow(
   let predictions: Prediction[] = [];
 
   if (WORKSPACE && WORKFLOW_ID) {
-    // Workflow mode → proxy runs serverless.roboflow.com/{workspace}/workflows/{id}.
     data = await callProxy({ image: b64, api_key: API_KEY });
     const outputs = (data as { outputs?: unknown[] })?.outputs ?? [];
     for (const entry of outputs) {
@@ -336,12 +314,11 @@ export async function analyzePhotoWithRoboflow(
     base.annotatedImage = annotated;
     if (predictions.length === 0) {
       base.description =
-        'The workflow ran, but it only returned an annotated image — no detection data. ' +
-        'To get confidence scores, expose the predictions as a workflow output (or use a detect.roboflow.com model URL).';
+        'The workflow ran, but it returned no detection data. Expose the predictions as a workflow output, ' +
+        'or use a detect.roboflow.com model URL.';
       return base;
     }
   } else if (MODEL) {
-    // Detect mode → proxy runs detect.roboflow.com/{model}?api_key=…
     data = await callProxy({ image: b64, api_key: API_KEY, model: MODEL });
     predictions = extractPredictions(data);
     if (predictions.length === 0) {
@@ -355,14 +332,37 @@ export async function analyzePhotoWithRoboflow(
   const top = predictions.reduce((a, b) => (b.confidence > a.confidence ? b : a));
   const confidence = clamp(Number(top.confidence) || 0, 0, 1);
   const category = mapClass(top.class);
+  const sev = severityFromConfidence(confidence);
   const objects = predictions.slice(0, 8).map((p) => `${p.class} (${Math.round(p.confidence * 100)}%)`);
+
+  // Human-friendly, grounded description from the real detections.
+  const unique = [...new Set(predictions.map((p) => p.class))];
+  const topObjects = predictions
+    .slice()
+    .sort((a, b) => b.confidence - a.confidence)
+    .slice(0, 3)
+    .map((p) => `${p.class} (${Math.round(p.confidence * 100)}%)`)
+    .join(', ');
+  const severityWord: Record<Severity, string> = {
+    low: 'Minor',
+    medium: 'Moderate',
+    high: 'Significant',
+    critical: 'Critical',
+  };
+  const description =
+    `${severityWord[sev]} ${category.replace(/-/g, ' ')} detected in the photo ` +
+    `(${unique.length} distinct object type${unique.length === 1 ? '' : 's'}, ` +
+    `${predictions.length} detection${predictions.length === 1 ? '' : 's'} total). ` +
+    `Top matches: ${topObjects}. ` +
+    (annotated
+      ? 'The annotated image highlights each detection; this report can be reviewed before submission.'
+      : 'No annotated image was returned by the detector.');
 
   return {
     category,
     confidence,
-    severity: severityFromConfidence(confidence),
-    description: `Detected "${top.class}" with ${Math.round(confidence * 100)}% confidence. ` +
-      `${predictions.length} object${predictions.length === 1 ? '' : 's'} found in the scene.`,
+    severity: sev,
+    description,
     objects,
     coordinates,
     timestamp: new Date().toISOString(),
