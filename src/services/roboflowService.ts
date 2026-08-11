@@ -32,11 +32,52 @@ const MODEL = import.meta.env.VITE_ROBOFLOW_MODEL?.trim() ?? '';
 /** Optional Cloudflare Worker URL — preferred over the Vercel proxy. */
 const PROXY_URL = import.meta.env.VITE_ROBOFLOW_PROXY_URL?.trim() ?? '';
 
+/**
+ * Validate the proxy URL. Catches placeholder junk like
+ * "https://roboflow-proxy.<you>.workers.dev" before fetch throws a
+ * confusing "Failed to parse URL" error.
+ */
+function isValidProxyUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    // Hostname must not contain placeholder chars and must have a dot.
+    return /^[a-z0-9.-]+$/i.test(u.hostname) && u.hostname.includes('.') && !u.hostname.includes('<');
+  } catch {
+    return false;
+  }
+}
+
+export const PROXY_TARGET = PROXY_URL
+  ? isValidProxyUrl(PROXY_URL)
+    ? `${PROXY_URL.replace(/\/+$/, '')}/`
+    : null
+  : '/api/roboflow';
+
 export const hasRoboflowKey = Boolean(API_KEY && (WORKSPACE && WORKFLOW_ID ? true : MODEL));
 
-/** Where the browser sends the request: Worker (if set) else /api/roboflow. */
-const PROXY_TARGET = PROXY_URL ? `${PROXY_URL.replace(/\/+$/, '')}/` : '/api/roboflow';
+/** Which Roboflow env pieces are present (for diagnostics). */
+export const roboflowConfig = {
+  apiKey: Boolean(API_KEY),
+  workspace: Boolean(WORKSPACE),
+  workflowId: Boolean(WORKFLOW_ID),
+  model: Boolean(MODEL),
+  proxyUrl: PROXY_URL ? PROXY_URL : null,
+};
 
+/** Human-readable reason Roboflow is skipped (or null when it will run). */
+export function roboflowStatus(): { ok: boolean; reason: string } {
+  if (!API_KEY) return { ok: false, reason: 'Missing VITE_ROBOFLOW_API_KEY.' };
+  if (WORKSPACE && WORKFLOW_ID) return { ok: true, reason: '' };
+  if (MODEL) return { ok: true, reason: '' };
+  return {
+    ok: false,
+    reason:
+      'Incomplete Roboflow config: set VITE_ROBOFLOW_WORKSPACE and VITE_ROBOFLOW_WORKFLOW_ID ' +
+      '(or VITE_ROBOFLOW_MODEL) in addition to VITE_ROBOFLOW_API_KEY.',
+  };
+}
+
+/** Where the browser sends the request: Worker (if set) else /api/roboflow. */
 const REQUEST_TIMEOUT_MS = 45_000;
 const MAX_ATTEMPTS = 3; // 1 call + 2 retries
 const BACKOFF_BASE_MS = 500;
@@ -218,6 +259,14 @@ export function extractAnnotatedImage(node: unknown): string | null {
 async function callProxy(
   body: { image: string; api_key?: string; model?: string },
 ): Promise<unknown> {
+  if (!PROXY_TARGET) {
+    throw new RoboflowError(
+      'VITE_ROBOFLOW_PROXY_URL is invalid (looks like a placeholder, e.g. <you>). ' +
+        'Set it to your real Cloudflare Worker URL, or remove it to use /api/roboflow.',
+      undefined,
+      'config',
+    );
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   let res: Response;

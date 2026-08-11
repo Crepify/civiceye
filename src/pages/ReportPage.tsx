@@ -34,6 +34,7 @@ import { useReports } from '@/hooks/useReports';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
 import { ANALYSIS_STAGES, analysisTotalMs, runImageAnalysis } from '@/services/aiAnalysisService';
+import { roboflowStatus } from '@/services/roboflowService';
 import { requestLocation } from '@/services/geoService';
 import { mockReverseGeocode } from '@/services/geocodeService';
 import { publishPhoto } from '@/services/syncService';
@@ -734,6 +735,24 @@ function AnalysisResultCard({
             </>
           )}
         </p>
+        {/* Config warning — Roboflow is the primary engine; if it's skipped
+            due to missing env vars, say so instead of hiding it. */}
+        {analysis.engine !== 'roboflow' ? (
+          (() => {
+            const rf = roboflowStatus();
+            if (!rf.ok) {
+              return (
+                <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    <strong>Roboflow not active:</strong> {rf.reason} Falling back to the next engine.
+                  </span>
+                </p>
+              );
+            }
+            return null;
+          })()
+        ) : null}
         {onRetry ? (
           <button
             onClick={onRetry}

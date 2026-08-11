@@ -117,9 +117,10 @@ VITE_ROBOFLOW_WORKFLOW_ID=civiceye-pothole-reporting-starter-1786336062967
   ```
 - ⚠️ **Vercel Hobby functions time out at 10s**, but Roboflow's workflow can take ~5–15s.
   So a **Cloudflare Worker proxy** is recommended (30s free timeout): see
-  `worker/README.md` (deploy + `VITE_ROBOFLOW_PROXY_URL`). The app prefers the Worker
-  when `VITE_ROBOFLOW_PROXY_URL` is set, otherwise it uses `/api/roboflow` (Vercel),
-  falling back to Groq on timeout.
+  `worker/README.md` (deploy + set `VITE_ROBOFLOW_PROXY_URL` to your real Worker URL).
+  The app prefers the Worker when a valid `VITE_ROBOFLOW_PROXY_URL` is set, otherwise it
+  uses `/api/roboflow` (Vercel), falling back to Groq on timeout. An invalid/placeholder
+  proxy URL is rejected with a clear error instead of a confusing fetch failure.
 
 See **[ENVIRONMENT.md](./ENVIRONMENT.md)**, **[DEPLOYMENT.md](./DEPLOYMENT.md)** and
 **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** for full details. Email uses Supabase's

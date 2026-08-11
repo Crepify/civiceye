@@ -2,7 +2,7 @@ import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types'
 import { CATEGORIES, categoryById } from '@/data/categories';
 import { compressImageForAI } from '@/utils/image';
 import { analyzePhotoWithGroq, hasGroqKey } from './groqService';
-import { analyzePhotoWithRoboflow, hasRoboflowKey } from './roboflowService';
+import { analyzePhotoWithRoboflow, hasRoboflowKey, roboflowStatus } from './roboflowService';
 
 /**
  * Mock computer-vision photo analysis.
@@ -180,6 +180,15 @@ export async function runImageAnalysis(
     } catch (err) {
       console.warn('[CivicEye] Roboflow unavailable:', err);
     }
+  } else if (!hasGroqKey) {
+    // No real engine at all — make the config problem obvious.
+    console.warn('[CivicEye] Roboflow is NOT configured correctly —', roboflowStatus().reason);
+  } else {
+    console.warn(
+      '[CivicEye] Roboflow is NOT configured correctly —',
+      roboflowStatus().reason,
+      'Falling back to Groq.',
+    );
   }
   // 2) Groq — backup real engine (vision LLM).
   if (hasGroqKey) {
