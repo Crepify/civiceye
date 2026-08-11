@@ -1,7 +1,8 @@
 import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types';
 import { CATEGORIES, categoryById } from '@/data/categories';
-import { analyzePhotoWithAI, hasGeminiKey } from './geminiService';
+import { compressImageForAI } from '@/utils/image';
 import { analyzePhotoWithGroq, hasGroqKey } from './groqService';
+import { analyzePhotoWithRoboflow, hasRoboflowKey } from './roboflowService';
 
 /**
  * Mock computer-vision photo analysis.
@@ -154,25 +155,36 @@ export function analysisTotalMs(): number {
 }
 
 /**
- * Orchestrator: try the REAL hosted vision models first (Gemini → Groq),
+ * Orchestrator: try the REAL engines in order (Roboflow → Groq),
  * falling back to the built-in mock estimate only if both fail (no keys,
  * offline, or rate limited). Result is tagged with the engine used.
+ * Photos are compressed before hitting the APIs to stay under quotas.
  */
 export async function runImageAnalysis(
   photo: string,
   coordinates: Coordinates | null,
 ): Promise<AnalysisOutput> {
-  if (hasGeminiKey) {
+  // Compress once for all real-model calls (keeps payloads small).
+  let aiPhoto = photo;
+  try {
+    aiPhoto = await compressImageForAI(photo);
+  } catch {
+    aiPhoto = photo; // fall back to original if compression fails
+  }
+
+  // 1) Roboflow — primary. Real object detection with per-box confidence.
+  if (hasRoboflowKey) {
     try {
-      const real = await analyzePhotoWithAI(photo, coordinates);
+      const real = await analyzePhotoWithRoboflow(aiPhoto, coordinates);
       return { ...real, photo };
     } catch (err) {
-      console.warn('[CivicEye] Gemini unavailable:', err);
+      console.warn('[CivicEye] Roboflow unavailable:', err);
     }
   }
+  // 2) Groq — backup real engine (vision LLM).
   if (hasGroqKey) {
     try {
-      const real = await analyzePhotoWithGroq(photo, coordinates);
+      const real = await analyzePhotoWithGroq(aiPhoto, coordinates);
       return { ...real, photo };
     } catch (err) {
       console.warn('[CivicEye] Groq unavailable:', err);

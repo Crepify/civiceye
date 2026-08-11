@@ -14,6 +14,21 @@ export default defineConfig({
     port: 5173,
     host: true,
     open: false,
+    proxy: {
+      // Dev-only: mimic the /api/roboflow serverless function so
+      // `npm run dev` works without the Vercel runtime. Forwards to
+      // the real Roboflow workflow endpoint (server-side -> no CORS).
+      '/api/roboflow': {
+        target: 'https://serverless.roboflow.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) =>
+          p.replace(
+            /^\/api\/roboflow/,
+            '/aswathram-kumar/workflows/civiceye-pothole-reporting-starter-1786336062967',
+          ),
+      },
+    },
   },
   preview: {
     port: 4173,

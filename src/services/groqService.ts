@@ -2,13 +2,16 @@ import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types'
 import { categoryById } from '@/data/categories';
 
 /**
- * Groq vision engine (free tier, no card) — Llama 3.2 90B Vision.
+ * Groq vision engine (free tier, no card) — qwen 3.6 27B vision.
  * Drop-in second provider: used when Gemini is unavailable/rate-limited.
  * Set VITE_GROQ_API_KEY in your environment to activate.
+ *
+ * IMPORTANT: free-tier quota is small (~8k tokens/min). Phone photos are
+ * huge, so photos are compressed client-side before sending (see
+ * compressImageForAI in utils/image.ts) to stay under the limit.
  */
 
 const API_KEY = import.meta.env.VITE_GROQ_API_KEY?.trim() ?? '';
-// Current Groq vision model (free tier). Override via VITE_GROQ_MODEL.
 const MODEL = import.meta.env.VITE_GROQ_MODEL?.trim() || 'qwen/qwen3.6-27b';
 
 export const hasGroqKey = Boolean(API_KEY);
@@ -50,21 +53,10 @@ JSON schema:
 function parseModelJson(text: string): Record<string, unknown> {
   let cleaned = text.trim();
   cleaned = cleaned.replace(/^```(?:json)?/i, '').replace(/```$/, '');
-
-  // Find the JSON object anywhere (even if the model put prose around it).
-  let start = cleaned.indexOf('{');
-  let end = cleaned.lastIndexOf('}');
-  if (start === -1 || end === -1) {
-    // Fallback: look inside the <think> block too (model sometimes
-    // interleaves the answer there when truncated).
-    cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, (m) => m);
-    start = cleaned.indexOf('{');
-    end = cleaned.lastIndexOf('}');
-    if (start === -1 || end === -1) {
-      throw new Error('Model returned no JSON.');
-    }
-  }
-
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  const start = cleaned.indexOf('{');
+  const end = cleaned.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error('Model returned no JSON.');
   try {
     return JSON.parse(cleaned.slice(start, end + 1)) as Record<string, unknown>;
   } catch {

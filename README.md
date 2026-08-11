@@ -86,6 +86,41 @@ VITE_GOOGLE_MAPS_API_KEY=your_key_here
 
 > 🔑 The key is read at build time via `import.meta.env` — it must be prefixed with `VITE_`.
 
+### 🤖 Real AI engines (image analysis)
+
+Analysis tries **Roboflow → Groq → built-in estimate**, whichever is configured (Roboflow is primary).
+
+**Roboflow workflow ("CivicEye Pothole Reporting Starter")** — env setup:
+
+```env
+VITE_ROBOFLOW_API_KEY=<key from app.roboflow.com/settings/api>
+VITE_ROBOFLOW_WORKSPACE=aswathram-kumar
+VITE_ROBOFLOW_WORKFLOW_ID=civiceye-pothole-reporting-starter-1786336062967
+```
+
+- The browser can't call Roboflow directly (its serverless endpoint omits the CORS
+  `Access-Control-Allow-Origin` header in preflight), so the app calls **its own proxy**:
+  `POST /api/roboflow` (Vercel function `api/roboflow.js`, mirrored in dev by a vite
+  proxy). The function forwards to
+  `https://serverless.roboflow.com/{workspace}/workflows/{workflow_id}` with
+  `{ api_key, inputs: { image: { type: "base64", value } } }` (declared input: `image`;
+  URL inputs must be https, base64 works too).
+- **Grounded real response:** `{ outputs: [ { output_image: { type: "base64", value: <jpeg> } } ] }`
+  — this starter workflow returns **only the annotated image**, no class/confidence data.
+  The app shows the annotated image and reports "no detection data" honestly. To get real
+  confidence scores, expose the predictions as a workflow output, or set
+  `VITE_ROBOFLOW_MODEL=<model/version>` to use a standard `detect.roboflow.com` endpoint
+  (which returns per-box `{class, confidence}`).
+- Smoke test (validates the live contract; key via env, never hardcoded):
+  ```bash
+  RF_KEY=<your key> node scripts/roboflow-smoke.mjs
+  ```
+- ⚠️ **Vercel Hobby functions time out at 10s**, but Roboflow's workflow can take ~5–15s.
+  So a **Cloudflare Worker proxy** is recommended (30s free timeout): see
+  `worker/README.md` (deploy + `VITE_ROBOFLOW_PROXY_URL`). The app prefers the Worker
+  when `VITE_ROBOFLOW_PROXY_URL` is set, otherwise it uses `/api/roboflow` (Vercel),
+  falling back to Groq on timeout.
+
 See **[ENVIRONMENT.md](./ENVIRONMENT.md)**, **[DEPLOYMENT.md](./DEPLOYMENT.md)** and
 **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** for full details. Email uses Supabase's
 built-in sender (~30/hr) — confirmation emails may land in spam, so the login page warns

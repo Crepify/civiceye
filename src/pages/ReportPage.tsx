@@ -14,6 +14,7 @@ import {
   MapPin,
   PartyPopper,
   QrCode,
+  RefreshCw,
   ScanLine,
   Send,
   Sparkles,
@@ -98,6 +99,7 @@ function ReportWizard() {
   const [submitted, setSubmitted] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [chosenScope, setChosenScope] = useState<'city' | 'campus' | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const timerRef = useRef<number | null>(null);
 
   // Auto-detect: if the report's coordinates are inside the campus, it's
@@ -107,7 +109,10 @@ function ReportWizard() {
   const detectedScope: 'city' | 'campus' = insideCampus ? 'campus' : 'city';
   const finalScope = chosenScope ?? detectedScope;
 
-  const update = (patch: Partial<ReportDraft>) => setDraft((d) => ({ ...d, ...patch }));
+  const update = useCallback(
+    (patch: Partial<ReportDraft>) => setDraft((d) => ({ ...d, ...patch })),
+    [],
+  );
 
   /* ----- Auto-run AI analysis when a photo arrives ----- */
   useEffect(() => {
@@ -149,12 +154,36 @@ function ReportWizard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft.photo]);
 
+  /* ----- Re-run AI on the same photo (rate-limit / retake-friendly) ----- */
+  const retryAnalysis = useCallback(async () => {
+    if (!draft.photo || retrying) return;
+    setRetrying(true);
+    setAnalysisProgress(0);
+    update({ analysis: null });
+    try {
+      const result = await runImageAnalysis(draft.photo as string, draft.coordinates);
+      update({ analysis: result, category: result.category });
+      if (result.imageQuality && result.imageQuality !== 'clear') {
+        toast.warning(
+          'Photo may be unclear',
+          result.qualityNote ?? 'The AI suggests retaking the photo for a more accurate detection.',
+        );
+      } else {
+        toast.success('AI analysis complete', 'Category, severity and description were auto-detected.');
+      }
+    } catch (err) {
+      toast.error('Analysis failed', err instanceof Error ? err.message : 'Please try again.');
+    } finally {
+      setRetrying(false);
+    }
+  }, [draft.photo, draft.coordinates, retrying, toast, update]);
+
   /* ----- Photo from QR / uploader ----- */
   const handlePhoto = useCallback((photo: string) => {
     update({ photo, analysis: null });
     setStep(2);
     setAnalysisProgress(0);
-  }, []);
+  }, [update]);
 
   const canContinue = (() => {
     switch (step) {
@@ -201,7 +230,12 @@ function ReportWizard() {
           confidence: draft.analysis.confidence,
           objects: draft.analysis.objects,
           summary: draft.analysis.description,
-          model: draft.analysis.engine === 'gemini' ? 'gemini-2.0-flash' : 'mock-vision-v2.4',
+          model:
+            draft.analysis.engine === 'roboflow'
+              ? 'roboflow-detector'
+              : draft.analysis.engine === 'groq'
+                ? 'qwen/qwen3.6-27b'
+                : 'mock-vision-v2.4',
           imageQuality: draft.analysis.imageQuality ?? null,
           disclaimer:
             'AI confidence is an estimate and may be inaccurate. Verify the issue before acting.',
@@ -364,6 +398,8 @@ function ReportWizard() {
                     photo={draft.photo as string}
                     onCategoryChange={(category) => update({ category })}
                     onSeverityChange={(severity) => update({ analysis: { ...analysis, severity } })}
+                    onRetry={() => void retryAnalysis()}
+                    retrying={retrying}
                   />
                 ) : step === 2 ? (
                   <AnalysisProgressCard
@@ -519,22 +555,28 @@ function AnalysisResultCard({
   photo,
   onCategoryChange,
   onSeverityChange,
+  onRetry,
+  retrying,
 }: {
   analysis: AnalysisResult;
   photo: string;
   onCategoryChange: (category: CategoryId) => void;
   onSeverityChange: (severity: Severity) => void;
+  onRetry?: () => void;
+  retrying?: boolean;
 }) {
   const { isAmrita } = useBrand();
   const availableCategories = getAvailableCategories(isAmrita);
   const confidencePct = Math.round(analysis.confidence * 100);
+  const [showAnnotated, setShowAnnotated] = useState(false);
+  const canShowAnnotated = Boolean(analysis.annotatedImage);
   return (
     <div className="space-y-4">
       <div className="card overflow-hidden p-6">
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="relative overflow-hidden rounded-2xl">
             <img
-              src={photo}
+              src={showAnnotated && analysis.annotatedImage ? analysis.annotatedImage : photo}
               alt="Analysed evidence"
               className="aspect-[16/9] w-full object-cover"
             />
@@ -542,6 +584,28 @@ function AnalysisResultCard({
               <BadgeCheck className="h-3.5 w-3.5" />
               ANALYSED
             </span>
+            {canShowAnnotated ? (
+              <div className="absolute right-3 top-3 flex gap-1 rounded-lg bg-slate-950/70 p-1 backdrop-blur">
+                <button
+                  onClick={() => setShowAnnotated(false)}
+                  className={cn(
+                    'rounded-md px-2 py-1 text-[10px] font-bold transition-colors',
+                    !showAnnotated ? 'bg-white text-slate-900' : 'text-white hover:text-white/80',
+                  )}
+                >
+                  Original
+                </button>
+                <button
+                  onClick={() => setShowAnnotated(true)}
+                  className={cn(
+                    'rounded-md px-2 py-1 text-[10px] font-bold transition-colors',
+                    showAnnotated ? 'bg-white text-slate-900' : 'text-white hover:text-white/80',
+                  )}
+                >
+                  AI annotated
+                </button>
+              </div>
+            ) : null}
           </div>
           <div className="space-y-4">
             <div>
@@ -651,10 +715,12 @@ function AnalysisResultCard({
           </p>
         ) : null}
         <p className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          {analysis.engine === 'gemini' ? (
+          {analysis.engine === 'roboflow' ? (
             <>
-              <Sparkles className="h-3.5 w-3.5 text-primary-500" />
-              Analysed by Gemini Vision (real model)
+              <ScanLine className="h-3.5 w-3.5 text-primary-500" />
+              <span className="normal-case text-primary-700 dark:text-primary-300">
+                ✅ Detected by Roboflow (real object detection)
+              </span>
             </>
           ) : analysis.engine === 'groq' ? (
             <>
@@ -668,6 +734,16 @@ function AnalysisResultCard({
             </>
           )}
         </p>
+        {onRetry ? (
+          <button
+            onClick={onRetry}
+            disabled={retrying}
+            className="btn-secondary mt-4 !px-4 !py-2 text-xs"
+          >
+            {retrying ? <Loader size="sm" /> : <RefreshCw className="h-3.5 w-3.5" />}
+            {retrying ? 'Re-analysing…' : 'Retry analysis'}
+          </button>
+        ) : null}
       </div>
     </div>
   );
