@@ -133,36 +133,54 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Model class labels → CivicEye categories (normalized: spaces → hyphens). */
 const CLASS_MAP: Record<string, CategoryId> = {
+  // Roads
   pothole: 'pothole',
   'pothole-hole': 'pothole',
+  'water-filled-pothole': 'pothole',
+  'water-filled': 'pothole',
   'broken-road': 'broken-road',
   'road-damage': 'broken-road',
   crack: 'broken-road',
-  garbage: 'garbage',
-  trash: 'garbage',
-  litter: 'garbage',
-  'garbage-pile': 'garbage',
+  'open-trench': 'manhole',
+  'open-manhole': 'manhole',
+  'missing-manhole-cover': 'manhole',
+  // Sidewalks
   sidewalk: 'sidewalk',
   'broken-sidewalk': 'sidewalk',
-  manhole: 'manhole',
-  'manhole-cover': 'manhole',
+  'damaged-sidewalk': 'sidewalk',
+  // Waste
+  garbage: 'garbage',
+  'garbage-accumulation': 'garbage',
+  'garbage-pile': 'garbage',
+  trash: 'garbage',
+  litter: 'garbage',
+  // Trees
   'fallen-tree': 'fallen-tree',
   'fallen-tree-branch': 'fallen-tree',
   tree: 'fallen-tree',
   'tree-branch': 'fallen-tree',
   'fallen-tree-trunk': 'fallen-tree',
   'tree-trunk': 'fallen-tree',
+  // Lighting
   'street-light': 'street-light',
+  'broken-street-light': 'street-light',
+  'broken-streetlight': 'street-light',
   streetlight: 'street-light',
+  // Water / sewage
   'water-leakage': 'water-leakage',
   'water-leak': 'water-leakage',
+  'water-leaking': 'water-leakage',
   sewage: 'sewage',
   'sewage-overflow': 'sewage',
+  // Dumping
   'illegal-dumping': 'illegal-dumping',
   dumping: 'illegal-dumping',
+  // Traffic
   'traffic-light': 'traffic-signal',
   'traffic-signal': 'traffic-signal',
   signal: 'traffic-signal',
+  'broken-traffic-light': 'traffic-signal',
+  // Accidents / security
   accident: 'accident',
   crash: 'accident',
   collision: 'accident',
@@ -173,6 +191,58 @@ const CLASS_MAP: Record<string, CategoryId> = {
 function mapClass(label: string): CategoryId {
   const key = label.trim().toLowerCase().replace(/[_\s]+/g, '-');
   return CLASS_MAP[key] ?? 'other';
+}
+
+/**
+ * Aggregate noisy detector output (SAM workflows emit many overlapping
+ * boxes per class) into a single reliable verdict.
+ *
+ * Strategy (validated against the real workflow): group boxes by mapped
+ * category, then pick the category with the SINGLE HIGHEST box confidence
+ * (tie-break: more boxes). This mirrors what the model is most confident
+ * about, rather than letting a class with many weak boxes win.
+ */
+function aggregateVerdict(
+  predictions: Prediction[],
+): { category: CategoryId; confidence: number; representativeClass: string } {
+  const byCategory = new Map<CategoryId, { max: number; count: number; label: string }>();
+
+  for (const p of predictions) {
+    const cat = mapClass(p.class);
+    const entry = byCategory.get(cat) ?? { max: 0, count: 0, label: p.class };
+    entry.count += 1;
+    if (p.confidence > entry.max) {
+      entry.max = p.confidence;
+      entry.label = p.class; // keep the label of the highest-confidence box
+    }
+    byCategory.set(cat, entry);
+  }
+
+  let best: { category: CategoryId; max: number; count: number; label: string } | null = null;
+  for (const [cat, e] of byCategory) {
+    if (cat === 'other') continue; // never pick "other" if a real category exists
+    if (
+      !best ||
+      e.max > best.max ||
+      (e.max === best.max && e.count > best.count)
+    ) {
+      best = { category: cat, ...e };
+    }
+  }
+  // If every detection mapped to 'other', fall back to the highest entry.
+  if (!best) {
+    let fb: { category: CategoryId; max: number; count: number; label: string } | null = null;
+    for (const [cat, e] of byCategory) {
+      if (!fb || e.max > fb.max) fb = { category: cat, ...e };
+    }
+    best = fb ?? { category: 'other', max: 0, count: 0, label: 'Unknown' };
+  }
+
+  return {
+    category: best.category,
+    confidence: clamp(best.max || 0, 0, 1),
+    representativeClass: best.label,
+  };
 }
 
 function severityFromConfidence(score: number): Severity {
@@ -329,9 +399,9 @@ export async function analyzePhotoWithRoboflow(
     throw new RoboflowError('No Roboflow target configured (workspace+workflow_id or model).');
   }
 
-  const top = predictions.reduce((a, b) => (b.confidence > a.confidence ? b : a));
-  const confidence = clamp(Number(top.confidence) || 0, 0, 1);
-  const category = mapClass(top.class);
+  const verdict = aggregateVerdict(predictions);
+  const confidence = verdict.confidence;
+  const category = verdict.category;
   const sev = severityFromConfidence(confidence);
   const objects = predictions.slice(0, 8).map((p) => `${p.class} (${Math.round(p.confidence * 100)}%)`);
 

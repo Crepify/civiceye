@@ -397,7 +397,15 @@ function ReportWizard() {
                   <AnalysisResultCard
                     analysis={analysis}
                     photo={draft.photo as string}
-                    onCategoryChange={(category) => update({ category })}
+                    onCategoryChange={(category) => {
+                      // Update BOTH the draft category AND the analysis so
+                      // the dropdown stays in sync (previously it snapped back
+                      // to the AI's choice because analysis.category was read-only).
+                      update({ category });
+                      setDraft((d) =>
+                        d.analysis ? { ...d, analysis: { ...d.analysis, category } } : d,
+                      );
+                    }}
                     onSeverityChange={(severity) => update({ analysis: { ...analysis, severity } })}
                     onRetry={() => void retryAnalysis()}
                     retrying={retrying}
@@ -610,12 +618,17 @@ function AnalysisResultCard({
           </div>
           <div className="space-y-4">
             <div>
-              <p className="label-base">Detected category</p>
+              <p className="label-base flex items-center justify-between">
+                <span>Detected category</span>
+                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                  ⚠️ AI may be wrong — you can change it
+                </span>
+              </p>
               <select
                 value={analysis.category}
                 onChange={(e) => onCategoryChange(e.target.value as CategoryId)}
                 className="input-base appearance-none"
-                aria-label="Detected category"
+                aria-label="Detected category (editable)"
               >
                 {availableCategories.map((c) => (
                   <option key={c.id} value={c.id}>
