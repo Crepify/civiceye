@@ -22,8 +22,11 @@ import {
   escalationMailToUrl,
   escalationSmsUrl,
   escalationWhatsAppUrl,
+  isEmailJSConfigured,
   logEscalation,
+  newEscalationRef,
   sendEscalationEmail,
+  sendEscalationViaEmailJS,
 } from '@/services/authorityService';
 import { useToast } from '@/hooks/useToast';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -136,7 +139,39 @@ export function ReportToAuthority({
       setEscRef(result.ref);
 
       if (result.status === 'not-configured') {
-        // SMTP not set up yet — fall back to the citizen's own mail app.
+        // No SMTP on the server — try the third-party EmailJS sender next.
+        if (isEmailJSConfigured) {
+          const ref = newEscalationRef();
+          try {
+            await sendEscalationViaEmailJS(
+              report,
+              authority,
+              reporterEmail,
+              note.trim() || undefined,
+              ref,
+            );
+            await logEscalation({
+              report,
+              authority,
+              channel: 'email',
+              reporterId,
+              reporterEmail,
+              message: note.trim() || undefined,
+            });
+            setEscRef(ref);
+            setPhase('done');
+            toast.success('Report sent!', `${authority.name} has been emailed your report package.`);
+            notifications.add({
+              type: 'report',
+              title: 'Report sent to authority',
+              message: `${report.title} was emailed to ${authority.name} (ref ${ref}).`,
+            });
+            onDone?.();
+            return;
+          } catch {
+            // EmailJS failed too — fall through to the mail app fallback.
+          }
+        }
         setPhase('fallback');
         return;
       }

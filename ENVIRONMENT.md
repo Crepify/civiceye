@@ -107,3 +107,42 @@ Run `supabase/authority-reports.sql` in the Supabase SQL editor to create the
 `authority_reports` table. Every escalation (email / WhatsApp / call tap /
 mailto fallback) is then logged for admins. Skipping the migration is fine —
 logging fails silently and the escalation itself still works.
+
+---
+
+## ✉️ Third-party browser email (EmailJS) — no SMTP/server needed
+
+When `POST /api/report-authority` reports that SMTP is not configured, the app
+falls back to sending the escalation **directly from the browser via EmailJS**
+(https://www.emailjs.com — free tier ≈ 200 emails/month). Only if that isn't
+configured either does it fall back to the visitor's mail app.
+
+One-time setup (~5 min):
+
+1. Create a free account at [emailjs.com](https://www.emailjs.com).
+2. **Email Services → Add New Service → Gmail** → connect the Google account
+   whose inbox should receive escalations (e.g. `xetawaw@gmail.com`).
+   Copy the **Service ID** (e.g. `service_xxxxxx`).
+3. **Email Templates → Create New Template**, set **To Email** to `{{to_email}}`
+   and use these variables in the subject/body — the code sends exactly these:
+
+   `{{authority_name}}` `{{department}}` `{{app_name}}` `{{ref}}`
+   `{{report_code}}` `{{title}}` `{{category}}` `{{severity}}`
+   `{{location_name}}` `{{coordinates}}` `{{maps_url}}` `{{report_url}}`
+   `{{image_url}}` `{{author}}` `{{reporter_email}}` `{{description}}`
+   `{{message}}` `{{sla}}`
+
+   Suggested subject: `[{{app_name}}] {{title}} — escalation {{ref}}`
+   Copy the **Template ID** (e.g. `template_xxxxxx`).
+4. **Account → General** → copy the **Public Key**.
+5. In your EmailJS dashboard, restrict the key to your domain
+   (`civiceye-pied.vercel.app`) so nobody else can spend your quota.
+6. Add to Vercel (and `.env` locally), then redeploy/restart:
+
+   ```
+   VITE_EMAILJS_SERVICE_ID=service_xxxxxx
+   VITE_EMAILJS_TEMPLATE_ID=template_xxxxxx
+   VITE_EMAILJS_PUBLIC_KEY=xxxxxxxxxxxxxxxx
+   ```
+
+Priority order at runtime: **server SMTP → EmailJS → visitor's mail app**.

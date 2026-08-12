@@ -1,6 +1,65 @@
 import type { Authority, CategoryId, Report } from '@/types';
 import { authorityForCategory, mailToLink, smsLink, whatsAppLink } from '@/data/authorities';
 import { supabase } from '@/lib/supabase';
+import emailjs from '@emailjs/browser';
+
+/**
+ * Client-side email fallback via EmailJS (https://www.emailjs.com/) — a
+ * third-party sender that needs no server at all. Configure with the
+ * VITE_EMAILJS_* env vars (see ENVIRONMENT.md). The public key is safe for
+ * the browser; restrict it to your domain in the EmailJS dashboard.
+ */
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID?.trim() ?? '';
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID?.trim() ?? '';
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY?.trim() ?? '';
+
+export const isEmailJSConfigured = Boolean(
+  EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY,
+);
+
+export const newEscalationRef = (): string =>
+  `ESC-${Date.now().toString(36).toUpperCase()}`;
+
+/**
+ * Send the escalation via EmailJS from the browser. Variable names here must
+ * match the EmailJS template (documented in ENVIRONMENT.md).
+ */
+export async function sendEscalationViaEmailJS(
+  report: Report,
+  authority: Authority,
+  reporterEmail: string | null,
+  message: string | undefined,
+  ref: string,
+): Promise<void> {
+  const reportUrl = `${window.location.origin}/report/${report.id}`;
+  const mapsUrl = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
+  await emailjs.send(
+    EMAILJS_SERVICE_ID,
+    EMAILJS_TEMPLATE_ID,
+    {
+      to_email: authority.email,
+      authority_name: authority.name,
+      department: authority.department,
+      app_name: report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye',
+      ref,
+      report_code: report.code ?? report.id,
+      title: report.title,
+      category: report.category,
+      severity: report.severity,
+      location_name: report.locationName,
+      coordinates: `${report.coordinates.lat}, ${report.coordinates.lng}`,
+      maps_url: mapsUrl,
+      report_url: reportUrl,
+      image_url: report.image,
+      author: report.author,
+      reporter_email: reporterEmail ?? '—',
+      description: report.description,
+      message: message ?? '',
+      sla: '7 working days',
+    },
+    { publicKey: EMAILJS_PUBLIC_KEY },
+  );
+}
 
 /** Payload sent to POST /api/report-authority. */
 export interface EscalationPayload {
