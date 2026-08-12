@@ -154,6 +154,38 @@ export interface Authority {
   name: string;
   department: string;
   color: string;
+  /**
+   * Which product scope this authority serves:
+   * - 'city'   → CivicEye (government / municipal bodies)
+   * - 'campus' → Amrita Eye (campus offices)
+   */
+  scope: 'city' | 'campus';
+  /** Report categories this authority is responsible for. */
+  categories: CategoryId[];
+  /** Official inbox that receives escalated report packages. */
+  email: string;
+  /** Public phone line (dialable, e.g. "+918022661234"). */
+  phone?: string;
+  /** WhatsApp number in international format without '+', e.g. "918022661234". */
+  whatsapp?: string;
+  /** Postal / office address. */
+  address?: string;
+  /** Office hours label, e.g. "Mon–Sat 9:30–17:30". */
+  hours?: string;
+}
+
+/** A logged escalation of a report to an authority (the `authority_reports` table). */
+export interface AuthorityEscalation {
+  id: string;
+  report_id: string | null;
+  report_code: string | null;
+  authority_id: string;
+  authority_email: string;
+  channel: 'email' | 'whatsapp' | 'phone' | 'mailto';
+  reporter_id: string | null;
+  reporter_email: string | null;
+  message: string | null;
+  created_at: string;
 }
 
 /** Chart-friendly aggregation bucket. */

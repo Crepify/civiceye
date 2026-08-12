@@ -246,7 +246,38 @@ create policy "flags delete" on public.report_flags for delete using (auth.uid()
 -- ---------- Storage bucket for report photos ------------------------
 insert into storage.buckets (id, name, public)
 values ('report-photos', 'report-photos', true)
-on conflict (id) do nothing;
+on conflict (id) do update set public = true;
+
+-- RLS on storage.objects — without these, photo uploads fail with
+-- "new row violates row-level security policy".
+drop policy if exists "report photos public read" on storage.objects;
+create policy "report photos public read"
+  on storage.objects for select
+  using (bucket_id = 'report-photos');
+
+drop policy if exists "report photos auth insert" on storage.objects;
+create policy "report photos auth insert"
+  on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'report-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "report photos owner update" on storage.objects;
+create policy "report photos owner update"
+  on storage.objects for update to authenticated
+  using (
+    bucket_id = 'report-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "report photos owner delete" on storage.objects;
+create policy "report photos owner delete"
+  on storage.objects for delete to authenticated
+  using (
+    bucket_id = 'report-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
 
 -- Storage RLS: allow authenticated users to upload into report-photos,
 -- and allow public read (needed for the public URLs to load).

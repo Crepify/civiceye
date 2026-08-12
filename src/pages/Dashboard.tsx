@@ -25,7 +25,7 @@ import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { MapView } from '@/components/map/MapView';
 import { Badge } from '@/components/Badge';
 import { CATEGORIES, SEVERITY_META, STATUS_META, categoryById } from '@/data/categories';
-import { AUTHORITIES, authorityById } from '@/data/authorities';
+import { authoritiesForScope, authorityById } from '@/data/authorities';
 import { formatDate, timeAgo } from '@/utils/format';
 import { downloadTextFile } from '@/utils/download';
 import { cn } from '@/utils/cn';
@@ -549,7 +549,7 @@ export function Dashboard() {
                             aria-label={`Assign ${r.id}`}
                           >
                             <option value="">Assign to…</option>
-                            {AUTHORITIES.map((a) => (
+                            {authoritiesForScope(isAmrita ? 'campus' : 'city').map((a) => (
                               <option key={a.id} value={a.id}>
                                 {a.name}
                               </option>

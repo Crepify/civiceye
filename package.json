@@ -25,6 +25,7 @@
     "@supabase/supabase-js": "^2.109.0",
     "framer-motion": "^11.11.0",
     "lucide-react": "^0.453.0",
+    "nodemailer": "^6.9.16",
     "qrcode.react": "^4.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
