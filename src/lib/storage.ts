@@ -9,10 +9,26 @@ export async function uploadReportPhoto(dataUrl: string, userId: string): Promis
   const blob = await (await fetch(dataUrl)).blob();
   const ext = blob.type === 'image/png' ? 'png' : 'jpg';
   const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await supabase.storage
-    .from('report-photos')
-    .upload(path, blob, { contentType: blob.type || 'image/jpeg' });
-  if (error) throw error;
-  const { data } = supabase.storage.from('report-photos').getPublicUrl(path);
+
+  // Bucket name + full error surfaced so failures are diagnosable.
+  const BUCKET = 'report-photos';
+  const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
+    contentType: blob.type || 'image/jpeg',
+    upsert: false,
+  });
+
+  if (error) {
+    const detail =
+      typeof error.message === 'string' && error.message
+        ? error.message
+        : `HTTP ${error.statusCode ?? '?'}`;
+    throw new Error(
+      `Photo upload failed (${detail}). ` +
+        `Check that the "${BUCKET}" bucket exists and is Public in Supabase → Storage.`,
+    );
+  }
+
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }
+

@@ -618,16 +618,19 @@ function AnalysisResultCard({
           </div>
           <div className="space-y-4">
             <div>
-              <p className="label-base flex items-center justify-between">
-                <span>Detected category</span>
-                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <label htmlFor="detected-category" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Detected category
+                </label>
+                <span className="shrink-0 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
                   ⚠️ AI may be wrong — you can change it
                 </span>
-              </p>
+              </div>
               <select
+                id="detected-category"
                 value={analysis.category}
                 onChange={(e) => onCategoryChange(e.target.value as CategoryId)}
-                className="input-base appearance-none"
+                className="input-base w-full cursor-pointer"
                 aria-label="Detected category (editable)"
               >
                 {availableCategories.map((c) => (

@@ -20,7 +20,9 @@ const ENV_ADMINS: string[] = (import.meta.env.VITE_ADMIN_EMAILS ?? '')
 /** Static admin list (extend here). */
 const STATIC_ADMINS: Array<{ email: string; brand: BrandId | 'both' }> = [
   { email: 'bl.ai.u4aid26006@bl.students.amrita.edu', brand: 'amrita' },
+  { email: 'bl.ai.u4aid26007@bl.students.amrita.edu', brand: 'amrita' },
   { email: 'architrenjeev@gmail.com', brand: 'civiceye' },
+  { email: 'xetawaw@gmail.com', brand: 'civiceye' },
 ];
 
 export function isAdminEmail(email: string | null | undefined, brand: BrandId): boolean {

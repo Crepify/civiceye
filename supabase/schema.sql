@@ -34,7 +34,9 @@ create table if not exists public.admin_users (
 
 insert into public.admin_users (email, brand) values
   ('architrenjeev@gmail.com', 'civiceye'),
-  ('bl.ai.u4aid26006@bl.students.amrita.edu', 'amrita')
+  ('xetawaw@gmail.com', 'civiceye'),
+  ('bl.ai.u4aid26006@bl.students.amrita.edu', 'amrita'),
+  ('bl.ai.u4aid26007@bl.students.amrita.edu', 'amrita')
 on conflict (email) do nothing;
 
 -- Every @amrita.edu address that is NOT a *.students.* address is a
