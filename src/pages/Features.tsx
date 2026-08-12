@@ -4,6 +4,10 @@ import { PageHeader } from '@/components/PageHeader';
 import { SectionHeading } from '@/components/SectionHeading';
 import { FeatureCard } from '@/components/FeatureCard';
 import { Reveal } from '@/components/Reveal';
+import { MapView } from '@/components/map/MapView';
+import { useReports } from '@/hooks/useReports';
+import { useBrand } from '@/hooks/useBrand';
+import { useMemo } from 'react';
 import { FEATURES, HOW_IT_WORKS } from '@/data/features';
 
 const DETAILS = [
@@ -41,6 +45,14 @@ const DETAILS = [
 
 /** Features page. */
 export function Features() {
+  const { reports } = useReports();
+  const { isAmrita } = useBrand();
+  // Only the active brand's reports for the live map preview.
+  const scoped = useMemo(
+    () => reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city')).slice(0, 40),
+    [reports, isAmrita],
+  );
+
   return (
     <>
       <PageHeader
@@ -105,18 +117,33 @@ export function Features() {
                 <div className="lg:[direction:ltr]">
                   <div className="relative">
                     <div className="absolute -inset-4 rounded-[2rem] brand-panel blur-xl" />
-                    <img
-                      src={
-                        i === 0
-                          ? '/reports/hero-city.jpg'
-                          : i === 1
-                            ? '/reports/pothole.jpg'
-                            : '/reports/garbage.jpg'
-                      }
-                      alt={d.title}
-                      loading="lazy"
-                      className="relative aspect-[16/10] w-full rounded-2xl border border-white/60 object-cover shadow-soft dark:border-white/10"
-                    />
+                    {i === 0 ? (
+                      // The "interactive map" feature shows a live map preview
+                      // (Google Maps when a key is set, fallback map otherwise).
+                      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/60 shadow-soft dark:border-white/10">
+                        <MapView
+                          reports={scoped}
+                          center={{ lat: 12.9716, lng: 77.5946 }}
+                          zoom={12}
+                          onViewChange={() => undefined}
+                          selectedId={null}
+                          onSelect={() => undefined}
+                          heatmap
+                          className="h-full w-full"
+                        />
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500 via-emerald-500 to-primary-500 opacity-60" />
+                        <div className="absolute bottom-3 right-3 rounded-xl bg-white/85 px-3 py-1.5 text-[10px] font-bold text-slate-600 backdrop-blur dark:bg-slate-900/85 dark:text-slate-300">
+                          LIVE · {scoped.length} reports
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={i === 1 ? '/reports/pothole.jpg' : '/reports/garbage.jpg'}
+                        alt={d.title}
+                        loading="lazy"
+                        className="relative aspect-[16/10] w-full rounded-2xl border border-white/60 object-cover shadow-soft dark:border-white/10"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
