@@ -403,30 +403,35 @@ export async function analyzePhotoWithRoboflow(
   const confidence = verdict.confidence;
   const category = verdict.category;
   const sev = severityFromConfidence(confidence);
-  const objects = predictions.slice(0, 8).map((p) => `${p.class} (${Math.round(p.confidence * 100)}%)`);
+
+  // Dedupe objects: each class appears once, with its highest confidence.
+  const classBest = new Map<string, number>();
+  for (const p of predictions) {
+    classBest.set(p.class, Math.max(classBest.get(p.class) ?? 0, p.confidence));
+  }
+  const uniqueClasses = [...classBest.entries()]
+    .sort((a, b) => b[1] - a[1]);
+  const objects = uniqueClasses.slice(0, 8).map(([cls, conf]) => `${cls} (${Math.round(conf * 100)}%)`);
 
   // Human-friendly, grounded description from the real detections.
-  const unique = [...new Set(predictions.map((p) => p.class))];
-  const topObjects = predictions
-    .slice()
-    .sort((a, b) => b.confidence - a.confidence)
-    .slice(0, 3)
-    .map((p) => `${p.class} (${Math.round(p.confidence * 100)}%)`)
-    .join(', ');
   const severityWord: Record<Severity, string> = {
     low: 'Minor',
     medium: 'Moderate',
     high: 'Significant',
     critical: 'Critical',
   };
+  const listed = uniqueClasses
+    .slice(0, 4)
+    .map(([cls, conf]) => `${cls} (${Math.round(conf * 100)}% confidence)`)
+    .join(', ');
+  const dominant = category.replace(/-/g, ' ');
   const description =
-    `${severityWord[sev]} ${category.replace(/-/g, ' ')} detected in the photo ` +
-    `(${unique.length} distinct object type${unique.length === 1 ? '' : 's'}, ` +
-    `${predictions.length} detection${predictions.length === 1 ? '' : 's'} total). ` +
-    `Top matches: ${topObjects}. ` +
+    `${severityWord[sev]} ${dominant} detected in this photo. ` +
+    `The image shows ${listed}. ` +
+    `These are the top issues the model found in the scene; ` +
     (annotated
-      ? 'The annotated image highlights each detection; this report can be reviewed before submission.'
-      : 'No annotated image was returned by the detector.');
+      ? 'the annotated preview highlights exactly where each one is located.'
+      : 'no annotated preview was returned for this image.');
 
   return {
     category,
@@ -436,7 +441,7 @@ export async function analyzePhotoWithRoboflow(
     objects,
     coordinates,
     timestamp: new Date().toISOString(),
-    tags: predictions.slice(0, 5).map((p) => p.class),
+    tags: uniqueClasses.slice(0, 5).map(([cls]) => cls),
     imageQuality: quality,
     qualityNote: undefined,
     engine: 'roboflow',

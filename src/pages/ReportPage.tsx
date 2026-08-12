@@ -186,6 +186,12 @@ function ReportWizard() {
     setAnalysisProgress(0);
   }, [update]);
 
+  // A result is "relevant" only if the model found a real civic issue
+  // (not "other") with at least some confidence. Irrelevant photos (a
+  // random street, a pet, etc.) are blocked so users don't submit junk.
+  const isRelevantAnalysis = (a: AnalysisResult | null): boolean =>
+    Boolean(a && a.category !== 'other' && a.confidence >= 0.3);
+
   const canContinue = (() => {
     switch (step) {
       case 0:
@@ -193,7 +199,7 @@ function ReportWizard() {
       case 1:
         return Boolean(draft.photo);
       case 2:
-        return Boolean(draft.analysis);
+        return isRelevantAnalysis(draft.analysis);
       case 3:
         return Boolean(draft.coordinates);
       case 4:
@@ -416,6 +422,36 @@ function ReportWizard() {
                     progress={analysisProgress}
                     stageIndex={analysisStageIndex}
                   />
+                ) : null}
+
+                {/* Block irrelevant photos: if analysis ran but found no
+                    real issue, warn + keep Continue disabled. */}
+                {step === 2 && analysis && !isRelevantAnalysis(analysis) ? (
+                  <div className="mt-4 flex items-start gap-3 rounded-2xl border border-rose-300/70 bg-rose-50 p-4 dark:border-rose-500/30 dark:bg-rose-500/10">
+                    <Camera className="mt-0.5 h-5 w-5 shrink-0 text-rose-500" />
+                    <div>
+                      <p className="text-sm font-bold text-rose-800 dark:text-rose-300">
+                        No relevant issue detected in this photo
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed text-rose-700 dark:text-rose-400">
+                        This image doesn't clearly show a pothole, broken road, garbage, fallen
+                        tree, broken light or other civic issue. Please{' '}
+                        <strong>retake the photo</strong> of the actual problem so staff can act on
+                        it — the Continue button stays disabled until a relevant issue is found.
+                      </p>
+                      <button
+                        onClick={() => {
+                          update({ photo: null, analysis: null });
+                          setStep(1);
+                          setAnalysisProgress(0);
+                        }}
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-rose-500"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Retake photo
+                      </button>
+                    </div>
+                  </div>
                 ) : null}
 
                 {/* STEP 4 — Location */}
@@ -736,7 +772,7 @@ function AnalysisResultCard({
             <>
               <ScanLine className="h-3.5 w-3.5 text-primary-500" />
               <span className="normal-case text-primary-700 dark:text-primary-300">
-                ✅ Detected by Roboflow (real object detection)
+                ✅ Detected by CivicLENS AI (real object detection)
               </span>
             </>
           ) : analysis.engine === 'groq' ? (

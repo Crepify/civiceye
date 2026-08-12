@@ -75,12 +75,13 @@ export function MapPage() {
     if (selectedId && !visibleReports.some((r) => r.id === selectedId)) setSelectedId(null);
   }, [visibleReports, selectedId]);
 
-  // Clicking a report in the side list zooms the map to its location.
+  // Clicking a report — either a map marker or the side list — centers the
+  // map on it and zooms in so the pin is clearly visible.
   useEffect(() => {
     if (!selectedId) return;
     const report = reports.find((r) => r.id === selectedId || r.code === selectedId);
     if (report) {
-      setView({ center: report.coordinates, zoom: Math.max(view.zoom, 15) });
+      setView({ center: report.coordinates, zoom: 16 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId]);

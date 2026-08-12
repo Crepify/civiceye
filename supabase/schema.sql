@@ -248,6 +248,20 @@ insert into storage.buckets (id, name, public)
 values ('report-photos', 'report-photos', true)
 on conflict (id) do nothing;
 
+-- Storage RLS: allow authenticated users to upload into report-photos,
+-- and allow public read (needed for the public URLs to load).
+-- (Newer Supabase projects enable RLS on storage.objects by default, which
+--  blocks uploads until these policies exist.)
+drop policy if exists "report-photos insert" on storage.objects;
+create policy "report-photos insert" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'report-photos');
+
+drop policy if exists "report-photos select" on storage.objects;
+create policy "report-photos select" on storage.objects
+  for select
+  using (bucket_id = 'report-photos');
+
 -- ===================================================================
 -- REVIEW SYSTEM
 -- Users review reports; other users agree/disagree with each review.
