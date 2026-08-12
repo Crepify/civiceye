@@ -34,7 +34,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'other'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BBMP Ward 42 Office, 4th Main Road, Bengaluru — 5600XX', // TODO
     hours: 'Mon–Sat 9:30–17:30',
   },
@@ -47,7 +47,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['garbage', 'illegal-dumping'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'SWM Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
     hours: 'Mon–Sat 9:00–18:00',
   },
@@ -60,6 +60,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['water-leakage', 'sewage'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BWSSB, Cauvery Bhavan, KG Road, Bengaluru — 560009', // TODO
     hours: '24×7 helpline',
   },
@@ -72,6 +73,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['street-light'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BESCOM Corporate Office, KR Circle, Bengaluru — 560001', // TODO
     hours: '24×7 helpline (1912)',
   },
@@ -84,7 +86,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['traffic-signal', 'accident'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Traffic Management Centre, Infantry Road, Bengaluru — 560001', // TODO
     hours: '24×7 control room',
   },
@@ -97,6 +99,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['fallen-tree'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Forest Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
     hours: 'Mon–Sat 10:00–17:00',
   },
@@ -111,7 +114,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'fallen-tree', 'other'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Estate Office, Admin Block, Amrita Campus', // TODO
     hours: 'Mon–Sat 9:00–17:00',
   },
@@ -124,7 +127,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['garbage', 'sewage', 'water-leakage', 'street-light'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Facilities Office, Ground Floor, Admin Block', // TODO
     hours: 'Mon–Sat 8:30–17:30',
   },
@@ -137,7 +140,7 @@ export const AUTHORITIES: Authority[] = [
     categories: ['security', 'accident'],
     email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Security Control Room, Main Gate', // TODO
     hours: '24×7 emergency line',
   },
@@ -171,12 +174,16 @@ export function authorityForCategory(
 export const telLink = (a: Authority): string | undefined =>
   a.phone ? `tel:${a.phone.replace(/[^\d+]/g, '')}` : undefined;
 
-/** wa.me deep link with an optional pre-filled message. */
-export function whatsAppLink(a: Authority, message?: string): string | undefined {
-  if (!a.whatsapp) return undefined;
-  const digits = a.whatsapp.replace(/\D/g, '');
-  const base = `https://wa.me/${digits}`;
-  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+/** wa.me deep links, one per authority WhatsApp number, with an optional pre-filled message. */
+export function whatsAppLinks(
+  a: Authority,
+  message?: string,
+): { number: string; url: string }[] {
+  return (a.whatsapp ?? []).map((raw) => {
+    const digits = raw.replace(/\D/g, '');
+    const base = `https://wa.me/${digits}`;
+    return { number: digits, url: message ? `${base}?text=${encodeURIComponent(message)}` : base };
+  });
 }
 
 /**

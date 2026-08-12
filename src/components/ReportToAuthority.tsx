@@ -21,7 +21,7 @@ import {
   buildEscalationPayload,
   escalationMailToUrl,
   escalationSmsUrl,
-  escalationWhatsAppUrl,
+  escalationWhatsAppTargets,
   isEmailJSConfigured,
   logEscalation,
   newEscalationRef,
@@ -93,7 +93,7 @@ export function ReportToAuthority({
 
   const resolvedLabel = isAmrita && !report ? 'Report to staff' : label;
   const phoneHref = telLink(authority);
-  const waHref = report ? escalationWhatsAppUrl(report, authority) : undefined;
+  const waTargets = report ? escalationWhatsAppTargets(report, authority) : [];
   const smsHref = report ? escalationSmsUrl(report, authority) : undefined;
   const mailToHref = report
     ? escalationMailToUrl(report, authority, reporterEmail, note.trim() || undefined)
@@ -293,18 +293,20 @@ export function ReportToAuthority({
                       Call
                     </a>
                   ) : null}
-                  {report && waHref ? (
+                  {waTargets.map((t) => (
                     <a
-                      href={waHref}
+                      key={t.number}
+                      href={t.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => log('whatsapp')}
                       className="btn-secondary !px-2 text-xs"
+                      title={`WhatsApp +${t.number}`}
                     >
                       <MessageCircle className="h-4 w-4" />
-                      WhatsApp
+                      WA ·{t.number.slice(-5)}
                     </a>
-                  ) : null}
+                  ))}
                   {report && smsHref ? (
                     <a href={smsHref} onClick={() => log('sms')} className="btn-secondary !px-2 text-xs">
                       <MessageSquare className="h-4 w-4" />
@@ -494,18 +496,20 @@ export function ReportToAuthority({
                       Call
                     </a>
                   ) : null}
-                  {waHref ? (
+                  {waTargets.map((t) => (
                     <a
-                      href={waHref}
+                      key={t.number}
+                      href={t.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => log('whatsapp')}
                       className="btn-secondary"
+                      title={`WhatsApp +${t.number}`}
                     >
                       <MessageCircle className="h-4 w-4" />
-                      WhatsApp
+                      WhatsApp ·{t.number.slice(-5)}
                     </a>
-                  ) : null}
+                  ))}
                   <a href={mailToHref} onClick={() => log('mailto')} className="btn-secondary">
                     <Mail className="h-4 w-4" />
                     Mail app

@@ -166,8 +166,8 @@ export interface Authority {
   email: string;
   /** Public phone line (dialable, e.g. "+918022661234"). */
   phone?: string;
-  /** WhatsApp number in international format without '+', e.g. "918022661234". */
-  whatsapp?: string;
+  /** WhatsApp numbers in international format without '+', e.g. ["918022661234"]. */
+  whatsapp?: string[];
   /** Postal / office address. */
   address?: string;
   /** Office hours label, e.g. "Mon–Sat 9:30–17:30". */
