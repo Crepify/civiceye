@@ -8,6 +8,7 @@ import {
   Loader2,
   Mail,
   MessageCircle,
+  MessageSquare,
   Phone,
   Send,
   ShieldAlert,
@@ -19,6 +20,7 @@ import { authorityForCategory, telLink } from '@/data/authorities';
 import {
   buildEscalationPayload,
   escalationMailToUrl,
+  escalationSmsUrl,
   escalationWhatsAppUrl,
   logEscalation,
   sendEscalationEmail,
@@ -89,6 +91,7 @@ export function ReportToAuthority({
   const resolvedLabel = isAmrita && !report ? 'Report to staff' : label;
   const phoneHref = telLink(authority);
   const waHref = report ? escalationWhatsAppUrl(report, authority) : undefined;
+  const smsHref = report ? escalationSmsUrl(report, authority) : undefined;
   const mailToHref = report
     ? escalationMailToUrl(report, authority, reporterEmail, note.trim() || undefined)
     : `mailto:${authority.email}`;
@@ -100,7 +103,7 @@ export function ReportToAuthority({
     [],
   );
 
-  const log = (channel: 'email' | 'whatsapp' | 'phone' | 'mailto') => {
+  const log = (channel: 'email' | 'whatsapp' | 'phone' | 'sms' | 'mailto') => {
     void logEscalation({
       report: report ?? null,
       authority,
@@ -248,7 +251,7 @@ export function ReportToAuthority({
                 )}
 
                 {/* Direct channels */}
-                <div className="mt-4 grid grid-cols-3 gap-2">
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {phoneHref ? (
                     <a href={phoneHref} onClick={() => log('phone')} className="btn-secondary !px-2 text-xs">
                       <Phone className="h-4 w-4" />
@@ -267,10 +270,16 @@ export function ReportToAuthority({
                       WhatsApp
                     </a>
                   ) : null}
+                  {report && smsHref ? (
+                    <a href={smsHref} onClick={() => log('sms')} className="btn-secondary !px-2 text-xs">
+                      <MessageSquare className="h-4 w-4" />
+                      SMS
+                    </a>
+                  ) : null}
                   <a
                     href={mailToHref}
                     onClick={() => log('mailto')}
-                    className={cn('btn-secondary !px-2 text-xs', !phoneHref && 'col-span-3')}
+                    className="btn-secondary !px-2 text-xs"
                   >
                     <Mail className="h-4 w-4" />
                     Mail app

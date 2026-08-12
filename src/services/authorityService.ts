@@ -1,5 +1,5 @@
 import type { Authority, CategoryId, Report } from '@/types';
-import { authorityForCategory, mailToLink, whatsAppLink } from '@/data/authorities';
+import { authorityForCategory, mailToLink, smsLink, whatsAppLink } from '@/data/authorities';
 import { supabase } from '@/lib/supabase';
 
 /** Payload sent to POST /api/report-authority. */
@@ -130,6 +130,17 @@ export function escalationWhatsAppUrl(report: Report, authority: Authority): str
   return whatsAppLink(authority, text);
 }
 
+/** The SMS deep link for texting the authority about a report. */
+export function escalationSmsUrl(report: Report, authority: Authority): string | undefined {
+  const text = [
+    `CivicEye report: ${report.title}`,
+    `Category: ${report.category} · Severity: ${report.severity}`,
+    `Location: ${report.locationName} (${report.coordinates.lat}, ${report.coordinates.lng})`,
+    `Details: ${window.location.origin}/report/${report.id}`,
+  ].join('\n');
+  return smsLink(authority, text);
+}
+
 /** The mailto: fallback link for a report escalation. */
 export function escalationMailToUrl(
   report: Report,
@@ -149,7 +160,7 @@ export function escalationMailToUrl(
 export async function logEscalation(entry: {
   report: Report | null;
   authority: Authority;
-  channel: 'email' | 'whatsapp' | 'phone' | 'mailto';
+  channel: 'email' | 'whatsapp' | 'phone' | 'sms' | 'mailto';
   reporterId?: string | null;
   reporterEmail?: string | null;
   message?: string;

@@ -32,7 +32,7 @@ begin
   if not exists (select 1 from pg_constraint where conname = 'authority_reports_channel_check') then
     alter table public.authority_reports
       add constraint authority_reports_channel_check
-      check (channel in ('email','whatsapp','phone','mailto'));
+      check (channel in ('email','whatsapp','phone','sms','mailto'));
   end if;
 end $$;
 

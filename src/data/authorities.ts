@@ -32,9 +32,9 @@ export const AUTHORITIES: Authority[] = [
     color: '#f59e0b',
     scope: 'city',
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'other'],
-    email: 'bbmp.ward42.apps@gmail.com', // TODO: replace with the ward office email
-    phone: '+918022661234', // TODO: replace with the ward control-room number
-    whatsapp: '918022661234', // TODO: replace with the ward WhatsApp helpline
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
     address: 'BBMP Ward 42 Office, 4th Main Road, Bengaluru — 5600XX', // TODO
     hours: 'Mon–Sat 9:30–17:30',
   },
@@ -45,9 +45,9 @@ export const AUTHORITIES: Authority[] = [
     color: '#22c55e',
     scope: 'city',
     categories: ['garbage', 'illegal-dumping'],
-    email: 'bbmp.swm.apps@gmail.com', // TODO
-    phone: '+918022970432', // TODO
-    whatsapp: '918022970432', // TODO
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
     address: 'SWM Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
     hours: 'Mon–Sat 9:00–18:00',
   },
@@ -58,8 +58,8 @@ export const AUTHORITIES: Authority[] = [
     color: '#38bdf8',
     scope: 'city',
     categories: ['water-leakage', 'sewage'],
-    email: 'bwssb.helpdesk.apps@gmail.com', // TODO
-    phone: '+918022945678', // TODO
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
     address: 'BWSSB, Cauvery Bhavan, KG Road, Bengaluru — 560009', // TODO
     hours: '24×7 helpline',
   },
@@ -70,8 +70,8 @@ export const AUTHORITIES: Authority[] = [
     color: '#facc15',
     scope: 'city',
     categories: ['street-light'],
-    email: 'bescom.1912.apps@gmail.com', // TODO
-    phone: '+918022871112', // TODO
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
     address: 'BESCOM Corporate Office, KR Circle, Bengaluru — 560001', // TODO
     hours: '24×7 helpline (1912)',
   },
@@ -82,9 +82,9 @@ export const AUTHORITIES: Authority[] = [
     color: '#fb7185',
     scope: 'city',
     categories: ['traffic-signal', 'accident'],
-    email: 'btp.control.apps@gmail.com', // TODO
-    phone: '+918022868445', // TODO
-    whatsapp: '918022868445', // TODO
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
     address: 'Traffic Management Centre, Infantry Road, Bengaluru — 560001', // TODO
     hours: '24×7 control room',
   },
@@ -95,8 +95,8 @@ export const AUTHORITIES: Authority[] = [
     color: '#34d399',
     scope: 'city',
     categories: ['fallen-tree'],
-    email: 'bbmp.forest.apps@gmail.com', // TODO
-    phone: '+918022867530', // TODO
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
     address: 'Forest Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
     hours: 'Mon–Sat 10:00–17:00',
   },
@@ -109,9 +109,9 @@ export const AUTHORITIES: Authority[] = [
     color: '#f59e0b',
     scope: 'campus',
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'fallen-tree', 'other'],
-    email: 'estate.office.apps@gmail.com', // TODO: replace with the estate office email
-    phone: '+914726470000', // TODO: replace with the estate office number
-    whatsapp: '914726470000', // TODO
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
     address: 'Estate Office, Admin Block, Amrita Campus', // TODO
     hours: 'Mon–Sat 9:00–17:00',
   },
@@ -122,9 +122,9 @@ export const AUTHORITIES: Authority[] = [
     color: '#38bdf8',
     scope: 'campus',
     categories: ['garbage', 'sewage', 'water-leakage', 'street-light'],
-    email: 'facilities.desk.apps@gmail.com', // TODO
-    phone: '+914726470100', // TODO
-    whatsapp: '914726470100', // TODO
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
     address: 'Facilities Office, Ground Floor, Admin Block', // TODO
     hours: 'Mon–Sat 8:30–17:30',
   },
@@ -135,9 +135,9 @@ export const AUTHORITIES: Authority[] = [
     color: '#fb7185',
     scope: 'campus',
     categories: ['security', 'accident'],
-    email: 'security.control.apps@gmail.com', // TODO
-    phone: '+914726470111', // TODO
-    whatsapp: '914726470111', // TODO
+    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    phone: '+919480079837', // TEST: personal number — replace with real dept number
+    whatsapp: '919480079837', // TEST: personal number — replace with real dept number
     address: 'Security Control Room, Main Gate', // TODO
     hours: '24×7 emergency line',
   },
@@ -177,6 +177,17 @@ export function whatsAppLink(a: Authority, message?: string): string | undefined
   const digits = a.whatsapp.replace(/\D/g, '');
   const base = `https://wa.me/${digits}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+}
+
+/**
+ * sms: deep link with a pre-filled body — opens the citizen's messaging app.
+ * The "?&body" form works on both Android (?body) and iOS (&body).
+ */
+export function smsLink(a: Authority, message?: string): string | undefined {
+  if (!a.phone) return undefined;
+  const number = a.phone.replace(/[^\d+]/g, '');
+  const base = `sms:${number}`;
+  return message ? `${base}?&body=${encodeURIComponent(message)}` : base;
 }
 
 /** mailto: link with pre-filled subject + body. */

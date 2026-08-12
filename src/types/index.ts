@@ -181,7 +181,7 @@ export interface AuthorityEscalation {
   report_code: string | null;
   authority_id: string;
   authority_email: string;
-  channel: 'email' | 'whatsapp' | 'phone' | 'mailto';
+  channel: 'email' | 'whatsapp' | 'phone' | 'sms' | 'mailto';
   reporter_id: string | null;
   reporter_email: string | null;
   message: string | null;

@@ -33,15 +33,15 @@ import nodemailer from 'nodemailer';
 /* Built-in authority directory (id → { name, department, email }).
  * Keep in sync with src/data/authorities.ts. Env vars always win. */
 const DIRECTORY = {
-  'bbmp-42': { name: 'BBMP Ward 42 Control Room', department: 'Roads & Infrastructure', email: 'bbmp.ward42.apps@gmail.com' },
-  'bbmp-swm': { name: 'BBMP Solid Waste Management', department: 'Sanitation', email: 'bbmp.swm.apps@gmail.com' },
-  bwssb: { name: 'BWSSB Helpline', department: 'Water Supply & Sewerage', email: 'bwssb.helpdesk.apps@gmail.com' },
-  bescom: { name: 'BESCOM 1912', department: 'Street Lighting & Power', email: 'bescom.1912.apps@gmail.com' },
-  'traffic-police': { name: 'Bengaluru Traffic Police', department: 'Traffic & Signals', email: 'btp.control.apps@gmail.com' },
-  'forest-dept': { name: 'BBMP Forest Cell', department: 'Trees & Parks', email: 'bbmp.forest.apps@gmail.com' },
-  'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: 'estate.office.apps@gmail.com' },
-  'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: 'facilities.desk.apps@gmail.com' },
-  'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: 'security.control.apps@gmail.com' },
+  'bbmp-42': { name: 'BBMP Ward 42 Control Room', department: 'Roads & Infrastructure', email: 'xetawaw@gmail.com' },
+  'bbmp-swm': { name: 'BBMP Solid Waste Management', department: 'Sanitation', email: 'xetawaw@gmail.com' },
+  bwssb: { name: 'BWSSB Helpline', department: 'Water Supply & Sewerage', email: 'xetawaw@gmail.com' },
+  bescom: { name: 'BESCOM 1912', department: 'Street Lighting & Power', email: 'xetawaw@gmail.com' },
+  'traffic-police': { name: 'Bengaluru Traffic Police', department: 'Traffic & Signals', email: 'xetawaw@gmail.com' },
+  'forest-dept': { name: 'BBMP Forest Cell', department: 'Trees & Parks', email: 'xetawaw@gmail.com' },
+  'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: 'xetawaw@gmail.com' },
+  'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: 'xetawaw@gmail.com' },
+  'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: 'xetawaw@gmail.com' },
 };
 
 const MAX_BODY_CHARS = 20_000;
