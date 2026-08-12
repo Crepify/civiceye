@@ -18,7 +18,7 @@ export function ChartCard({ title, subtitle, children, className, index = 0 }: C
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.45, delay: index * 0.07 }}
-      className={cn('card p-5 sm:p-6', className)}
+      className={cn('card overflow-hidden p-5 sm:p-6', className)}
     >
       <div className="mb-5">
         <h3 className="text-base font-bold text-slate-900 dark:text-white">{title}</h3>

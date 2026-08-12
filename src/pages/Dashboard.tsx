@@ -409,19 +409,21 @@ export function Dashboard() {
       </div>
 
       {/* Map + top areas */}
-      <div className="section-pad mt-5 grid gap-5 lg:grid-cols-3">
+      <div className="section-pad mt-5 grid gap-5 lg:grid-cols-3 [&>*]:min-w-0">
         <ChartCard
           title="Live ward map"
           subtitle="Click a pin to inspect a report"
           className="lg:col-span-2"
         >
-          <MapView
-            reports={scopedReports}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            heatmap
-            className="h-[380px]"
-          />
+          <div className="h-[380px] w-full overflow-hidden rounded-2xl">
+            <MapView
+              reports={scopedReports}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              heatmap
+              className="h-full w-full"
+            />
+          </div>
         </ChartCard>
 
         <ChartCard title="Hotspots" subtitle="Areas with the most reports">

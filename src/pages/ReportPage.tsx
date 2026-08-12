@@ -662,19 +662,22 @@ function AnalysisResultCard({
                   ⚠️ AI may be wrong — you can change it
                 </span>
               </div>
-              <select
-                id="detected-category"
-                value={analysis.category}
-                onChange={(e) => onCategoryChange(e.target.value as CategoryId)}
-                className="input-base w-full cursor-pointer"
-                aria-label="Detected category (editable)"
-              >
-                {availableCategories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  id="detected-category"
+                  value={analysis.category}
+                  onChange={(e) => onCategoryChange(e.target.value as CategoryId)}
+                  className="w-full appearance-none rounded-xl border border-slate-300/80 bg-white py-2.5 pl-4 pr-10 text-sm font-semibold text-slate-800 transition-all focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/15 dark:border-white/15 dark:bg-slate-800 dark:text-slate-100"
+                  aria-label="Detected category (editable)"
+                >
+                  {availableCategories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
             </div>
             <div>
               <p className="label-base flex items-center justify-between">
