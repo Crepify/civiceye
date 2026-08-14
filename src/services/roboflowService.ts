@@ -135,6 +135,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const CLASS_MAP: Record<string, CategoryId> = {
   // Roads
   pothole: 'pothole',
+  potholes: 'pothole',
   'pothole-hole': 'pothole',
   'water-filled-pothole': 'pothole',
   'water-filled': 'pothole',
@@ -188,10 +189,13 @@ const CLASS_MAP: Record<string, CategoryId> = {
   person: 'security',
 };
 
-function mapClass(label: string): CategoryId {
+/** Map a Roboflow class label to CivicEye's category ids. */
+export function categoryFromRoboflowLabel(label: string): CategoryId {
   const key = label.trim().toLowerCase().replace(/[_\s]+/g, '-');
   return CLASS_MAP[key] ?? 'other';
 }
+
+const mapClass = categoryFromRoboflowLabel;
 
 /**
  * Aggregate noisy detector output (SAM workflows emit many overlapping
@@ -213,29 +217,24 @@ function aggregateVerdict(
     entry.count += 1;
     if (p.confidence > entry.max) {
       entry.max = p.confidence;
-      entry.label = p.class; // keep the label of the highest-confidence box
+      entry.label = p.class;
     }
     byCategory.set(cat, entry);
   }
 
   let best: { category: CategoryId; max: number; count: number; label: string } | null = null;
   for (const [cat, e] of byCategory) {
-    if (cat === 'other') continue; // never pick "other" if a real category exists
-    if (
-      !best ||
-      e.max > best.max ||
-      (e.max === best.max && e.count > best.count)
-    ) {
+    if (cat === 'other') continue;
+    if (!best || e.max > best.max || (e.max === best.max && e.count > best.count)) {
       best = { category: cat, ...e };
     }
   }
-  // If every detection mapped to 'other', fall back to the highest entry.
   if (!best) {
-    let fb: { category: CategoryId; max: number; count: number; label: string } | null = null;
+    let fallback: { category: CategoryId; max: number; count: number; label: string } | null = null;
     for (const [cat, e] of byCategory) {
-      if (!fb || e.max > fb.max) fb = { category: cat, ...e };
+      if (!fallback || e.max > fallback.max) fallback = { category: cat, ...e };
     }
-    best = fb ?? { category: 'other', max: 0, count: 0, label: 'Unknown' };
+    best = fallback ?? { category: 'other', max: 0, count: 0, label: 'Unknown' };
   }
 
   return {
@@ -254,23 +253,44 @@ function severityFromConfidence(score: number): Severity {
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
-interface Prediction {
+/** A raw object prediction returned by a Roboflow detector. */
+export interface RoboflowPrediction {
   class: string;
   confidence: number;
+  /** Roboflow standard-detector coordinates (usually pixel values). */
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
 }
 
+type Prediction = RoboflowPrediction;
+
 /** Recursively find every {class, confidence} object in the response. */
-export function extractPredictions(node: unknown, out: Prediction[] = []): Prediction[] {
+export function extractPredictions(node: unknown, out: RoboflowPrediction[] = []): RoboflowPrediction[] {
   if (Array.isArray(node)) {
     for (const item of node) extractPredictions(item, out);
     return out;
   }
   if (node && typeof node === 'object') {
     const obj = node as Record<string, unknown>;
-    if (typeof obj.class === 'string' && typeof obj.confidence === 'number') {
-      out.push({ class: obj.class, confidence: obj.confidence });
+    const confidence = typeof obj.confidence === 'number' ? obj.confidence : Number(obj.confidence);
+    if (typeof obj.class === 'string' && Number.isFinite(confidence)) {
+      const numeric = (key: string): number | undefined => {
+        const value = obj[key];
+        const parsed = typeof value === 'number' ? value : Number(value);
+        return Number.isFinite(parsed) ? parsed : undefined;
+      };
+      out.push({
+        class: obj.class,
+        confidence,
+        x: numeric('x'),
+        y: numeric('y'),
+        width: numeric('width'),
+        height: numeric('height'),
+      });
     }
-    for (const k of Object.keys(obj)) extractPredictions(obj[k], out);
+    for (const key of Object.keys(obj)) extractPredictions(obj[key], out);
   }
   return out;
 }
@@ -294,8 +314,8 @@ export function extractAnnotatedImage(node: unknown): string | null {
     ) {
       return `data:image/jpeg;base64,${obj.value}`;
     }
-    for (const k of Object.keys(obj)) {
-      const found = extractAnnotatedImage(obj[k]);
+    for (const key of Object.keys(obj)) {
+      const found = extractAnnotatedImage(obj[key]);
       if (found) return found;
     }
   }
@@ -337,6 +357,55 @@ async function callProxy(body: { image: string; api_key?: string; model?: string
   }
 }
 
+export interface RoboflowInference {
+  predictions: RoboflowPrediction[];
+  annotatedImage: string | null;
+}
+
+/**
+ * Run one image through the same Roboflow target used by the report wizard.
+ * Keeping this path shared is important: Live AI and Report AI cannot drift
+ * onto different models or proxy payloads.
+ */
+async function runRoboflowInference(photo: string): Promise<RoboflowInference> {
+  const match = /^data:image\/(?:png|jpeg|jpg|webp|gif);base64,(.+)$/s.exec(photo);
+  if (!match) throw new RoboflowError('Unsupported image format.');
+
+  let data: unknown;
+  let predictions: RoboflowPrediction[] = [];
+  let annotatedImage: string | null = null;
+
+  if (WORKSPACE && WORKFLOW_ID) {
+    data = await callProxy({ image: match[1], api_key: API_KEY });
+    const outputs = (data as { outputs?: unknown[] })?.outputs ?? [];
+    const roots = outputs.length > 0 ? outputs : [data];
+    for (const entry of roots) {
+      predictions = predictions.concat(extractPredictions(entry));
+      annotatedImage = annotatedImage ?? extractAnnotatedImage(entry);
+    }
+  } else if (MODEL) {
+    data = await callProxy({ image: match[1], api_key: API_KEY, model: MODEL });
+    predictions = extractPredictions(data);
+    annotatedImage = extractAnnotatedImage(data);
+  } else {
+    throw new RoboflowError('No Roboflow target configured (workspace+workflow or model).');
+  }
+
+  return { predictions, annotatedImage };
+}
+
+/**
+ * Analyze one live frame with the exact same Roboflow workflow/model used for
+ * reports. Unlike the report result, this exposes every raw box so the live
+ * page can draw detections across successive full-road frames.
+ */
+export async function detectFrameWithRoboflow(photo: string): Promise<RoboflowInference> {
+  if (!hasRoboflowKey) {
+    throw new RoboflowError('Roboflow is not configured (key + workspace/workflow or model).');
+  }
+  return runRoboflowInference(photo);
+}
+
 /**
  * Analyze a photo with Roboflow via the proxy. Workflow if
  * workspace+workflow_id configured, else the detect endpoint
@@ -349,10 +418,6 @@ export async function analyzePhotoWithRoboflow(
 ): Promise<AnalysisResult & { annotatedImage?: string | null }> {
   if (!hasRoboflowKey)
     throw new RoboflowError('Roboflow is not configured (key + workspace/workflow or model).');
-
-  const match = /^data:image\/(?:png|jpeg|jpg|webp|gif);base64,(.+)$/s.exec(photo);
-  if (!match) throw new RoboflowError('Unsupported image format.');
-  const b64 = match[1];
 
   const quality = await detectBlur(photo);
   const base: AnalysisResult & { annotatedImage?: string | null } = {
@@ -370,33 +435,14 @@ export async function analyzePhotoWithRoboflow(
     annotatedImage: null,
   };
 
-  let data: unknown;
-  let annotated: string | null = null;
-  let predictions: Prediction[] = [];
-
-  if (WORKSPACE && WORKFLOW_ID) {
-    data = await callProxy({ image: b64, api_key: API_KEY });
-    const outputs = (data as { outputs?: unknown[] })?.outputs ?? [];
-    for (const entry of outputs) {
-      predictions = predictions.concat(extractPredictions(entry));
-      annotated = annotated ?? extractAnnotatedImage(entry);
-    }
-    base.annotatedImage = annotated;
-    if (predictions.length === 0) {
-      base.description =
-        'The workflow ran, but it returned no detection data. Expose the predictions as a workflow output, ' +
-        'or use a detect.roboflow.com model URL.';
-      return base;
-    }
-  } else if (MODEL) {
-    data = await callProxy({ image: b64, api_key: API_KEY, model: MODEL });
-    predictions = extractPredictions(data);
-    if (predictions.length === 0) {
-      base.description = 'The model did not detect any known civic issue in this photo.';
-      return base;
-    }
-  } else {
-    throw new RoboflowError('No Roboflow target configured (workspace+workflow_id or model).');
+  const { predictions, annotatedImage } = await runRoboflowInference(photo);
+  base.annotatedImage = annotatedImage;
+  if (predictions.length === 0) {
+    base.description =
+      WORKSPACE && WORKFLOW_ID
+        ? 'The workflow ran, but it returned no detection data. Expose the predictions as a workflow output, or use a detect.roboflow.com model URL.'
+        : 'The model did not detect any known civic issue in this photo.';
+    return base;
   }
 
   const verdict = aggregateVerdict(predictions);
@@ -406,12 +452,16 @@ export async function analyzePhotoWithRoboflow(
 
   // Dedupe objects: each class appears once, with its highest confidence.
   const classBest = new Map<string, number>();
-  for (const p of predictions) {
-    classBest.set(p.class, Math.max(classBest.get(p.class) ?? 0, p.confidence));
+  for (const prediction of predictions) {
+    classBest.set(
+      prediction.class,
+      Math.max(classBest.get(prediction.class) ?? 0, prediction.confidence),
+    );
   }
-  const uniqueClasses = [...classBest.entries()]
-    .sort((a, b) => b[1] - a[1]);
-  const objects = uniqueClasses.slice(0, 8).map(([cls, conf]) => `${cls} (${Math.round(conf * 100)}%)`);
+  const uniqueClasses = [...classBest.entries()].sort((a, b) => b[1] - a[1]);
+  const objects = uniqueClasses
+    .slice(0, 8)
+    .map(([label, confidenceValue]) => `${label} (${Math.round(confidenceValue * 100)}%)`);
 
   // Human-friendly, grounded description from the real detections.
   const severityWord: Record<Severity, string> = {
@@ -422,14 +472,14 @@ export async function analyzePhotoWithRoboflow(
   };
   const listed = uniqueClasses
     .slice(0, 4)
-    .map(([cls, conf]) => `${cls} (${Math.round(conf * 100)}% confidence)`)
+    .map(([label, confidenceValue]) => `${label} (${Math.round(confidenceValue * 100)}% confidence)`)
     .join(', ');
   const dominant = category.replace(/-/g, ' ');
   const description =
     `${severityWord[sev]} ${dominant} detected in this photo. ` +
     `The image shows ${listed}. ` +
     `These are the top issues the model found in the scene; ` +
-    (annotated
+    (annotatedImage
       ? 'the annotated preview highlights exactly where each one is located.'
       : 'no annotated preview was returned for this image.');
 
@@ -441,10 +491,10 @@ export async function analyzePhotoWithRoboflow(
     objects,
     coordinates,
     timestamp: new Date().toISOString(),
-    tags: uniqueClasses.slice(0, 5).map(([cls]) => cls),
+    tags: uniqueClasses.slice(0, 5).map(([label]) => label),
     imageQuality: quality,
     qualityNote: undefined,
     engine: 'roboflow',
-    annotatedImage: annotated,
+    annotatedImage,
   };
 }

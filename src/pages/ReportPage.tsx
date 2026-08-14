@@ -20,7 +20,7 @@ import {
   Sparkles,
   Target,
 } from 'lucide-react';
-import type { AnalysisResult, CategoryId, Coordinates, ReportDraft, Severity } from '@/types';
+import type { AnalysisResult, CategoryId, Coordinates, Report, ReportDraft, Severity } from '@/types';
 import { getAvailableCategories, SEVERITY_META, categoryById } from '@/data/categories';
 import { useBrand } from '@/hooks/useBrand';
 import { CATEGORY_ICONS } from '@/components/categoryIcons';
@@ -86,7 +86,7 @@ export function ReportPage() {
 /* ------------------------------------------------------------------ */
 
 function ReportWizard() {
-  const { addReport } = useReports();
+  const { addReport, getById } = useReports();
   const toast = useToast();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -302,6 +302,7 @@ function ReportWizard() {
         {submitted ? (
           <SuccessScreen
             reportId={createdId}
+            report={createdId ? getById(createdId) : undefined}
             onNew={() => {
               setDraft(emptyDraft());
               setStep(0);
@@ -1159,11 +1160,13 @@ function ReviewStep({ draft, finalScope }: { draft: ReportDraft; finalScope: 'ci
 
 function SuccessScreen({
   reportId,
+  report,
   onNew,
   onMap,
   onReport,
 }: {
   reportId: string | null;
+  report?: Report;
   onNew: () => void;
   onMap: () => void;
   onReport: () => void;
@@ -1220,6 +1223,7 @@ function SuccessScreen({
           </button>
         ) : null}
         <ReportToAuthority
+          report={report}
           subject={`report ${reportId ?? ''}`.trim()}
           label="Report to authority"
           variant="secondary"

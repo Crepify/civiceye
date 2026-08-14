@@ -5,8 +5,10 @@ import {
   Calendar,
   CheckCheck,
   Crosshair,
+  Mail,
   MapPin,
   Navigation,
+  Phone,
   Share2,
   ShieldCheck,
   ThumbsDown,
@@ -16,6 +18,8 @@ import { useReports } from '@/hooks/useReports';
 import { useToast } from '@/hooks/useToast';
 import { categoryById, SEVERITY_META, STATUS_META } from '@/data/categories';
 import { authorityById } from '@/data/authorities';
+import { responsibleAuthority } from '@/services/authorityService';
+import { AuthorityContactCard } from '@/components/AuthorityContactCard';
 import { Badge } from '@/components/Badge';
 import { VoteButtons } from '@/components/VoteButtons';
 import { ReportCard } from '@/components/ReportCard';
@@ -252,7 +256,8 @@ export function ReportDetails() {
                 Share this report
               </button>
               <ReportToAuthority
-                subject={`report ${report.id}`}
+                report={report}
+                subject={`report ${report.code ?? report.id}`}
                 label="Report to authority"
                 variant="primary"
                 className="w-full"
@@ -262,6 +267,17 @@ export function ReportDetails() {
               </Link>
             </div>
 
+            {/* Responsible authority — public contact channels */}
+            <AuthorityContactCard
+              authority={responsibleAuthority(report)}
+              heading={
+                assigned
+                  ? `Escalate further — ${responsibleAuthority(report).name}`
+                  : 'Report this to'
+              }
+              className="card"
+            />
+
             {assigned ? (
               <div className="card flex items-start gap-3 p-5">
                 <span
@@ -270,7 +286,7 @@ export function ReportDetails() {
                 >
                   <Wrench className="h-4 w-4" />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
                     Handled by
                   </p>
@@ -280,6 +296,24 @@ export function ReportDetails() {
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     {assigned.department}
                   </p>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                    {assigned.phone ? (
+                      <a
+                        href={`tel:${assigned.phone.replace(/[^\d+]/g, '')}`}
+                        className="flex items-center gap-1 text-xs font-semibold text-primary-600 hover:underline dark:text-primary-400"
+                      >
+                        <Phone className="h-3 w-3" />
+                        {assigned.phone}
+                      </a>
+                    ) : null}
+                    <a
+                      href={`mailto:${assigned.email}`}
+                      className="flex items-center gap-1 text-xs font-semibold text-primary-600 hover:underline dark:text-primary-400"
+                    >
+                      <Mail className="h-3 w-3" />
+                      Email
+                    </a>
+                  </div>
                 </div>
               </div>
             ) : null}

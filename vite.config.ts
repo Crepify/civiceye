@@ -14,6 +14,8 @@ export default defineConfig({
     port: 5173,
     host: true,
     open: false,
+    // Allow sandboxed preview hosts (e.g. *.e2b.app) during development.
+    allowedHosts: ['.e2b.app', 'localhost', '127.0.0.1'],
     proxy: {
       // Dev-only: mimic the /api/roboflow serverless function so
       // `npm run dev` works without the Vercel runtime. Forwards to
