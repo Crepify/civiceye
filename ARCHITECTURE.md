@@ -103,6 +103,6 @@ Pure derived state from `useReports()` — no extra store:
 ## 8. Testing / extending
 
 - **Swap in a real backend:** implement `reportService` methods against your API (keep the same signatures) — zero page changes.
-- **Real Google Maps:** add `VITE_GOOGLE_MAPS_API_KEY` (see ENVIRONMENT.md).
+- **Real Google Maps:** add `VITE_GOOGLE_MAPS_API_KEY` (see README — Environment variables).
 - **Real AI:** replace `analyzePhoto` with a call to any vision API; the UI contract (`AnalysisResult`) is unchanged.
 - **New category:** add to `CategoryId`, `CATEGORIES`, `CATEGORY_ICONS`, `OBJECT_POOL`, and the generator pools — everything else adapts automatically.

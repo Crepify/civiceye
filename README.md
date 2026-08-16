@@ -1,197 +1,155 @@
-# 👁️ CivicEye
+# 👁️ CivicEye / Amrita Eye
 
 **Making cities better, one report at a time.**
 
-CivicEye is a production-grade **hackathon prototype** of a citizen-powered civic-issue reporting platform. Citizens report potholes, garbage, broken street lights and more with a photo and a pin; the community validates reports; authorities get an organised dashboard to assign, fix and resolve them — all visualised on a live map.
-
-> ⚠️ **Prototype notice:** The AI analysis and live-stream detection are mocked, and the Google Maps integration falls back to a built-in vector map without an API key. **Login, reports, votes and photos are real** — they run on Supabase (see `SUPABASE_SETUP.md`). No dummy data is shipped; the map starts empty until citizens submit real reports.
+CivicEye is a civic-issue reporting platform. Citizens and campus students photograph and pin problems — potholes, garbage, broken street lights, fallen trees, water leaks, and more — the community validates them, and staff/authorities act on them. Amrita Eye is the campus-branded mode (auto-activated for `@…amrita.edu` users) with campus-specific categories and routing.
 
 ---
 
-## ✨ Highlights
+## ✨ Features
 
-| Area                                | What you get                                                                                                                                                                                                     |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🗺️ **Live map**                     | Google Maps when a key is configured, built-in SVG fallback otherwise. Marker clustering, severity heatmap, filters, search, current-location, popups with photos/votes/status.                                  |
-| 📸 **AI photo analysis** _(mocked)_ | 6-step wizard → snap/upload/QR-scan a photo → animated “vision model” detects category, confidence, severity, objects, description and GPS. |
-| 📡 **Live AI Detection** _(mocked)_ | `/live` page simulates a CCTV watchtower — auto-detects potholes, accidents, garbage from “streams” and creates reports. Real YOLOv8 integration blueprint in `LIVESTREAM_DETECTION.md`. |
-| 📱 **QR phone→desktop flow**        | Scan a QR on your desktop, take the photo on your phone, it syncs back automatically (BroadcastChannel + simulated cloud relay).                                                                                 |
-| ✅ **Community validation**         | Upvote / downvote / confirm / reject. 3 confirmations ⇒ report becomes **Verified** and appears on the map & dashboard.                                                                                          |
-| 🏛️ **Authorities dashboard**        | KPI cards, category/severity/weekly charts, hotspot list, recent-report table with _Mark Resolved / Assign / Reject_, downloadable ward report, and a “Report to authority” simulation with a success animation. |
-| 🌓 **Polish**                       | Glassmorphism, soft shadows, Framer Motion page/scroll/hover animations, dark mode, toasts, skeletons, empty/error states, notifications, fully responsive & mobile-first.                                       |
+| Area | What it does |
+| --- | --- |
+| 🗺️ **Live map** | Google Maps (with key) or built-in fallback map. Marker clustering, severity heatmap, filters, search, current location, and popups with photos/votes/status. Clicking a report zooms & pins it. |
+| 📸 **AI photo analysis** | Upload or take a photo → **CivicLENS AI** (Roboflow) detects category, confidence, severity, objects, and a description. Blurry/unclear photos warn the user. Category is user-editable. |
+| 📡 **Live AI Detection** | `/live` captures your device camera, a video file, or screen — sends frames to CivicLENS AI (Roboflow), draws detection boxes, and can auto-create reports. |
+| 📱 **QR phone → desktop flow** | Scan a QR on your desktop, take the photo on your phone, it syncs back automatically. |
+| ✅ **Community validation** | Upvote / downvote / confirm / reject. 3 confirmations → report becomes **Verified**. Flag button on every post. |
+| 💬 **Reviews** | Report threads with agree/disagree tallies; landing page shows live community reviews. |
+| 🏛️ **Authorities dashboard** | KPIs, category/severity/weekly charts, hotspot list, recent reports, assign/resolve/reject, downloadable ward report, and **real "Report to Authority"** escalation (email/WhatsApp/SMS/mailto). |
+| 🎓 **Amrita Eye mode** | Red/white/black/yellow campus theme, campus-only categories (suspicious activity, etc.), campus-scoped reports & routing. Auto-activates on `@…amrita.edu` logins. |
+| 🛡️ **Staff/Admin panel** | Flagged-post moderation (take down/dismiss), scope management (mark campus/city), reporter details. Configurable admins. |
 
-**Tech stack:** React 18 · TypeScript · Vite 5 · TailwindCSS · Framer Motion · React Router 6 · Google Maps JS API (+ MarkerClusterer) · Lucide icons · React Hook Form + Zod · qrcode.react
+**Tech:** React 18 · TypeScript · Vite 5 · TailwindCSS · Framer Motion · React Router · Supabase (auth, Postgres, storage, RLS) · Google Maps · Roboflow (CivicLENS AI) · Lucide icons · Vercel serverless functions.
 
 ---
 
 ## 🚀 Quick start
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Start the dev server
 npm run dev
 ```
 
-Open **http://localhost:5173** — the app works immediately with the fallback map (no API key
-needed). For **login + real reports**, add Supabase keys: see `SUPABASE_SETUP.md` (5 minutes).
+Open **http://localhost:5173**. The app works out of the box with the fallback map; real features activate when environment variables are set (see [Environment](#-environment-variables)).
 
-### Other scripts
+### Scripts
 
 ```bash
-npm run build        # type-check + production build → dist/
-npm run preview      # serve the production build locally
-npm run lint         # ESLint (zero warnings allowed)
-npm run lint:fix     # auto-fix lint issues
-npm run format       # Prettier
-npm run typecheck    # TypeScript only
-npm run data:generate # regenerate the 100-report mock database
+npm run dev          # dev server
+npm run build        # type-check + production build
+npm run preview      # preview the build
+npm run lint         # eslint (zero warnings)
+npm run typecheck    # typescript only
 ```
 
 ---
 
 ## 🧭 Pages
 
-| Route                 | Page                                                                                               |
-| --------------------- | -------------------------------------------------------------------------------------------------- |
-| `/`                   | Landing — hero, animated background, stats, how-it-works, features, testimonials, live map preview |
-| `/map` | Interactive map — Google/fallback engine, clustering, heatmap, filters, search, legend, popups |
-| `/live` | **Live AI Detection** — mock CCTV vision model auto-creates reports (potholes, accidents, …). Real pipeline in `LIVESTREAM_DETECTION.md` |
-| `/report` | Multi-step report wizard (category → photo/QR → AI analysis → location → details → review) |
-| `/report?session=xxx` | Phone capture mode (opened by scanning the desktop QR code)                                        |
-| `/report/:id`         | Report detail — full evidence, meta, community validation, related reports, directions             |
-| `/dashboard`          | Authorities dashboard — KPIs, charts, map, recent table, assign/resolve/reject, generate report    |
-| `/community`          | Community feed — search, filters, sorting, pagination, skeletons                                   |
-| `/about` · `/contact` | Static product pages                                                                               |
-| `*`                   | Polished 404                                                                                       |
+| Route | Page |
+| --- | --- |
+| `/` | Landing — hero, live map preview, stats, how-it-works, features, community reviews |
+| `/map` | Interactive map — clustering, heatmap, filters, search, zoom-on-click |
+| `/live` | Live AI Detection — camera / video / screen → CivicLENS AI boxes |
+| `/report` | Report wizard — category → photo → AI analysis → location → details → review |
+| `/report/:id` | Report detail — evidence, votes, reviews, flag, report-to-authority |
+| `/community` | Community feed — search, filter, sort, paginate |
+| `/dashboard` | Authorities dashboard — KPIs, charts, map, assign/resolve |
+| `/admin` | Staff/admin moderation panel (admin-only) |
+| `/about` · `/contact` · `/login` | Product pages + auth |
+| `*` | 404 |
 
 ---
 
-## 🌍 Google Maps setup (optional)
+## 🔐 Authentication
 
-The app runs without a key using its **fallback vector map**. To enable real Google Maps:
-
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/) → create/select a project.
-2. Enable the **Maps JavaScript API** (and optionally **Places API**, **Geocoding API**).
-3. Create an **API key** under _APIs & Services → Credentials_ → _Create credentials → API key_.
-4. Restrict the key (HTTP referrers → `localhost:*` and your domain) — recommended.
-5. Copy `.env.example` → `.env` and set:
-
-```env
-VITE_GOOGLE_MAPS_API_KEY=your_key_here
-```
-
-6. Restart the dev server. The map now renders with Google Maps, clustering and heatmap.
-
-> 🔑 The key is read at build time via `import.meta.env` — it must be prefixed with `VITE_`.
-
-### 🤖 Real AI engines (image analysis)
-
-Analysis tries **Roboflow → Groq → built-in estimate**, whichever is configured (Roboflow is primary).
-
-**Roboflow workflow ("CivicEye Pothole Reporting Starter")** — env setup:
-
-```env
-VITE_ROBOFLOW_API_KEY=<key from app.roboflow.com/settings/api>
-VITE_ROBOFLOW_WORKSPACE=aswathram-kumar
-VITE_ROBOFLOW_WORKFLOW_ID=civiceye-pothole-reporting-starter-1786336062967
-```
-
-- The browser can't call Roboflow directly (its serverless endpoint omits the CORS
-  `Access-Control-Allow-Origin` header in preflight), so the app calls **its own proxy**:
-  `POST /api/roboflow` (Vercel function `api/roboflow.js`, mirrored in dev by a vite
-  proxy). The function forwards to
-  `https://serverless.roboflow.com/{workspace}/workflows/{workflow_id}` with
-  `{ api_key, inputs: { image: { type: "base64", value } } }` (declared input: `image`;
-  URL inputs must be https, base64 works too).
-- **Grounded real response:** `{ outputs: [ { output_image: { type: "base64", value: <jpeg> } } ] }`
-  — this starter workflow returns **only the annotated image**, no class/confidence data.
-  The app shows the annotated image and reports "no detection data" honestly. To get real
-  confidence scores, expose the predictions as a workflow output, or set
-  `VITE_ROBOFLOW_MODEL=<model/version>` to use a standard `detect.roboflow.com` endpoint
-  (which returns per-box `{class, confidence}`).
-- Smoke test (validates the live contract; key via env, never hardcoded):
-  ```bash
-  RF_KEY=<your key> node scripts/roboflow-smoke.mjs
-  ```
-- ⚠️ **Vercel Hobby functions time out at 10s**, but Roboflow's workflow can take ~5–15s.
-  So a **Cloudflare Worker proxy** is recommended (30s free timeout): see
-  `worker/README.md` (deploy + set `VITE_ROBOFLOW_PROXY_URL` to your real Worker URL).
-  The app prefers the Worker when a valid `VITE_ROBOFLOW_PROXY_URL` is set, otherwise it
-  uses `/api/roboflow` (Vercel), falling back to Groq on timeout. An invalid/placeholder
-  proxy URL is rejected with a clear error instead of a confusing fetch failure.
-
-See **[ENVIRONMENT.md](./ENVIRONMENT.md)**, **[DEPLOYMENT.md](./DEPLOYMENT.md)** and
-**[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** for full details. Email uses Supabase's
-built-in sender (~30/hr) — confirmation emails may land in spam, so the login page warns
-users to check their junk folder. Optional: **[SMTP_SETUP.md](./SMTP_SETUP.md)** for a
-free custom SMTP (own sender name + more capacity).
+- Supabase Auth: email + password, magic link, password reset.
+- Login-first — every page redirects to `/login` when signed out.
+- **Admin rule:** emails in `src/data/admins.ts` (or `VITE_ADMIN_EMAILS`) are admins. Every `@amrita.edu` email that is **not** a `*.students.*` address is an Amrita Eye admin.
 
 ---
 
-## 🗄️ Mock database
+## 🌍 Environment variables
 
-The database is **real (Supabase Postgres)** — no seeded dummy data. The `reports` table stores titles, descriptions, coordinates, category, severity, status, photo URL, votes, confirmations, verification state and the reporter. Schema + RLS in `supabase/schema.sql`.
+All keys are stored on **Vercel** (or `.env` locally). Every `VITE_` var is read at build time — set them, then **Redeploy**.
 
-- Regenerate deterministically: `npm run data:generate` (seeded — same output every run).
-- Runtime changes (new reports, votes, status) are persisted to `localStorage` under `civiceye:reports:v1`.
-- Reset the demo data anytime from the dashboard header (`↻` button).
+| Variable | Purpose |
+| --- | --- |
+| `VITE_SUPABASE_URL` · `VITE_SUPABASE_ANON_KEY` | Supabase project (auth + data + storage) |
+| `VITE_GOOGLE_MAPS_API_KEY` | Real Google Maps (optional; fallback map otherwise) |
+| `VITE_ROBOFLOW_API_KEY` | CivicLENS AI — real object detection (primary engine) |
+| `VITE_ROBOFLOW_WORKSPACE` | Roboflow workspace slug |
+| `VITE_ROBOFLOW_WORKFLOW_ID` | Roboflow workflow slug (your pothole workflow) |
+| `VITE_ROBOFLOW_PROXY_URL` | Cloudflare Worker URL for Roboflow (30s timeout; else Vercel `/api/roboflow`) |
+| `VITE_GROQ_API_KEY` · `VITE_GROQ_MODEL` | Backup vision engine |
+| `VITE_ADMIN_EMAILS` | Extra comma-separated admin emails |
+| `VITE_APP_URL` | Public origin (QR + magic links) |
+
+**SMTP / EmailJS (optional):** `SMTP_HOST/PORT/USER/PASS/FROM` or `VITE_EMAILJS_SERVICE_ID/TEMPLATE_ID/PUBLIC_KEY` enable real authority escalation emails. Without them, the app falls back to `mailto:`.
+
+---
+
+## 🧠 AI engines (order)
+
+1. **CivicLENS AI (Roboflow)** — primary. Real object detection with per-box confidence. Runs via a proxy (Cloudflare Worker preferred, or `/api/roboflow`).
+2. **Groq** — backup vision LLM.
+3. **Built-in estimate** — last resort, clearly labeled.
+
+Photos are compressed before sending (768px, JPEG ~72) to stay within free-tier quotas.
+
+> ⚠️ **Quota note:** Roboflow free tier ≈ 1,000 inferences/month. Each report photo = 1; each live frame = 1. Use `/live` sparingly ("Careful · 8s") or run a local model for unlimited inference.
 
 ---
 
 ## 📁 Project structure
 
 ```
-civiceye/
-├─ public/                    # static assets (evidence photos, SVGs, favicon)
-├─ scripts/
-│  └─ generate-reports.mjs    # mock DB generator
 ├─ src/
-│  ├─ assets/                 # (static imports live here if you add any)
-│  ├─ components/             # reusable UI
-│  │  └─ map/                 # GoogleMapView, FallbackMapView, MapView, MapPopup
-│  ├─ context/                # Theme, Toast, Reports, Notifications providers
-│  ├─ data/                   # categories, authorities, brands, features…
-│  ├─ hooks/                  # useTheme, useToast, useReports, useDebounce, …
-│  ├─ pages/                  # one file per route
-│  ├─ services/               # mock "API" layer: reports, geo, AI, sync, maps
-│  ├─ styles/                 # Tailwind entry + design tokens
-│  ├─ types/                  # domain types
-│  ├─ utils/                  # cn, format, geo, download helpers
-│  ├─ App.tsx                 # routes + animated layout
-│  └─ main.tsx                # entry point
-├─ index.html
-├─ vite.config.ts / tailwind.config.js / tsconfig.json / …
-├─ .env.example
-└─ docs? (see README files: ENVIRONMENT.md, DEPLOYMENT.md, GITHUB_SETUP.md, ARCHITECTURE.md)
+│  ├─ components/        # UI: Navbar, Footer, cards, map views, review/flag/vote…
+│  │  └─ map/            # GoogleMapView, FallbackMapView, MapView, MapPopup
+│  ├─ context/           # Auth, Brand, Reports, Notifications, Toast, Theme
+│  ├─ data/              # categories, authorities, admins, campus config, brands
+│  ├─ hooks/             # useAuth, useBrand, useReports, useToast, …
+│  ├─ lib/               # supabase client, storage upload
+│  ├─ pages/             # one file per route
+│  ├─ services/          # roboflow, groq, report, geo, detection, authority, review
+│  ├─ styles/            # Tailwind + brand theme (CivicEye indigo / Amrita red)
+│  ├─ types/             # domain types
+│  └─ utils/             # cn, format, geo, image compression
+├─ api/                  # Vercel serverless: roboflow proxy, report-authority email
+├─ worker/               # Cloudflare Worker (Roboflow proxy, 30s timeout)
+├─ supabase/             # schema.sql + setup SQL (re-runnable)
+└─ scripts/              # roboflow smoke test, report generator
 ```
 
-See **[ARCHITECTURE.md](./ARCHITECTURE.md)** for a deep dive into the design.
+---
+
+## 🚀 Deployment
+
+- **Host:** Vercel (auto-deploys from GitHub). Build: `npm run build` → output `dist`.
+- **Supabase:** free project for auth/data/storage — run `supabase/schema.sql` (re-runnable), plus `supabase/storage-fix.sql` if uploads fail with RLS errors.
+- **Roboflow proxy:** deploy `worker/roboflow-proxy.js` as a Cloudflare Worker (see `worker/README.md`) and set `VITE_ROBOFLOW_PROXY_URL` — avoids Vercel's 10s serverless timeout.
 
 ---
 
-## 🧪 Demo script (30 seconds)
+## 🤝 Contributing / collaboration
 
-1. **Report:** `/report` → pick _Pothole_ → _Browse files_ (use `/reports/pothole.jpg` from `public`) → watch the AI analysis → _Use my location_ (or drop a pin) → add title/description → submit 🎉.
-2. **QR flow:** on the photo step choose _Scan from my phone_ → open the QR link in a new tab/phone → take a photo → watch it arrive on the desktop.
-3. **Community validation:** open the report from the success screen → _Confirm_ 3 times → it becomes **Verified**.
-4. **Dashboard:** `/dashboard` → assign the report to BBMP → mark resolved → _Generate report_ (downloads a `.txt` ward report).
-5. **Map:** `/map` → toggle the heatmap, filter by category/severity, search your new report.
-
----
-
-## 🛠️ Troubleshooting
-
-| Issue                                | Fix                                                                                           |
-| ------------------------------------ | --------------------------------------------------------------------------------------------- |
-| Map shows the stylised fallback view | That's expected without a key. Add `VITE_GOOGLE_MAPS_API_KEY` to enable Google Maps.          |
-| Geolocation denied                   | The wizard falls back to manual pin-dropping with a friendly toast.                           |
-| `npm run dev` port in use            | Vite auto-increments to 5174.                                                                 |
-| Data “resets” on a new browser       | Expected — the mock DB lives in that browser's `localStorage`. Use the dashboard ↻ to reseed. |
+Multiple people work on this repo. Read **`COLLABORATION.md`** — the short version:
+- **Never use `git push -f`.** Use `git pull --rebase` before pushing.
+- Work on branches and merge via pull requests.
+- Only `git add` the files you changed.
+- Never commit `.env` or API keys.
 
 ---
 
-## 📄 License
+## 📖 More docs
 
-MIT — free to use, modify and demo. All report data is fictional and generated for demonstration purposes.
+- **`ARCHITECTURE.md`** — how the app is put together (data flow, map engines, AI pipeline).
+- **`COLLABORATION.md`** — git workflow for the team.
+
+---
+
+## ⚠️ Status
+
+Active development. AI detection uses real Roboflow inference (CivicLENS AI branding); Live AI and authority escalation are functional. Google Maps requires a key; without it the built-in vector map is used.
