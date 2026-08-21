@@ -1,7 +1,9 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Report, VoteType } from '@/types';
-import { reportService } from '@/services/reportService';
+import { reportService, mapRow } from '@/services/reportService';
+import type { ReportRow } from '@/services/reportService';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Reports store (async).
@@ -60,6 +62,37 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void refresh();
+
+    if (!supabase) return;
+    const channel = supabase
+      .channel('reports-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reports' },
+        (payload) => {
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            const row = payload.new as ReportRow;
+            const updatedReport = mapRow(row);
+            setReports((prev) => {
+              const exists = prev.some((r) => r.id === updatedReport.id);
+              if (exists) {
+                return prev.map((r) => (r.id === updatedReport.id ? updatedReport : r));
+              } else if (payload.eventType === 'INSERT') {
+                return [updatedReport, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+              }
+              return prev;
+            });
+          } else if (payload.eventType === 'DELETE') {
+            const oldRow = payload.old as { id: string };
+            setReports((prev) => prev.filter((r) => r.id !== oldRow.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [refresh]);
 
   /** Run a mutation, then refresh. */
