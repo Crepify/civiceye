@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CivicEye — broken ring optic mark">
+  <!-- Broken ring: gap at top-right and bottom, reads as a pin + eye -->
+  <path
+    d="M48 22
+       A 18 18 0 1 0 49.5 38
+       L 44 35
+       A 13.5 13.5 0 1 1 44.5 26 Z"
+    fill="none"
+    stroke="#6366F1"
+    stroke-width="2.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- Floating lens (eye) offset lower-right -->
+  <circle cx="38" cy="32" r="5.5" fill="none" stroke="#34D399" stroke-width="2"/>
+  <circle cx="38" cy="32" r="2" fill="#34D399"/>
+  <!-- Pin tip dot -->
+  <circle cx="32" cy="54" r="3" fill="#6366F1"/>
+</svg>

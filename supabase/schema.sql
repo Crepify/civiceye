@@ -163,9 +163,6 @@ drop trigger if exists reports_touch on public.reports;
 create trigger reports_touch before update on public.reports
   for each row execute function public.touch_updated_at();
 
--- Enable Realtime for the reports table
-alter publication supabase_realtime add table public.reports;
-
 -- ---------- Votes (one vote per user per report per type) -----------
 create table if not exists public.report_votes (
   user_id    uuid not null references auth.users(id) on delete cascade,

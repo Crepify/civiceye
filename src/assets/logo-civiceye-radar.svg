@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CivicEye — radar eye pin mark">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="0.5" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+    <radialGradient id="lens" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Radar rings (map pin silhouette) -->
+  <g fill="none" stroke="url(#g)" stroke-width="3" opacity="0.9">
+    <circle cx="32" cy="26" r="16" opacity="0.35"/>
+    <circle cx="32" cy="26" r="11" opacity="0.6"/>
+    <circle cx="32" cy="26" r="6.5" stroke-width="3.5"/>
+  </g>
+
+  <!-- Radar sweep line -->
+  <line x1="32" y1="26" x2="48" y2="18" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Pin point -->
+  <path d="M32 43 L37 55 L27 55 Z" fill="url(#g)"/>
+
+  <!-- Center lens (the eye) -->
+  <circle cx="32" cy="26" r="4.5" fill="url(#lens)"/>
+  <circle cx="32" cy="26" r="1.8" fill="#0B1120"/>
+
+  <!-- Accent -->
+  <circle cx="51" cy="12" r="3" fill="#34D399"/>
+</svg>

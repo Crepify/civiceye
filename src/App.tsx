@@ -34,6 +34,10 @@ export default function App() {
     location.pathname.startsWith('/auth/callback') ||
     location.pathname.startsWith('/reset');
 
+  // DEMO MODE (VITE_DEMO_MODE=true): bypass the login gate so pages render
+  // without a Supabase session — used for screenshots & live demos.
+  const demoMode = import.meta.env.VITE_DEMO_MODE === 'true';
+
   // Everything else requires a signed-in user (login-first app).
   const gatedRoutes = (
     <Routes location={location}>
@@ -73,7 +77,7 @@ export default function App() {
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-1 flex-col"
         >
-          {isAuthPage ? authRoutes : <RequireAuth>{gatedRoutes}</RequireAuth>}
+          {isAuthPage ? authRoutes : demoMode ? gatedRoutes : <RequireAuth>{gatedRoutes}</RequireAuth>}
         </motion.main>
       </AnimatePresence>
       {!isAuthPage ? <Footer /> : null}

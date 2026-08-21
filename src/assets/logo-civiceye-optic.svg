@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CivicEye — smart city optic mark">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="0.5" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#34D399"/>
+      <stop offset="0.6" stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#4F46E5"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Outer optic ring -->
+  <circle cx="32" cy="29" r="21" fill="none" stroke="url(#g)" stroke-width="4"/>
+
+  <!-- Inner thin ring -->
+  <circle cx="32" cy="29" r="16.5" fill="none" stroke="url(#g)" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Iris facets -->
+  <circle cx="32" cy="29" r="11" fill="url(#iris)"/>
+  <g fill="none" stroke="#0B1120" stroke-width="1.2" opacity="0.35">
+    <path d="M32 18 L32 40"/><path d="M21 29 L43 29"/>
+    <path d="M24.2 21.2 L39.8 36.8"/><path d="M39.8 21.2 L24.2 36.8"/>
+  </g>
+
+  <!-- Pupil -->
+  <circle cx="32" cy="29" r="3.6" fill="#0B1120"/>
+  <circle cx="31" cy="28" r="1.1" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Pin point -->
+  <path d="M32 50 L36.5 60 L27.5 60 Z" fill="url(#g)"/>
+
+  <!-- Signal pulses -->
+  <g stroke="#34D399" stroke-width="1.6" stroke-linecap="round" opacity="0.8">
+    <path d="M53 12 L49 15"/>
+    <path d="M58 20 L53 22"/>
+    <path d="M12 12 L16 15"/>
+    <path d="M8 20 L13 22"/>
+  </g>
+
+  <!-- Hot accent dot -->
+  <circle cx="52" cy="8" r="2.8" fill="#F43F5E"/>
+</svg>

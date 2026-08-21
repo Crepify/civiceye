@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CivicEye — minimal optic mark">
+  <!-- Minimal: thin ring + dot (eye), short pin point, no glow -->
+  <g fill="none" stroke="#6366F1" stroke-width="2.2" stroke-linecap="round">
+    <circle cx="32" cy="28" r="16"/>
+    <!-- pin point -->
+    <path d="M32 44 L32 52"/>
+  </g>
+  <!-- emerald pupil -->
+  <circle cx="32" cy="28" r="4" fill="#34D399"/>
+  <circle cx="32" cy="28" r="1.6" fill="#F8FAFC"/>
+  <!-- tiny accent -->
+  <circle cx="32" cy="52" r="2.2" fill="#34D399"/>
+</svg>
