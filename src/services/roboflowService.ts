@@ -1,4 +1,5 @@
 import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types';
+import { categoryById } from '@/data/categories';
 import { detectBlur } from '@/utils/image';
 
 /**
@@ -162,11 +163,13 @@ const CLASS_MAP: Record<string, CategoryId> = {
   'tree-branch': 'fallen-tree',
   'fallen-tree-trunk': 'fallen-tree',
   'tree-trunk': 'fallen-tree',
-  // Lighting
+  // Lighting — Roboflow SAM3 mapped class is "Broken Street Light"
   'street-light': 'street-light',
   'broken-street-light': 'street-light',
   'broken-streetlight': 'street-light',
   streetlight: 'street-light',
+  'street-lamp': 'street-light',
+  'lamp-post': 'street-light',
   // Water / sewage
   'water-leakage': 'water-leakage',
   'water-leak': 'water-leakage',
@@ -179,20 +182,59 @@ const CLASS_MAP: Record<string, CategoryId> = {
   // Traffic
   'traffic-light': 'traffic-signal',
   'traffic-signal': 'traffic-signal',
+  'traffic-signal-damage': 'traffic-signal',
   signal: 'traffic-signal',
   'broken-traffic-light': 'traffic-signal',
   // Accidents / security
   accident: 'accident',
+  'traffic-accident': 'accident',
   crash: 'accident',
   collision: 'accident',
   'suspicious-activity': 'security',
   person: 'security',
+  // Explicit "other" labels from the workflow (do not treat as a miss)
+  'other-infrastructure': 'other',
+  'no-issue': 'other',
 };
 
-/** Map a Roboflow class label to CivicEye's category ids. */
+/** Phrases in long SAM3 prompts / Gemini class names, most-specific first. */
+const CLASS_CONTAINS: Array<[string, CategoryId]> = [
+  ['water filled pothole', 'pothole'],
+  ['standing water', 'pothole'],
+  ['broken street light', 'street-light'],
+  ['street light', 'street-light'],
+  ['streetlight', 'street-light'],
+  ['lamp post', 'street-light'],
+  ['traffic signal', 'traffic-signal'],
+  ['traffic light', 'traffic-signal'],
+  ['traffic accident', 'accident'],
+  ['missing manhole', 'manhole'],
+  ['open trench', 'manhole'],
+  ['manhole', 'manhole'],
+  ['garbage', 'garbage'],
+  ['illegal dump', 'illegal-dumping'],
+  ['fallen tree', 'fallen-tree'],
+  ['water leak', 'water-leakage'],
+  ['sewage', 'sewage'],
+  ['broken sidewalk', 'sidewalk'],
+  ['sidewalk', 'sidewalk'],
+  ['broken road', 'broken-road'],
+  ['pothole', 'pothole'],
+  ['crash', 'accident'],
+  ['collision', 'accident'],
+];
+
+/** Map a Roboflow class label (short or long SAM3 prompt) to CivicEye ids. */
 export function categoryFromRoboflowLabel(label: string): CategoryId {
-  const key = label.trim().toLowerCase().replace(/[_\s]+/g, '-');
-  return CLASS_MAP[key] ?? 'other';
+  const trimmed = label.trim();
+  if (!trimmed || /^no issue$/i.test(trimmed)) return 'other';
+  const key = trimmed.toLowerCase().replace(/[_\s]+/g, '-');
+  if (CLASS_MAP[key]) return CLASS_MAP[key];
+  const hay = trimmed.toLowerCase();
+  for (const [needle, cat] of CLASS_CONTAINS) {
+    if (hay.includes(needle)) return cat;
+  }
+  return 'other';
 }
 
 const mapClass = categoryFromRoboflowLabel;
@@ -251,6 +293,17 @@ function severityFromConfidence(score: number): Severity {
   return 'low';
 }
 
+/** Map the workflow's "Low" | "Medium" | "High" | "None" string. */
+export function severityFromWorkflowLabel(label: string | null | undefined): Severity | null {
+  if (!label) return null;
+  const key = label.trim().toLowerCase();
+  if (key.startsWith('crit')) return 'critical';
+  if (key.startsWith('high')) return 'high';
+  if (key.startsWith('med')) return 'medium';
+  if (key.startsWith('low')) return 'low';
+  return null;
+}
+
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
 /** A raw object prediction returned by a Roboflow detector. */
@@ -266,6 +319,26 @@ export interface RoboflowPrediction {
 
 type Prediction = RoboflowPrediction;
 
+/** Keys that are huge (polygons / jpeg) and never contain a detection. */
+const SKIP_RECURSE_KEYS = new Set(['points', 'value', 'video_metadata']);
+
+function readClassName(obj: Record<string, unknown>): string | null {
+  for (const key of ['class', 'class_name', 'label', 'predicted_class']) {
+    const v = obj[key];
+    if (typeof v === 'string' && v.trim()) return v;
+  }
+  return null;
+}
+
+function readConfidence(obj: Record<string, unknown>): number | null {
+  for (const key of ['confidence', 'confidence_score', 'score']) {
+    const raw = obj[key];
+    const n = typeof raw === 'number' ? raw : Number(raw);
+    if (Number.isFinite(n)) return n > 1 ? n / 100 : n;
+  }
+  return null;
+}
+
 /** Recursively find every {class, confidence} object in the response. */
 export function extractPredictions(node: unknown, out: RoboflowPrediction[] = []): RoboflowPrediction[] {
   if (Array.isArray(node)) {
@@ -274,15 +347,30 @@ export function extractPredictions(node: unknown, out: RoboflowPrediction[] = []
   }
   if (node && typeof node === 'object') {
     const obj = node as Record<string, unknown>;
-    const confidence = typeof obj.confidence === 'number' ? obj.confidence : Number(obj.confidence);
-    if (typeof obj.class === 'string' && Number.isFinite(confidence)) {
+
+    const names = obj.class_name ?? obj.classes;
+    const confs = obj.confidence ?? obj.scores;
+    if (Array.isArray(names) && Array.isArray(confs) && names.length === confs.length && names.length > 0) {
+      names.forEach((name, i) => {
+        if (typeof name === 'string') {
+          const conf = typeof confs[i] === 'number' ? (confs[i] as number) : Number(confs[i]);
+          if (Number.isFinite(conf)) {
+            out.push({ class: name, confidence: conf > 1 ? conf / 100 : conf });
+          }
+        }
+      });
+    }
+
+    const cls = readClassName(obj);
+    const confidence = readConfidence(obj);
+    if (cls && confidence != null) {
       const numeric = (key: string): number | undefined => {
         const value = obj[key];
         const parsed = typeof value === 'number' ? value : Number(value);
         return Number.isFinite(parsed) ? parsed : undefined;
       };
       out.push({
-        class: obj.class,
+        class: cls,
         confidence,
         x: numeric('x'),
         y: numeric('y'),
@@ -290,12 +378,90 @@ export function extractPredictions(node: unknown, out: RoboflowPrediction[] = []
         height: numeric('height'),
       });
     }
-    for (const key of Object.keys(obj)) extractPredictions(obj[key], out);
+    for (const key of Object.keys(obj)) {
+      if (SKIP_RECURSE_KEYS.has(key)) continue;
+      extractPredictions(obj[key], out);
+    }
   }
   return out;
 }
 
-/** Find the workflow's image-shaped output (data URL for the UI). */
+export interface WorkflowHints {
+  primaryIssue: string | null;
+  severity: string | null;
+  issueClasses: string[];
+}
+
+function asNonEmptyString(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const t = value.trim();
+  return t ? t : null;
+}
+
+/** Read primary_issue / severity / issue_classes from a workflow output entry. */
+export function extractWorkflowHints(node: unknown): WorkflowHints {
+  const hints: WorkflowHints = { primaryIssue: null, severity: null, issueClasses: [] };
+  const visit = (value: unknown) => {
+    if (!value || typeof value !== 'object') return;
+    if (Array.isArray(value)) {
+      if (value.length > 0 && value.every((item) => typeof item === 'string')) {
+        for (const item of value) {
+          const s = asNonEmptyString(item);
+          if (s) hints.issueClasses.push(s);
+        }
+        return;
+      }
+      for (const item of value) visit(item);
+      return;
+    }
+    const obj = value as Record<string, unknown>;
+    if (!hints.primaryIssue) {
+      hints.primaryIssue =
+        asNonEmptyString(obj.primary_issue) ?? asNonEmptyString(obj.primaryIssue) ?? null;
+    }
+    if (!hints.severity) {
+      hints.severity = asNonEmptyString(obj.severity) ?? null;
+    }
+    if (Array.isArray(obj.issue_classes)) visit(obj.issue_classes);
+    for (const key of Object.keys(obj)) {
+      if (
+        SKIP_RECURSE_KEYS.has(key) ||
+        key === 'predictions' ||
+        key === 'filtered_predictions' ||
+        key === 'output_image'
+      ) {
+        continue;
+      }
+      visit(obj[key]);
+    }
+  };
+  visit(node);
+  return hints;
+}
+
+const ANNOTATED_IMAGE_KEYS = [
+  'output_image',
+  'visualization',
+  'visualisation',
+  'annotated_image',
+  'label_visualization',
+];
+
+function asImageDataUrl(obj: Record<string, unknown>): string | null {
+  const value = obj.value;
+  if (typeof value !== 'string' || value.length < 80) return null;
+  if (value.startsWith('data:image/')) return value;
+  if (obj.type === 'base64' || obj.type === 'jpeg' || obj.type === 'jpg' || obj.type === 'png') {
+    return `data:image/jpeg;base64,${value}`;
+  }
+  return null;
+}
+
+/**
+ * Find the workflow's annotated JPEG. Prefer known output names and never
+ * walk SAM3 polygon `points` or prediction arrays — those are huge on mobile
+ * and used to prevent the preview from being attached.
+ */
 export function extractAnnotatedImage(node: unknown): string | null {
   if (Array.isArray(node)) {
     for (const item of node) {
@@ -304,22 +470,100 @@ export function extractAnnotatedImage(node: unknown): string | null {
     }
     return null;
   }
-  if (node && typeof node === 'object') {
-    const obj = node as Record<string, unknown>;
-    if (
-      typeof obj.type === 'string' &&
-      obj.type === 'base64' &&
-      typeof obj.value === 'string' &&
-      obj.value.length > 0
-    ) {
-      return `data:image/jpeg;base64,${obj.value}`;
-    }
-    for (const key of Object.keys(obj)) {
+  if (!node || typeof node !== 'object') return null;
+  const obj = node as Record<string, unknown>;
+  const direct = asImageDataUrl(obj);
+  if (direct) return direct;
+  for (const key of ANNOTATED_IMAGE_KEYS) {
+    if (key in obj) {
       const found = extractAnnotatedImage(obj[key]);
       if (found) return found;
     }
   }
+  for (const [key, value] of Object.entries(obj)) {
+    if (
+      SKIP_RECURSE_KEYS.has(key) ||
+      key === 'predictions' ||
+      key === 'filtered_predictions' ||
+      ANNOTATED_IMAGE_KEYS.includes(key)
+    ) {
+      continue;
+    }
+    const found = extractAnnotatedImage(value);
+    if (found) return found;
+  }
   return null;
+}
+
+function extractFrameSize(node: unknown): { width: number; height: number } | null {
+  if (!node || typeof node !== 'object') return null;
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      const found = extractFrameSize(item);
+      if (found) return found;
+    }
+    return null;
+  }
+  const obj = node as Record<string, unknown>;
+  const img = obj.image;
+  if (img && typeof img === 'object') {
+    const rec = img as Record<string, unknown>;
+    const width = Number(rec.width);
+    const height = Number(rec.height);
+    if (width > 1 && height > 1) return { width, height };
+  }
+  for (const key of ['predictions', 'filtered_predictions']) {
+    if (key in obj) {
+      const found = extractFrameSize(obj[key]);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/** Convert Roboflow centre/size pixels (or 0–1) into percent boxes for the UI. */
+export function predictionsToPercentBoxes(
+  predictions: RoboflowPrediction[],
+  frame: { width: number; height: number } | null,
+): import('@/types').AnalysisBox[] {
+  const boxes: import('@/types').AnalysisBox[] = [];
+  for (const prediction of predictions) {
+    if (
+      prediction.x == null ||
+      prediction.y == null ||
+      prediction.width == null ||
+      prediction.height == null ||
+      prediction.width <= 0 ||
+      prediction.height <= 0
+    ) {
+      continue;
+    }
+    const normalized =
+      Math.abs(prediction.x) <= 1 &&
+      Math.abs(prediction.y) <= 1 &&
+      Math.abs(prediction.width) <= 1 &&
+      Math.abs(prediction.height) <= 1;
+    const width = frame?.width && frame.width > 1 ? frame.width : 1;
+    const height = frame?.height && frame.height > 1 ? frame.height : 1;
+    const centerX = normalized ? prediction.x * 100 : (prediction.x / width) * 100;
+    const centerY = normalized ? prediction.y * 100 : (prediction.y / height) * 100;
+    const boxW = normalized ? prediction.width * 100 : (prediction.width / width) * 100;
+    const boxH = normalized ? prediction.height * 100 : (prediction.height / height) * 100;
+    const left = clamp(centerX - boxW / 2, 0, 100);
+    const top = clamp(centerY - boxH / 2, 0, 100);
+    const right = clamp(centerX + boxW / 2, 0, 100);
+    const bottom = clamp(centerY + boxH / 2, 0, 100);
+    if (right <= left || bottom <= top) continue;
+    boxes.push({
+      label: prediction.class,
+      confidence: clamp(prediction.confidence, 0, 1),
+      x: left,
+      y: top,
+      w: right - left,
+      h: bottom - top,
+    });
+  }
+  return boxes;
 }
 
 /* ------------------------------------------------------------------ */
@@ -360,6 +604,9 @@ async function callProxy(body: { image: string; api_key?: string; model?: string
 export interface RoboflowInference {
   predictions: RoboflowPrediction[];
   annotatedImage: string | null;
+  primaryIssue: string | null;
+  severityLabel: string | null;
+  frameSize: { width: number; height: number } | null;
 }
 
 /**
@@ -374,24 +621,40 @@ async function runRoboflowInference(photo: string): Promise<RoboflowInference> {
   let data: unknown;
   let predictions: RoboflowPrediction[] = [];
   let annotatedImage: string | null = null;
+  let primaryIssue: string | null = null;
+  let severityLabel: string | null = null;
+  let frameSize: { width: number; height: number } | null = null;
 
   if (WORKSPACE && WORKFLOW_ID) {
     data = await callProxy({ image: match[1], api_key: API_KEY });
     const outputs = (data as { outputs?: unknown[] })?.outputs ?? [];
     const roots = outputs.length > 0 ? outputs : [data];
     for (const entry of roots) {
-      predictions = predictions.concat(extractPredictions(entry));
       annotatedImage = annotatedImage ?? extractAnnotatedImage(entry);
+      frameSize = frameSize ?? extractFrameSize(entry);
+      const hints = extractWorkflowHints(entry);
+      primaryIssue = primaryIssue ?? hints.primaryIssue;
+      severityLabel = severityLabel ?? hints.severity;
+
+      const record = entry && typeof entry === 'object' ? (entry as Record<string, unknown>) : null;
+      // Prefer the primary-issue boxes (what the overlay labels show), then all SAM3 boxes.
+      const filtered = record?.filtered_predictions
+        ? extractPredictions(record.filtered_predictions)
+        : [];
+      const raw = record?.predictions ? extractPredictions(record.predictions) : [];
+      const fromEntry = filtered.length > 0 ? filtered : raw.length > 0 ? raw : extractPredictions(entry);
+      predictions = predictions.concat(fromEntry);
     }
   } else if (MODEL) {
     data = await callProxy({ image: match[1], api_key: API_KEY, model: MODEL });
     predictions = extractPredictions(data);
     annotatedImage = extractAnnotatedImage(data);
+    frameSize = extractFrameSize(data);
   } else {
     throw new RoboflowError('No Roboflow target configured (workspace+workflow or model).');
   }
 
-  return { predictions, annotatedImage };
+  return { predictions, annotatedImage, primaryIssue, severityLabel, frameSize };
 }
 
 /**
@@ -435,24 +698,44 @@ export async function analyzePhotoWithRoboflow(
     annotatedImage: null,
   };
 
-  const { predictions, annotatedImage } = await runRoboflowInference(photo);
+  const { predictions, annotatedImage, primaryIssue, severityLabel, frameSize } =
+    await runRoboflowInference(photo);
   base.annotatedImage = annotatedImage;
-  if (predictions.length === 0) {
-    base.description =
-      WORKSPACE && WORKFLOW_ID
-        ? 'The workflow ran, but it returned no detection data. Expose the predictions as a workflow output, or use a detect.roboflow.com model URL.'
-        : 'The model did not detect any known civic issue in this photo.';
+
+  const primaryIsNone = !primaryIssue || /^no issue$/i.test(primaryIssue);
+  const primaryCategory = !primaryIsNone && primaryIssue ? mapClass(primaryIssue) : null;
+  const usefulPrimary = primaryCategory && primaryCategory !== 'other' ? primaryCategory : null;
+
+  // A named Roboflow issue (Pothole, Garbage Accumulation, …) counts even if
+  // the box list is empty — that used to become a fake 20% "Other Infrastructure".
+  if (predictions.length === 0 && !usefulPrimary && primaryIsNone) {
+    base.description = 'The model did not detect any known civic issue in this photo.';
     return base;
   }
 
-  const verdict = aggregateVerdict(predictions);
-  const confidence = verdict.confidence;
-  const category = verdict.category;
-  const sev = severityFromConfidence(confidence);
+  const boxes: Prediction[] =
+    predictions.length > 0
+      ? predictions
+      : primaryIssue
+        ? [{ class: primaryIssue, confidence: 0.7 }]
+        : [];
 
-  // Dedupe objects: each class appears once, with its highest confidence.
+  const verdict = aggregateVerdict(boxes);
+  // Use the same class Roboflow labelled on the image whenever it maps.
+  const category = usefulPrimary ?? verdict.category;
+  const matching = boxes.filter((p) => mapClass(p.class) === category);
+  const confidence = clamp(
+    matching.length > 0
+      ? Math.max(...matching.map((p) => p.confidence))
+      : verdict.confidence || (usefulPrimary ? 0.7 : 0),
+    0,
+    1,
+  );
+  const sev = severityFromWorkflowLabel(severityLabel) ?? severityFromConfidence(confidence);
+
+  // Dedupe objects: each Roboflow class appears once, with its highest confidence.
   const classBest = new Map<string, number>();
-  for (const prediction of predictions) {
+  for (const prediction of boxes) {
     classBest.set(
       prediction.class,
       Math.max(classBest.get(prediction.class) ?? 0, prediction.confidence),
@@ -463,7 +746,6 @@ export async function analyzePhotoWithRoboflow(
     .slice(0, 8)
     .map(([label, confidenceValue]) => `${label} (${Math.round(confidenceValue * 100)}%)`);
 
-  // Human-friendly, grounded description from the real detections.
   const severityWord: Record<Severity, string> = {
     low: 'Minor',
     medium: 'Moderate',
@@ -474,10 +756,11 @@ export async function analyzePhotoWithRoboflow(
     .slice(0, 4)
     .map(([label, confidenceValue]) => `${label} (${Math.round(confidenceValue * 100)}% confidence)`)
     .join(', ');
-  const dominant = category.replace(/-/g, ' ');
+  const dominant = categoryById(category).label;
+  const shown = listed || dominant;
   const description =
     `${severityWord[sev]} ${dominant} detected in this photo. ` +
-    `The image shows ${listed}. ` +
+    `The image shows ${shown}. ` +
     `These are the top issues the model found in the scene; ` +
     (annotatedImage
       ? 'the annotated preview highlights exactly where each one is located.'
@@ -496,5 +779,6 @@ export async function analyzePhotoWithRoboflow(
     qualityNote: undefined,
     engine: 'roboflow',
     annotatedImage,
+    boxes: predictionsToPercentBoxes(boxes, frameSize),
   };
 }

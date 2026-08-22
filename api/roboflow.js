@@ -17,6 +17,19 @@
 const WORKFLOW_BASE = 'https://serverless.roboflow.com';
 const DETECT_BASE = 'https://detect.roboflow.com';
 
+function stripPolygonPoints(node) {
+  if (Array.isArray(node)) return node.map(stripPolygonPoints);
+  if (node && typeof node === 'object') {
+    const out = {};
+    for (const [key, value] of Object.entries(node)) {
+      if (key === 'points') continue;
+      out[key] = stripPolygonPoints(value);
+    }
+    return out;
+  }
+  return node;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed. Use POST.' });
@@ -67,7 +80,15 @@ export default async function handler(req, res) {
       body: payload,
     });
     const text = await rf.text();
-    res.status(rf.status).setHeader('Content-Type', 'application/json').send(text);
+    let bodyOut = text;
+    if (rf.ok) {
+      try {
+        bodyOut = JSON.stringify(stripPolygonPoints(JSON.parse(text)));
+      } catch {
+        bodyOut = text;
+      }
+    }
+    res.status(rf.status).setHeader('Content-Type', 'application/json').send(bodyOut);
   } catch (err) {
     res.status(502).json({ error: `Roboflow proxy failed: ${err?.message ?? err}` });
   }

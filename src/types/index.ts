@@ -128,6 +128,18 @@ export interface AnalysisResult {
   engine?: 'gemini' | 'groq' | 'roboflow' | 'mock';
   /** Annotated (drawn-on) image from a Roboflow workflow, as a data URL. */
   annotatedImage?: string | null;
+  /** Bounding boxes in percent of the preview (0–100), for client-side overlay. */
+  boxes?: AnalysisBox[];
+}
+
+/** A detection rectangle drawn over the evidence photo. */
+export interface AnalysisBox {
+  label: string;
+  confidence: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 /** A toast notification shown by the ToastProvider. */

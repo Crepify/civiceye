@@ -119,8 +119,17 @@ if (buf.length < 10_000) {
   process.exit(1);
 }
 
-// Verify no prediction data leaks into this workflow's output (documented behavior).
-console.log('ℹ️  Workflow returns image-only output (no class/confidence keys) — expected for this starter workflow.');
+const entry = outputs[0] ?? {};
+const primary = entry.primary_issue;
+const preds = entry.predictions?.predictions ?? entry.predictions;
+if (Array.isArray(preds) && preds.length > 0) {
+  const sample = preds.slice(0, 5).map((p) => `${p.class} (${Math.round((p.confidence ?? 0) * 100)}%)`);
+  console.log(`✅ detections: ${sample.join(', ')}`);
+} else if (typeof primary === 'string' && primary.trim()) {
+  console.log(`✅ primary_issue: ${primary}`);
+} else {
+  console.log('ℹ️  No prediction boxes in this run (image-only).');
+}
 
 console.log('🎉 Smoke test passed.');
 process.exit(0);

@@ -93,7 +93,15 @@ export default {
         body: payload,
       });
       const text = await rf.text();
-      return new Response(text, {
+      let bodyOut = text;
+      if (rf.ok) {
+        try {
+          bodyOut = JSON.stringify(stripPolygonPoints(JSON.parse(text)));
+        } catch {
+          bodyOut = text;
+        }
+      }
+      return new Response(bodyOut, {
         status: rf.status,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });

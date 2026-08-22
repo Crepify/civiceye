@@ -186,11 +186,15 @@ function ReportWizard() {
     setAnalysisProgress(0);
   }, [update]);
 
-  // A result is "relevant" only if the model found a real civic issue
-  // (not "other") with at least some confidence. Irrelevant photos (a
-  // random street, a pet, etc.) are blocked so users don't submit junk.
-  const isRelevantAnalysis = (a: AnalysisResult | null): boolean =>
-    Boolean(a && a.category !== 'other' && a.confidence >= 0.3);
+  // Allow continue whenever Roboflow (or another engine) actually detected
+  // something. The old rule blocked category "other", which wrongly treated
+  // a real "Other Infrastructure" / unmapped class as a failed analysis.
+  const isRelevantAnalysis = (a: AnalysisResult | null): boolean => {
+    if (!a) return false;
+    if (a.confidence >= 0.3 && a.category !== 'other') return true;
+    if (a.confidence >= 0.3 && (a.objects?.length ?? 0) > 0) return true;
+    return false;
+  };
 
   const canContinue = (() => {
     switch (step) {
@@ -432,13 +436,13 @@ function ReportWizard() {
                     <Camera className="mt-0.5 h-5 w-5 shrink-0 text-rose-500" />
                     <div>
                       <p className="text-sm font-bold text-rose-800 dark:text-rose-300">
-                        No relevant issue detected in this photo
+                        No civic issue detected in this photo
                       </p>
                       <p className="mt-1 text-xs leading-relaxed text-rose-700 dark:text-rose-400">
-                        This image doesn't clearly show a pothole, broken road, garbage, fallen
-                        tree, broken light or other civic issue. Please{' '}
-                        <strong>retake the photo</strong> of the actual problem so staff can act on
-                        it — the Continue button stays disabled until a relevant issue is found.
+                        Roboflow did not find a pothole, broken road, garbage, manhole, street
+                        light, or other civic issue. Please{' '}
+                        <strong>retake the photo</strong> of the actual problem — Continue stays
+                        disabled only when the model finds nothing.
                       </p>
                       <button
                         onClick={() => {
@@ -614,25 +618,52 @@ function AnalysisResultCard({
   const { isAmrita } = useBrand();
   const availableCategories = getAvailableCategories(isAmrita);
   const confidencePct = Math.round(analysis.confidence * 100);
-  const [showAnnotated, setShowAnnotated] = useState(false);
-  const canShowAnnotated = Boolean(analysis.annotatedImage);
+  const overlayBoxes = analysis.boxes ?? [];
+  const hasAnnotatedPreview = Boolean(analysis.annotatedImage) || overlayBoxes.length > 0;
+  const [showAnnotated, setShowAnnotated] = useState(hasAnnotatedPreview);
+  const [annotatedFailed, setAnnotatedFailed] = useState(false);
+  const useRoboflowJpeg = Boolean(showAnnotated && analysis.annotatedImage && !annotatedFailed);
+  const previewSrc = useRoboflowJpeg ? (analysis.annotatedImage as string) : photo;
+  const drawBoxes = showAnnotated && overlayBoxes.length > 0 && !useRoboflowJpeg;
   return (
     <div className="space-y-4">
       <div className="card overflow-hidden p-6">
         <div className="grid gap-6 sm:grid-cols-2">
-          <div className="relative overflow-hidden rounded-2xl">
+          <div className="relative overflow-hidden rounded-2xl bg-slate-950">
             <img
-              src={showAnnotated && analysis.annotatedImage ? analysis.annotatedImage : photo}
-              alt="Analysed evidence"
-              className="aspect-[16/9] w-full object-cover"
+              src={previewSrc}
+              alt={showAnnotated ? 'AI annotated evidence' : 'Original evidence'}
+              className="aspect-[16/9] w-full object-contain"
+              onError={() => {
+                if (useRoboflowJpeg) setAnnotatedFailed(true);
+              }}
             />
+            {drawBoxes
+              ? overlayBoxes.map((box, index) => (
+                  <div
+                    key={`${box.label}-${index}`}
+                    className="pointer-events-none absolute rounded-md border-2 border-emerald-400 bg-emerald-400/10"
+                    style={{
+                      left: `${box.x}%`,
+                      top: `${box.y}%`,
+                      width: `${box.w}%`,
+                      height: `${box.h}%`,
+                    }}
+                  >
+                    <span className="absolute -top-5 left-0 max-w-[180px] truncate rounded bg-emerald-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      {box.label} {Math.round(box.confidence * 100)}%
+                    </span>
+                  </div>
+                ))
+              : null}
             <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-emerald-500/90 px-3 py-1 text-[10px] font-bold text-white backdrop-blur">
               <BadgeCheck className="h-3.5 w-3.5" />
-              ANALYSED
+              {showAnnotated ? 'AI ANNOTATED' : 'ANALYSED'}
             </span>
-            {canShowAnnotated ? (
-              <div className="absolute right-3 top-3 flex gap-1 rounded-lg bg-slate-950/70 p-1 backdrop-blur">
+            {hasAnnotatedPreview ? (
+              <div className="absolute right-3 top-3 z-10 flex gap-1 rounded-lg bg-slate-950/80 p-1 backdrop-blur">
                 <button
+                  type="button"
                   onClick={() => setShowAnnotated(false)}
                   className={cn(
                     'rounded-md px-2 py-1 text-[10px] font-bold transition-colors',
@@ -642,6 +673,7 @@ function AnalysisResultCard({
                   Original
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowAnnotated(true)}
                   className={cn(
                     'rounded-md px-2 py-1 text-[10px] font-bold transition-colors',
