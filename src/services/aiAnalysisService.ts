@@ -173,15 +173,16 @@ export async function runImageAnalysis(
   }
 
   // 1) Roboflow — primary. Real object detection with per-box confidence.
+  let roboflowError: unknown;
   if (hasRoboflowKey) {
     try {
       const real = await analyzePhotoWithRoboflow(aiPhoto, coordinates);
       return { ...real, photo };
     } catch (err) {
+      roboflowError = err;
       console.warn('[CivicEye] Roboflow unavailable:', err);
     }
   } else if (!hasGroqKey) {
-    // No real engine at all — make the config problem obvious.
     console.warn('[CivicEye] Roboflow is NOT configured correctly —', roboflowStatus().reason);
   } else {
     console.warn(
@@ -198,6 +199,25 @@ export async function runImageAnalysis(
     } catch (err) {
       console.warn('[CivicEye] Groq unavailable:', err);
     }
+  }
+  // Never invent a fake category when Roboflow is configured — that produced
+  // the "87% Traffic Signal Damage" built-in estimate on a street-light photo.
+  if (hasRoboflowKey) {
+    const message =
+      roboflowError instanceof Error ? roboflowError.message : 'Roboflow analysis failed.';
+    return {
+      photo,
+      category: 'other',
+      confidence: 0,
+      severity: 'low',
+      description: `${message} Tap Retry analysis.`,
+      objects: [],
+      coordinates,
+      timestamp: new Date().toISOString(),
+      tags: [],
+      engine: 'roboflow',
+      annotatedImage: null,
+    };
   }
   const mock = analyzePhoto({ photo, coordinates });
   return { ...mock, engine: 'mock' as const };

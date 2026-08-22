@@ -43,12 +43,12 @@ function isValidProxyUrl(url: string): boolean {
   }
 }
 
-/** Where the browser sends the request (Worker → Vercel function). */
-export const PROXY_TARGET = PROXY_URL
-  ? isValidProxyUrl(PROXY_URL)
-    ? `${PROXY_URL.replace(/\/+$/, '')}/`
-    : null
-  : '/api/roboflow';
+/**
+ * Prefer the Vercel /api/roboflow proxy. The Cloudflare worker still runs a
+ * cached Gemini workflow that 403s; the Vercel function sends use_cache:false
+ * so it picks up the SAM3-only workflow.
+ */
+export const PROXY_TARGET = '/api/roboflow';
 
 /** Diagnostics for the UI/console. */
 export const roboflowConfig = {
@@ -392,6 +392,18 @@ export interface WorkflowHints {
   issueClasses: string[];
 }
 
+function mostFrequentLabel(labels: string[]): string | null {
+  if (labels.length === 0) return null;
+  const counts = new Map<string, number>();
+  for (const label of labels) {
+    const key = label.trim();
+    if (!key || /^no issue$/i.test(key)) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  if (counts.size === 0) return null;
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+}
+
 function asNonEmptyString(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const t = value.trim();
@@ -633,7 +645,10 @@ async function runRoboflowInference(photo: string): Promise<RoboflowInference> {
       annotatedImage = annotatedImage ?? extractAnnotatedImage(entry);
       frameSize = frameSize ?? extractFrameSize(entry);
       const hints = extractWorkflowHints(entry);
-      primaryIssue = primaryIssue ?? hints.primaryIssue;
+      primaryIssue =
+        primaryIssue ??
+        hints.primaryIssue ??
+        mostFrequentLabel(hints.issueClasses);
       severityLabel = severityLabel ?? hints.severity;
 
       const record = entry && typeof entry === 'object' ? (entry as Record<string, unknown>) : null;

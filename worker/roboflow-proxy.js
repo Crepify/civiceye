@@ -83,6 +83,7 @@ export default {
       payload = JSON.stringify({
         api_key: apiKey,
         inputs: { image: { type: 'base64', value: image } },
+        use_cache: false,
       });
     }
 
