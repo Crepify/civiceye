@@ -125,7 +125,7 @@ export interface AnalysisResult {
   /** Human-readable reason for the quality flag. */
   qualityNote?: string;
   /** Which engine produced this result. */
-  engine?: 'gemini' | 'groq' | 'roboflow' | 'mock';
+  engine?: 'ondevice' | 'roboflow' | 'huggingface' | 'mock';
   /** Annotated (drawn-on) image from a Roboflow workflow, as a data URL. */
   annotatedImage?: string | null;
 }

@@ -6,6 +6,7 @@ import {
   ArrowRight,
   BadgeCheck,
   Camera,
+  Cpu,
   Check,
   ChevronDown,
   Crosshair,
@@ -240,9 +241,11 @@ function ReportWizard() {
           model:
             draft.analysis.engine === 'roboflow'
               ? 'roboflow-detector'
-              : draft.analysis.engine === 'groq'
-                ? 'qwen/qwen3.6-27b'
-                : 'mock-vision-v2.4',
+              : draft.analysis.engine === 'ondevice'
+                ? 'transformers.js-ondevice'
+                : draft.analysis.engine === 'huggingface'
+                  ? 'huggingface-inference'
+                  : 'mock-vision-v2.4',
           imageQuality: draft.analysis.imageQuality ?? null,
           disclaimer:
             'AI confidence is an estimate and may be inaccurate. Verify the issue before acting.',
@@ -779,15 +782,22 @@ function AnalysisResultCard({
                 ✅ Detected by CivicLENS AI (real object detection)
               </span>
             </>
-          ) : analysis.engine === 'groq' ? (
+          ) : analysis.engine === 'ondevice' ? (
+            <>
+              <Cpu className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="normal-case text-emerald-700 dark:text-emerald-300">
+                🖥️ Analysed on your device (private & offline)
+              </span>
+            </>
+          ) : analysis.engine === 'huggingface' ? (
             <>
               <Sparkles className="h-3.5 w-3.5 text-primary-500" />
-              Analysed by Groq Llama Vision (real model)
+              Analysed by Hugging Face (real model)
             </>
           ) : (
             <>
               <Info className="h-3.5 w-3.5" />
-              Built-in estimate — add VITE_GEMINI_API_KEY or VITE_GROQ_API_KEY for real vision
+              Built-in estimate — add VITE_AI_ONDEVICE or VITE_ROBOFLOW_API_KEY for real vision
             </>
           )}
         </p>

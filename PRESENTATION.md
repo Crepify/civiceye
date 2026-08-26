@@ -99,7 +99,7 @@ A dedicated mode for the campus community:
 |---|---|
 | **Frontend** | React 18, TypeScript, Vite, TailwindCSS, Framer Motion |
 | **Backend** | Supabase (Postgres, Auth, Storage, RLS) + Vercel serverless |
-| **AI** | Roboflow (CivicLENS) object detection + Groq vision fallback |
+| **AI** | On-device (Transformers.js) + Roboflow (CivicLENS) + Hugging Face fallback |
 | **Maps** | Google Maps JS API + marker clustering + heatmap |
 | **Deployment** | Vercel + Cloudflare Worker proxy (30s timeout) |
 

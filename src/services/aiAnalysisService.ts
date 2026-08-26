@@ -1,8 +1,9 @@
 import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types';
 import { CATEGORIES, categoryById } from '@/data/categories';
 import { compressImageForAI } from '@/utils/image';
-import { analyzePhotoWithGroq, hasGroqKey } from './groqService';
 import { analyzePhotoWithRoboflow, hasRoboflowKey, roboflowStatus } from './roboflowService';
+import { analyzeOnDevice, onDeviceEnabled } from './onDeviceService';
+import { analyzeWithHuggingFace, hasHuggingFaceKey } from './huggingfaceService';
 
 /**
  * Mock computer-vision photo analysis.
@@ -155,9 +156,9 @@ export function analysisTotalMs(): number {
 }
 
 /**
- * Orchestrator: try the REAL engines in order (Roboflow → Groq),
- * falling back to the built-in mock estimate only if both fail (no keys,
- * offline, or rate limited). Result is tagged with the engine used.
+ * Orchestrator: try the REAL engines in order (on-device → Roboflow →
+ * Hugging Face), falling back to the built-in mock estimate only if all fail
+ * (no keys, offline, or rate limited). Result is tagged with the engine used.
  * Photos are compressed before hitting the APIs to stay under quotas.
  */
 export async function runImageAnalysis(
@@ -172,7 +173,20 @@ export async function runImageAnalysis(
     aiPhoto = photo; // fall back to original if compression fails
   }
 
-  // 1) Roboflow — primary. Real object detection with per-box confidence.
+  // 1) ON-DEVICE — free, private, offline-capable. Only trusted when it maps
+  //    to a real civic category with enough confidence; otherwise the cloud
+  //    engines take over (a general model can't see "pothole").
+  if (onDeviceEnabled) {
+    try {
+      const { confident, result } = await analyzeOnDevice(aiPhoto, coordinates);
+      if (confident) return { ...result, photo };
+      console.warn('[CivicEye] on-device AI not confident — using cloud engines.');
+    } catch (err) {
+      console.warn('[CivicEye] on-device AI unavailable:', err);
+    }
+  }
+
+  // 2) Roboflow (CivicLENS) — primary cloud engine, trained on civic issues.
   if (hasRoboflowKey) {
     try {
       const real = await analyzePhotoWithRoboflow(aiPhoto, coordinates);
@@ -180,23 +194,16 @@ export async function runImageAnalysis(
     } catch (err) {
       console.warn('[CivicEye] Roboflow unavailable:', err);
     }
-  } else if (!hasGroqKey) {
-    // No real engine at all — make the config problem obvious.
-    console.warn('[CivicEye] Roboflow is NOT configured correctly —', roboflowStatus().reason);
   } else {
-    console.warn(
-      '[CivicEye] Roboflow is NOT configured correctly —',
-      roboflowStatus().reason,
-      'Falling back to Groq.',
-    );
+    console.warn('[CivicEye] Roboflow is NOT configured correctly —', roboflowStatus().reason);
   }
-  // 2) Groq — backup real engine (vision LLM).
-  if (hasGroqKey) {
+  // 3) Hugging Face Inference API — cloud backup (after on-device + Roboflow).
+  if (hasHuggingFaceKey) {
     try {
-      const real = await analyzePhotoWithGroq(aiPhoto, coordinates);
+      const real = await analyzeWithHuggingFace(aiPhoto, coordinates);
       return { ...real, photo };
     } catch (err) {
-      console.warn('[CivicEye] Groq unavailable:', err);
+      console.warn('[CivicEye] Hugging Face unavailable:', err);
     }
   }
   const mock = analyzePhoto({ photo, coordinates });

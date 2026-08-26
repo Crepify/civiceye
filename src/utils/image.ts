@@ -3,7 +3,7 @@
  * Phone photos are 4–12 MB; the free tiers charge/limit by tokens, and a
  * giant base64 image blows the quota instantly. Downscaling to ~768px and
  * re-encoding as JPEG ~72 keeps quality for detection while shrinking the
- * payload ~10–20x — keeping us under Groq's small free-tier limits.
+ * payload ~10–20x — keeping API calls small and fast.
  */
 
 const MAX_DIM = 768;

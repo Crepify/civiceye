@@ -82,7 +82,8 @@ All keys are stored on **Vercel** (or `.env` locally). Every `VITE_` var is read
 | `VITE_ROBOFLOW_WORKSPACE` | Roboflow workspace slug |
 | `VITE_ROBOFLOW_WORKFLOW_ID` | Roboflow workflow slug (your pothole workflow) |
 | `VITE_ROBOFLOW_PROXY_URL` | Cloudflare Worker URL for Roboflow (30s timeout; else Vercel `/api/roboflow`) |
-| `VITE_GROQ_API_KEY` · `VITE_GROQ_MODEL` | Backup vision engine |
+| `VITE_AI_ONDEVICE` · `VITE_ONDEVICE_MODEL` | On-device AI (default `true`, model `Xenova/yolos-tiny`) |
+| `VITE_HF_API_TOKEN` · `VITE_HF_MODEL` | Hugging Face backup (default `facebook/detr-resnet-50`) |
 | `VITE_ADMIN_EMAILS` | Extra comma-separated admin emails |
 | `VITE_APP_URL` | Public origin (QR + magic links) |
 
@@ -92,9 +93,10 @@ All keys are stored on **Vercel** (or `.env` locally). Every `VITE_` var is read
 
 ## 🧠 AI engines (order)
 
-1. **CivicLENS AI (Roboflow)** — primary. Real object detection with per-box confidence. Runs via a proxy (Cloudflare Worker preferred, or `/api/roboflow`).
-2. **Groq** — backup vision LLM.
-3. **Built-in estimate** — last resort, clearly labeled.
+1. **On-device (Transformers.js)** — runs a real model in your browser (WASM/WebGPU). Free, private (photo never leaves the device), offline-capable after first download. Only trusted when it confidently maps to a civic category — otherwise the cloud takes over.
+2. **CivicLENS AI (Roboflow)** — primary cloud engine, trained on civic issues. Runs via a proxy (Cloudflare Worker preferred, or `/api/roboflow`).
+3. **Hugging Face Inference API** — cloud backup (needs `VITE_HF_API_TOKEN`).
+4. **Built-in estimate** — last resort, clearly labeled.
 
 Photos are compressed before sending (768px, JPEG ~72) to stay within free-tier quotas.
 
@@ -113,7 +115,7 @@ Photos are compressed before sending (768px, JPEG ~72) to stay within free-tier 
 │  ├─ hooks/             # useAuth, useBrand, useReports, useToast, …
 │  ├─ lib/               # supabase client, storage upload
 │  ├─ pages/             # one file per route
-│  ├─ services/          # roboflow, groq, report, geo, detection, authority, review
+│  ├─ services/          # roboflow, on-device, huggingface, report, geo, detection, authority, review
 │  ├─ styles/            # Tailwind + brand theme (CivicEye indigo / Amrita red)
 │  ├─ types/             # domain types
 │  └─ utils/             # cn, format, geo, image compression
