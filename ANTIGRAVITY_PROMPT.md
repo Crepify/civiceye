@@ -44,7 +44,6 @@ campus-scoped reports & routing). Tagline: "Making cities better, one report at 
 ## 3. PROJECT STRUCTURE (current)
 
 Root: README.md (fully rewritten, clean), ARCHITECTURE.md, COLLABORATION.md, PRESENTATION.md,
-PROJECT_DOCUMENTATION.docx, CivicEye_Presentation.pptx, screenshots/ (7 PNGs), api/,
 worker/, supabase/, scripts/, src/, vite.config.ts, vercel.json, tsconfig.json,
 tailwind.config.js, test-email-preview.html.
 
@@ -63,7 +62,6 @@ image, auth, download).
 ## 4. KEY FEATURES — EXACT CURRENT BEHAVIOR
 
 - Auth: Supabase email+password / magic link / password reset. Login-first: every non-auth
-  page redirects to /login unless VITE_DEMO_MODE=true (demo bypass added for screenshots/demos).
 - Branding: html.amrita class swaps CSS variables (indigo→Amrita red 228 0 43, accent
   emerald→yellow 245 158 11); brand-grad-1..6, brand-cta, brand-panel, brand-glow-a/b utility
   classes; favicon swaps to red logo-amrita.svg in Amrita mode; Logo shows "CivicEye" or
@@ -103,7 +101,6 @@ image, auth, download).
   (scoped), recent-reports table with Resolve/Assign/Reject. ChartCard has overflow-hidden.
 - Presentation/docs: CivicEye_Presentation.pptx (13 slides, Segoe UI, dark premium theme, 7
   screenshots embedded), PROJECT_DOCUMENTATION.docx (Segoe UI, styled, includes "4.0 UI /
-  Design → NEW UI COMING SOON."), PRESENTATION.md, screenshots/*.png.
 
 ## 5. ENVIRONMENT VARIABLES (stored on Vercel; .env for local)
 

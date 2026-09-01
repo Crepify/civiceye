@@ -1,6 +1,5 @@
 # CivicEye — Social Media & LinkedIn Post (data-backed edition)
 
-**Images:** the dark-mode screenshots in `screenshots/present/dark-*.png` (landing, map,
 dashboard, community, live AI).
 
 ---

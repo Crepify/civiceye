@@ -415,7 +415,7 @@ export function Dashboard() {
           subtitle="Click a pin to inspect a report"
           className="lg:col-span-2"
         >
-          <div className="h-[380px] w-full overflow-hidden rounded-2xl">
+          <div className="h-[420px] min-h-[420px] w-full overflow-hidden border-[4px] border-[#172b44] shadow-[5px_5px_0_#ef6b59]">
             <MapView
               reports={scopedReports}
               selectedId={selectedId}

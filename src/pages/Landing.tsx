@@ -1,370 +1,300 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  CheckCircle2,
-  MapPin,
-  Navigation,
-  Play,
-  ShieldCheck,
-  Sparkles,
-  Zap,
-} from 'lucide-react';
+import { Camera, MapPin, ShieldAlert, Sparkles, Users } from 'lucide-react';
+import { founderThemes, isComicSoundOn, setComicSoundOn } from '@/utils/comicSound';
 import { useReports } from '@/hooks/useReports';
 import { useBrand } from '@/hooks/useBrand';
-import { SectionHeading } from '@/components/SectionHeading';
-import { FeatureCard } from '@/components/FeatureCard';
-import { Reveal } from '@/components/Reveal';
-import { StatCard } from '@/components/StatCard';
-import { MapView } from '@/components/map/MapView';
-import { FEATURES, HOW_IT_WORKS } from '@/data/features';
-import { CommunityReviews } from '@/components/CommunityReviews';
-import { CATEGORIES } from '@/data/categories';
-import { compactNumber } from '@/utils/format';
 
-/** Landing page. */
+const steps = [
+  ['01', 'Spot it', 'Notice a pothole, a dark street, or an open manhole.'],
+  ['02', 'Snap it', 'Capture evidence with your phone.'],
+  ['03', 'Pin it', 'We grab GPS, or you can drop a map pin.'],
+  ['04', 'Verify it', 'Neighbours confirm the report.'],
+  ['05', 'Fix it', 'Authorities assign, work, and resolve it.'],
+];
+
+const features = [
+  { icon: Camera, title: 'Snap & Report', text: 'Photo evidence meets AI-assisted category and severity information.', tint: 'bg-[#ef6b59]' },
+  { icon: MapPin, title: 'Live Community Map', text: 'Verified issues appear on a map with clusters, heatmaps, and filters.', tint: 'bg-[#28627a]' },
+  { icon: Sparkles, title: 'AI Photo Analysis', text: 'Computer vision helps identify issue details in seconds.', tint: 'bg-[#5b806a]' },
+];
+
+/** The four founders of CivicEye — initials stand in until real photos are added. */
+const creators = [
+  ['AR', 'Archit Ranjeev', 'Founder · Backend', '#ffd630'],
+  ['AS', 'Aswathram', 'Founder · AI & Backend', '#91dcc4'],
+  ['KI', 'Kiushki', 'Founder · UI Designer', '#ef6b59'],
+  ['SH', 'S. Himeshkara', 'Founder · UI Designer', '#28627a'],
+];
+
+/** Why the team built CivicEye — written by the founders. */
+const mission =
+  'Our team of four built CivicEye to solve a specific problem: urban hazards are frequently ignored until they cause harm. CivicEye is a reporting platform that allows citizens across India to document and track infrastructure failures like potholes and broken streetlights. Beyond infrastructure, we prioritize personal security. CivicEye exists to give citizens a practical tool to improve their surroundings and ensure their safety.';
+
+/** Comic-book CivicEye landing page. Keeps existing routes and live report data intact. */
 export function Landing() {
   const { reports } = useReports();
   const { isAmrita } = useBrand();
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [certificateOpen, setCertificateOpen] = useState(false);
+  const [certificateIssued, setCertificateIssued] = useState(false);
+  const [certificateName, setCertificateName] = useState('');
+  const [certificatePlace, setCertificatePlace] = useState('');
+  const [certificateImage, setCertificateImage] = useState('');
+  const [soundOn, setSoundOn] = useState(isComicSoundOn);
+  const audioRef = useRef<AudioContext | null>(null);
+  // Shows the sticky "ABOUT US" prompt once a visitor has left the hero, so it
+  // stays in front of them for the rest of the page.
+  const [pastHero, setPastHero] = useState(false);
 
-  // Only show the active brand's reports (city vs campus).
-  const scoped = useMemo(
-    () => reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city')),
-    [reports, isAmrita],
-  );
+  useEffect(() => {
+    const onScroll = () => setPastHero(window.scrollY > 420);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const stats = useMemo(() => {
-    const verified = scoped.filter((r) => r.verified).length;
-    const resolved = scoped.filter((r) => r.status === 'resolved').length;
-    const critical = scoped.filter((r) => r.severity === 'critical').length;
-    const totalVotes = scoped.reduce((s, r) => s + r.upvotes, 0);
-    return { total: scoped.length, verified, resolved, critical, totalVotes };
-  }, [scoped]);
+    const scoped = reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city'));
+    return {
+      total: scoped.length,
+      verified: scoped.filter((r) => r.verified).length,
+      resolved: scoped.filter((r) => r.status === 'resolved').length,
+      votes: scoped.reduce((sum, r) => sum + r.upvotes, 0),
+    };
+  }, [reports, isAmrita]);
 
-  const showcase = useMemo(() => scoped.slice(0, 40), [scoped]);
+  const missionProgress = 2;
+  const missionComplete = missionProgress >= 3;
+
+  const sound = (notes: number[]) => {
+    if (!soundOn) return;
+    const Ctx = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return;
+    const context = audioRef.current || new Ctx();
+    audioRef.current = context;
+    void context.resume();
+    notes.forEach((frequency, i) => {
+      const osc = context.createOscillator();
+      const gain = context.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = frequency;
+      gain.gain.setValueAtTime(0, context.currentTime + i * 0.07);
+      gain.gain.linearRampToValueAtTime(0.13, context.currentTime + i * 0.07 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + i * 0.07 + 0.18);
+      osc.connect(gain); gain.connect(context.destination);
+      osc.start(context.currentTime + i * 0.07); osc.stop(context.currentTime + i * 0.07 + 0.2);
+    });
+  };
+
+  const downloadCertificate = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1600;
+    canvas.height = 1100;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.fillStyle = '#fff8e7'; ctx.fillRect(0, 0, 1600, 1100);
+    ctx.fillStyle = '#ffd630'; ctx.fillRect(0, 0, 1600, 42);
+    ctx.fillStyle = '#ef6b59'; ctx.fillRect(0, 42, 1600, 18);
+    ctx.strokeStyle = '#172b44'; ctx.lineWidth = 18; ctx.strokeRect(60, 90, 1480, 930);
+    ctx.strokeStyle = '#ef6b59'; ctx.lineWidth = 12; ctx.strokeRect(82, 112, 1436, 886);
+    ctx.fillStyle = '#91dcc4'; ctx.beginPath(); ctx.arc(800, 245, 74, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#172b44'; ctx.font = '900 32px Arial'; ctx.textAlign = 'center'; ctx.fillText('CIVICEYE CITY HERO CERTIFICATE', 800, 165);
+    ctx.font = '900 96px Georgia'; ctx.fillText('STREET GUARDIAN', 800, 385);
+    ctx.fillStyle = '#ef6b59'; ctx.font = '900 54px Georgia'; ctx.fillText(certificateName, 800, 500);
+    ctx.fillStyle = '#172b44'; ctx.font = '700 32px Arial'; ctx.fillText('is recognised for verified civic action in', 800, 590);
+    ctx.font = '900 42px Georgia'; ctx.fillText(certificatePlace, 800, 655);
+    ctx.fillStyle = '#ffd630'; ctx.fillRect(470, 730, 660, 78);
+    ctx.fillStyle = '#172b44'; ctx.font = '900 26px Arial'; ctx.fillText('ISSUE #004 · COMMUNITY POWER AWARDED', 800, 782);
+    ctx.font = '900 28px Arial'; ctx.fillText('✦ CITY HERO · CIVICEYE · BENGALURU ✦', 800, 905);
+    const image = canvas.toDataURL('image/jpeg', 0.94);
+    setCertificateImage(image);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `CivicEye-Street-Guardian-${certificateName.replace(/\\s+/g, '-') || 'Certificate'}.jpg`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 3000);
+    }, 'image/jpeg', 0.96);
+  };
 
   return (
-    <>
-      {/* ------------------------------------------------ Hero */}
-      <section className="relative overflow-hidden pb-16 pt-28 sm:pb-24 sm:pt-36">
-        {/* Animated background */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary-50/80 via-white to-white dark:from-primary-950/40 dark:via-slate-950 dark:to-slate-950" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.14),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(16,185,129,0.12),transparent_45%),radial-gradient(circle_at_50%_90%,rgba(99,102,241,0.08),transparent_50%)]" />
-          {/* Grid overlay */}
-          <div
-            className="absolute inset-0 opacity-[0.35] dark:opacity-[0.12]"
-            style={{
-              backgroundImage:
-                'linear-gradient(to right, rgba(100,116,139,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(100,116,139,0.12) 1px, transparent 1px)',
-              backgroundSize: '56px 56px',
-              maskImage: 'radial-gradient(ellipse 80% 60% at 50% 35%, black, transparent)',
-              WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 35%, black, transparent)',
-            }}
-          />
-          <motion.div
-            animate={{ y: [0, -24, 0], x: [0, 16, 0] }}
-            transition={{ duration: 14, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-            className="absolute -left-24 top-24 h-72 w-72 rounded-full brand-glow-a blur-3xl"
-          />
-          <motion.div
-            animate={{ y: [0, 28, 0], x: [0, -20, 0] }}
-            transition={{ duration: 18, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-            className="absolute -right-20 top-40 h-80 w-80 rounded-full brand-glow-b blur-3xl"
-          />
-        </div>
-
-        <div className="section-pad">
-          <div className="grid items-center gap-14 lg:grid-cols-2">
-            {/* Copy */}
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 rounded-full border border-primary-200/70 bg-primary-500/10 px-4 py-1.5 text-xs font-bold text-primary-700 dark:border-primary-400/20 dark:bg-primary-400/10 dark:text-primary-300"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                Prototype · live demo data
-              </motion.div>
-
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.08 }}
-                className="heading-xl mt-6"
-              >
-                Making cities better,
-                <span className="text-gradient block">one report at a time.</span>
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.16 }}
-                className="mt-6 max-w-xl text-base leading-relaxed text-slate-500 dark:text-slate-400 sm:text-lg"
-              >
-                New to the city, or lived here for years? Someone's already flagged the pothole,
-                the dark street, the flooded junction. Spot something yourself? Snap it, pin it,
-                and let your neighbours + local authorities take it from there.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.24 }}
-                className="mt-8 flex flex-wrap items-center gap-3"
-              >
-                <Link to="/report" className="btn-primary !px-7 !py-3.5 text-base">
-                  Report an issue
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-                <Link to="/map" className="btn-secondary !px-7 !py-3.5 text-base">
-                  <Play className="h-4 w-4" />
-                  Explore the map
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-slate-400 dark:text-slate-500"
-              >
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                  Free for citizens
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                  ‍Verified by neighbours
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                  Shared with authorities
-                </span>
-              </motion.div>
+    <div className="comic-page overflow-hidden bg-[#fff8e7] text-[#172b44]">
+      <div className="h-3 bg-[repeating-linear-gradient(135deg,#ffd630_0_15px,#ef6b59_15px_28px,#172b44_28px_32px)]" />
+      {pastHero ? (
+        <Link to="/about#creators" onMouseEnter={() => sound([330, 494])} onClick={() => sound([330, 494, 659])} className="about-us-pill group fixed left-3 top-[calc(var(--nav-height)+.5rem)] z-[55] flex items-center gap-2 border-[3px] border-[#172b44] bg-[#ffd630] px-3 py-2 text-xs font-black tracking-[.1em] shadow-[4px_4px_0_#ef6b59] transition hover:-translate-y-0.5 hover:bg-[#91dcc4] sm:left-5">
+          <Users className="h-4 w-4" strokeWidth={3} />
+          <span>ABOUT US</span>
+          <span aria-hidden className="about-us-ping absolute -right-1 -top-1 h-2.5 w-2.5 border-2 border-[#172b44] bg-[#ef6b59]" />
+        </Link>
+      ) : null}
+      <section className="comic-hero relative overflow-hidden section-pad pb-10 pt-28 sm:pt-32">
+        <div className="pointer-events-none absolute inset-0 -z-0 opacity-50 [background:repeating-linear-gradient(145deg,transparent_0_72px,rgba(239,107,89,.13)_73px_76px,transparent_77px_112px)]" />
+        <div className="pointer-events-none absolute right-[3%] top-36 z-0 h-36 w-36 rotate-12 bg-[#ffd630] [clip-path:polygon(50%_0%,60%_36%,100%_22%,68%_50%,100%_78%,60%_64%,50%_100%,40%_64%,0_78%,32%_50%,0_22%,40%_36%)]" />
+        <div className="relative z-10 grid items-center gap-10 lg:grid-cols-[.76fr_1.24fr]">
+          <div>
+            <p className="inline-block border-2 border-[#172b44] bg-[#172b44] px-3 py-2 text-xs font-extrabold tracking-[.14em] text-[#ffd630] shadow-[4px_4px_0_#ef6b59]">ISSUE #001 — THE CITY SPEAKS</p>
+            <h1 className="mt-6 font-serif text-5xl font-black uppercase leading-[.82] tracking-[-.07em] sm:text-7xl lg:text-8xl">Your street.<br /><span className="text-[#ef6b59]">Your story.</span><br />Your move.</h1>
+            <p className="mt-6 max-w-xl border-l-[6px] border-[#ef6b59] pl-4 text-base font-semibold leading-relaxed sm:text-lg">CivicEye turns everyday city problems into a story everyone can act on: citizens report, neighbours verify, and authorities respond.</p>
+            <div className="mt-7 flex flex-wrap items-center gap-4">
+              <Link onMouseEnter={() => sound([250, 520])} to="/report" className="comic-button bg-[#ffd630]">Report an issue →</Link>
+              <Link onMouseEnter={() => sound([390, 640])} to="/map" className="font-extrabold underline decoration-2 underline-offset-4">Explore the map</Link>
             </div>
-
-            {/* Hero visual: live map preview */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="relative"
-            >
-              <div className="absolute -inset-6 rounded-[2.5rem] brand-panel blur-2xl" />
-              <div className="card relative overflow-hidden !rounded-3xl p-2 shadow-glow">
-                <div className="pointer-events-none relative h-[320px] overflow-hidden rounded-2xl sm:h-[400px]">
-                  <MapView
-                    reports={showcase}
-                    center={{ lat: 12.97, lng: 77.6 }}
-                    zoom={12}
-                    onViewChange={() => undefined}
-                    selectedId={null}
-                    onSelect={() => undefined}
-                    heatmap
-                    className="h-full w-full"
-                  />
-                  {/* Decorative scanline */}
-                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500 via-emerald-500 to-primary-500 opacity-60" />
-                  <div className="absolute bottom-3 right-3 rounded-xl bg-white/85 px-3 py-1.5 text-[10px] font-bold text-slate-600 backdrop-blur dark:bg-slate-900/85 dark:text-slate-300">
-                    LIVE · {compactNumber(stats.total)} reports
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating chips */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-                className="glass-strong absolute -left-3 top-10 hidden items-center gap-2 rounded-2xl px-4 py-2.5 shadow-glow sm:flex"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-500">
-                  <ShieldCheck className="h-4 w-4" />
-                </span>
-                <div>
-                  <p className="text-xs font-bold text-slate-800 dark:text-white">
-                    {compactNumber(stats.verified)} verified
-                  </p>
-                  <p className="text-[10px] text-slate-400">by the community</p>
-                </div>
-              </motion.div>
-
-              <motion.div
-                animate={{ y: [0, 12, 0] }}
-                transition={{
-                  duration: 6,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: 'easeInOut',
-                  delay: 0.6,
-                }}
-                className="glass-strong absolute -right-2 bottom-16 hidden items-center gap-2 rounded-2xl px-4 py-2.5 shadow-glow sm:flex"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500/15 text-primary-600 dark:text-primary-400">
-                  <Zap className="h-4 w-4" />
-                </span>
-                <div>
-                  <p className="text-xs font-bold text-slate-800 dark:text-white">
-                    {compactNumber(stats.totalVotes)} votes cast
-                  </p>
-                  <p className="text-[10px] text-slate-400">across all reports</p>
-                </div>
-              </motion.div>
-            </motion.div>
+            <p className="mt-6 text-xs font-extrabold tracking-wide">✓ FREE FOR CITIZENS &nbsp; ✓ VERIFIED BY NEIGHBOURS &nbsp; ✓ SHARED WITH AUTHORITIES</p>
+          </div>
+          <div className="comic-frame relative overflow-hidden border-[6px] border-[#172b44] bg-[#172b44] shadow-[16px_16px_0_#ffd630,23px_23px_0_#ef6b59] lg:-mr-8 lg:scale-[1.07]">
+            <p className="absolute left-3 top-3 z-10 border-[3px] border-[#172b44] bg-[#ffd630] px-3 py-2 text-[10px] font-black tracking-[.12em] shadow-[3px_3px_0_#172b44]">NOW PLAYING · ISSUE #001</p>
+            <img src="/comic-assets/civiceye-talking-characters.gif" alt="Ravi and Meera discussing a civic issue" className="aspect-video w-full object-cover" />
+            <span className="absolute right-[7%] top-[12%] rotate-[9deg] border-[3px] border-[#172b44] bg-[#91dcc4] px-3 py-2 font-serif text-xl font-black shadow-[3px_3px_0_#172b44]">PIN IT!</span>
+            <span className="absolute bottom-[14%] left-[8%] -rotate-[8deg] border-[3px] border-[#172b44] bg-[#ef6b59] px-3 py-2 font-serif text-xl font-black shadow-[3px_3px_0_#172b44]">POW!</span>
+            <div className="absolute bottom-0 left-0 right-0 bg-[#172b44]/90 px-4 py-3 text-xs font-black tracking-[.12em] text-[#fff8e7]"><span className="mr-3 text-[#ffd630]">ISSUE #001</span> RAVI + MEERA / A STREET STORY</div>
           </div>
         </div>
       </section>
 
-      {/* ------------------------------------------------ Stats */}
-      <section className="border-y border-slate-200/70 bg-white/70 py-12 backdrop-blur dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
-        <div className="section-pad">
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <StatCard
-              icon={MapPin}
-              label="Active reports"
-              value={stats.total}
-              sub="in the prototype database"
-              gradient="brand-grad-1"
-              index={0}
-            />
-            <StatCard
-              icon={ShieldCheck}
-              label="Verified reports"
-              value={stats.verified}
-              sub="confirmed by neighbours"
-              gradient="brand-grad-2"
-              index={1}
-            />
-            <StatCard
-              icon={CheckCircle2}
-              label="Resolved"
-              value={stats.resolved}
-              sub="marked fixed by authorities"
-              gradient="brand-grad-3"
-              index={2}
-            />
-            <StatCard
-              icon={Zap}
-              label="Citizen votes"
-              value={compactNumber(stats.totalVotes)}
-              sub="community validation"
-              gradient="brand-grad-4"
-              index={3}
-            />
+      <section id="about-us" aria-labelledby="about-us-title" className="relative overflow-hidden border-y-[7px] border-[#172b44] bg-[#ef6b59] py-10 text-[#172b44] sm:py-14">
+        <div className="pointer-events-none absolute inset-0 opacity-30 [background:repeating-linear-gradient(135deg,transparent_0_46px,rgba(23,43,68,.22)_47px_50px,transparent_51px_88px)]" />
+        <div className="pointer-events-none absolute -left-10 top-1/2 hidden h-32 w-32 -translate-y-1/2 rotate-6 bg-[#91dcc4] [clip-path:polygon(50%_0%,60%_36%,100%_22%,68%_50%,100%_78%,60%_64%,50%_100%,40%_64%,0_78%,32%_50%,0_22%,40%_36%)] lg:block" />
+        <div className="pointer-events-none absolute -right-8 top-6 hidden rotate-12 border-[3px] border-[#172b44] bg-[#ffd630] px-3 py-2 font-serif text-lg font-black shadow-[3px_3px_0_#172b44] sm:block">FOUR FOUNDERS. ONE CITY.</div>
+        <div className="section-pad relative z-10">
+          <p className="inline-block border-2 border-[#172b44] bg-[#172b44] px-3 py-2 text-xs font-extrabold tracking-[.14em] text-[#ffd630] shadow-[4px_4px_0_#ffd630]">ISSUE #002 — THE FOUR FOUNDERS</p>
+          <h2 id="about-us-title" className="mt-5 font-serif text-5xl font-black uppercase leading-[.82] tracking-[-.06em] [text-shadow:3px_3px_0_#ffd630] sm:text-7xl">About us.</h2>
+          <p className="mt-6 max-w-3xl border-l-[6px] border-[#172b44] pl-4 text-base font-semibold leading-relaxed sm:text-lg">{mission}</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-2 border-[3px] border-[#172b44] bg-[#172b44] px-4 py-3 text-xs font-black tracking-[.12em] text-[#ffd630] shadow-[4px_4px_0_#ffd630]"><ShieldAlert className="h-4 w-4" strokeWidth={3} /> SOS FOR WOMEN — ALERTS LOCAL LAW ENFORCEMENT</span>
+            <Link onMouseEnter={() => sound([330, 494, 659])} onClick={() => sound([330, 494, 659])} to="/about#creators" className="about-us-cta comic-button bg-[#172b44]"><Users className="h-4 w-4" /> MEET THE FOUNDERS →</Link>
+            <Link onMouseEnter={() => sound([250, 520])} onClick={() => sound([250, 520])} to="/contact" className="comic-button bg-[#fff8e7]">Talk to the team</Link>
           </div>
+          <p className="mt-6 font-serif text-4xl font-black leading-[.9] text-[#ffd630] [text-shadow:3px_3px_0_#172b44,7px_7px_0_#172b44] sm:text-5xl">Alert Today, Alive Tomorrow.</p>
+          <p className="mt-7 text-xs font-black tracking-[.14em]">THE FOUR FOUNDERS OF CIVICEYE</p>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {creators.map(([badge, name, role, tint], index) => (
+              <li key={name}>
+                <Link onMouseEnter={() => founderThemes[index]?.()} onClick={() => founderThemes[index]?.()} to="/about#creators" tabIndex={0} className="flex h-full items-center gap-3 border-4 border-[#172b44] bg-[#fffdf4] p-4 shadow-[5px_5px_0_#172b44] transition hover:-translate-y-1 hover:rotate-[-1deg] hover:shadow-[7px_8px_0_#ffd630]">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center border-[3px] border-[#172b44] font-serif text-xl font-black shadow-[3px_3px_0_#172b44]" style={{ background: tint }}>{badge}</span>
+                  <span className="min-w-0">
+                    <span className="block font-serif text-base font-black uppercase leading-tight">{name}</span>
+                    <span className="mt-2 block text-[10px] font-bold tracking-[.06em]">{role}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      {/* ------------------------------------------------ How it works */}
-      <section className="section-pad py-16 sm:py-24">
-        <SectionHeading
-          eyebrow="How it works"
-          title="Five steps from spotted to sorted"
-          description="A reporting flow designed to take less than a minute — with AI and the community doing the heavy lifting."
-        />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-          {HOW_IT_WORKS.map((step, i) => (
-            <Reveal key={step.step} delay={i * 0.08}>
-              <div className="card relative h-full p-5 transition-transform duration-300 hover:-translate-y-1">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl brand-grad-1 text-base font-extrabold text-white shadow-glow">
-                  {step.step}
-                </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">{step.title}</h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                  {step.description}
-                </p>
-                {i < HOW_IT_WORKS.length - 1 ? (
-                  <ArrowRight className="absolute -right-3.5 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-primary-300 dark:text-primary-700 lg:block" />
-                ) : null}
-              </div>
-            </Reveal>
+      <div className="border-y-4 border-[#172b44] bg-[#172b44] py-3 text-center text-sm font-black tracking-[.12em] text-[#fff8e7]">⚡ CITY PULSE — {stats.verified} REPORTS VERIFIED ✦ {stats.resolved} ISSUES RESOLVED ✦ YOUR WARD IS LISTENING ✦</div>
+
+      <section className="section-pad py-14 sm:py-20">
+        <p className="inline-block border-2 border-[#172b44] bg-[#91dcc4] px-3 py-1 text-xs font-black tracking-[.14em]">THE FIVE-PANEL STORY</p>
+        <h2 className="mt-4 font-serif text-4xl font-black uppercase tracking-[-.05em] sm:text-5xl">From spotted to sorted</h2>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {steps.map(([number, title, text], index) => (
+            <article key={title} tabIndex={0} onMouseEnter={() => sound([310 + index * 48, 520 + index * 36])} className={`comic-card min-h-56 border-4 border-[#172b44] p-5 shadow-[5px_6px_0_#172b44] transition hover:-translate-y-2 hover:rotate-[-1deg] ${index % 3 === 1 ? 'bg-[#ffd630]' : index % 3 === 2 ? 'bg-[#91dcc4]' : 'bg-[#fffdf4]'}`}>
+              <p className="font-serif text-5xl font-black text-[#ef6b59] [text-shadow:1px_1px_0_#172b44]">{number}</p>
+              <h3 className="mt-4 font-serif text-xl font-black uppercase">{title}</h3>
+              <p className="mt-3 text-sm font-semibold leading-snug">{text}</p>
+            </article>
           ))}
         </div>
       </section>
 
-      {/* ------------------------------------------------ Features */}
-      <section className="border-y border-slate-200/70 bg-white/60 py-16 dark:border-white/5 dark:bg-white/[0.02] sm:py-24">
+      <section className="border-y-[7px] border-[#172b44] bg-[#172b44] py-14 text-[#fff8e7] sm:py-20">
         <div className="section-pad">
-          <SectionHeading
-            eyebrow="Features"
-            title="A complete civic toolkit"
-            description="From AI-powered photo analysis to authority dashboards — every piece a real product needs."
-          />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <FeatureCard key={f.title} feature={f} index={i} />
+          <p className="inline-block border-2 border-[#172b44] bg-[#ffd630] px-3 py-1 text-xs font-black tracking-[.14em] text-[#172b44]">CIVIC SUPERPOWERS</p>
+          <h2 className="mt-4 font-serif text-4xl font-black uppercase tracking-[-.05em] sm:text-5xl">A complete civic toolkit</h2>
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {features.map(({ icon: Icon, title, text, tint }, index) => (
+              <article key={title} tabIndex={0} onMouseEnter={() => sound([420 + index * 70, 650 + index * 70])} className={`${tint} min-h-60 border-4 border-[#fff8e7] p-7 transition hover:-translate-y-2 hover:rotate-1 hover:shadow-[7px_8px_0_#ffd630]`}>
+                <Icon className="h-9 w-9 text-[#ffd630]" strokeWidth={2.7} />
+                <h3 className="mt-6 font-serif text-2xl font-black uppercase leading-none">{title}</h3>
+                <p className="mt-4 text-sm font-semibold leading-relaxed">{text}</p>
+              </article>
             ))}
           </div>
-          <Reveal className="mt-10 text-center">
-            <Link to="/features" className="btn-secondary">
-              Explore all features
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Reveal>
         </div>
       </section>
 
-      {/* ------------------------------------------------ Category marquee */}
-      <section className="overflow-hidden border-b border-slate-200/70 py-8 dark:border-white/5">
-        <div className="pointer-events-none flex w-max animate-marquee gap-3">
-          {[...CATEGORIES, ...CATEGORIES].map((c, i) => (
-            <span key={`${c.id}-${i}`} className="chip shrink-0 !px-4 !py-2 text-sm">
-              {c.label}
-            </span>
-          ))}
+      <section className="section-pad py-14 sm:py-20">
+        <div className="grid overflow-hidden border-[5px] border-[#172b44] bg-[#ffd630] shadow-[12px_12px_0_#ef6b59] lg:grid-cols-[1.15fr_.85fr]">
+          <div className="relative p-8 sm:p-12">
+            <div className="absolute right-7 top-7 flex h-12 w-12 items-center justify-center rounded-full border-[3px] border-[#172b44] bg-[#91dcc4] shadow-[3px_3px_0_#172b44]"><MapPin className="h-7 w-7 text-[#ef6b59]" /></div>
+            <p className="inline-block bg-[#ef6b59] px-3 py-2 text-xs font-black tracking-[.14em]">NEXT CHAPTER — LIVE MAP</p>
+            <h2 className="mt-5 max-w-xl font-serif text-4xl font-black leading-[.9] sm:text-5xl">See the danger before you hit it.</h2>
+            <p className="mt-5 max-w-xl text-base font-semibold leading-relaxed">Heatmaps, filters, and severity pins help people choose safer routes and show authorities where action is needed first.</p>
+            <Link onMouseEnter={() => sound([280, 560, 790])} to="/map" className="comic-button mt-7 inline-flex bg-[#fff8e7]"><MapPin className="h-4 w-4" /> Open interactive map</Link>
+          </div>
+          <div className="group relative min-h-64 overflow-hidden border-t-[5px] border-[#172b44] bg-[#1f536b] lg:border-l-[5px] lg:border-t-0">
+            <iframe
+              title="Live Bengaluru map"
+              loading="lazy"
+              className="absolute inset-0 h-full w-full border-0"
+              src="https://www.google.com/maps?q=Bengaluru%2C%20Karnataka&z=12&output=embed"
+            />
+            <p className="pointer-events-none absolute left-[26%] top-[32%] z-10 rotate-[-8deg] border-[3px] border-[#172b44] bg-[#ef6b59] px-5 py-3 font-serif text-2xl font-black shadow-[4px_4px_0_#172b44] transition-all duration-300 group-hover:translate-y-4 group-hover:opacity-0">LIVE<br />MAP VIEW</p>
+          </div>
         </div>
       </section>
 
-      {/* ------------------------------------------------ Community reviews */}
-      <CommunityReviews />
-
-      {/* ------------------------------------------------ Map CTA */}
       <section className="section-pad pb-16 sm:pb-24">
-        <Reveal>
-          <div className="relative overflow-hidden rounded-3xl brand-cta p-10 shadow-glow sm:p-16">
-            <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-            <div className="relative grid items-center gap-8 lg:grid-cols-2">
-              <div>
-                <p className="text-sm font-bold uppercase tracking-widest text-white/70">
-                  Live map
-                </p>
-                <h2 className="mt-3 text-3xl font-extrabold text-white sm:text-4xl">
-                  See the danger before you hit it
-                </h2>
-                <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/85 sm:text-base">
-                  Heatmaps, filters and severity pins help you pick safer routes — and show
-                  authorities exactly where to send crews first.
-                </p>
-                <Link
-                  to="/map"
-                  className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary-700 shadow-soft transition-all hover:-translate-y-0.5"
-                >
-                  <Navigation className="h-4 w-4" />
-                  Open interactive map
-                </Link>
-              </div>
-              <div className="hidden lg:block">
-                <div className="card overflow-hidden !rounded-2xl p-1.5">
-                  <div className="pointer-events-none h-64 overflow-hidden rounded-xl">
-                    <MapView
-                      reports={showcase.slice(0, 24)}
-                      center={{ lat: 12.935, lng: 77.624 }}
-                      zoom={13}
-                      onViewChange={() => undefined}
-                      selectedId={null}
-                      onSelect={() => undefined}
-                      heatmap
-                      className="h-full w-full"
-                    />
-                  </div>
-                </div>
+        <div className="border-[5px] border-[#172b44] bg-[#172b44] p-6 text-[#fff8e7] shadow-[10px_10px_0_#ffd630] sm:p-10">
+          <p className="inline-block border-2 border-[#172b44] bg-[#ffd630] px-3 py-1 text-xs font-black tracking-[.14em] text-[#172b44]">CIVIC HERO MISSIONS</p>
+          <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_.9fr]">
+            <div>
+              <h2 className="font-serif text-4xl font-black uppercase leading-[.9] sm:text-5xl">Your next<br />city mission.</h2>
+              <p className="mt-4 max-w-xl font-semibold leading-relaxed text-[#fff8e7]/90">Confirm three neighbourhood reports and help a real civic issue become impossible to ignore.</p>
+              <div className="mt-6 border-3 border-[#fff8e7] bg-[#ef6b59] p-4 text-[#172b44] shadow-[4px_4px_0_#fff8e7]">
+                <p className="text-xs font-black tracking-[.14em]">MISSION #004 — LIGHT UP THE BLOCK</p>
+                <p className="mt-2 font-serif text-2xl font-black">PROGRESS: {missionProgress} / 3</p>
+                <div className="mt-3 h-4 border-2 border-[#172b44] bg-[#fff8e7] p-[2px]"><div className="h-full bg-[#ffd630]" style={{ width: `${(missionProgress / 3) * 100}%` }} /></div>
               </div>
             </div>
+            <div className="border-4 border-[#172b44] bg-[#91dcc4] p-6 text-[#172b44] shadow-[5px_5px_0_#ef6b59]">
+              <p className="text-xs font-black tracking-[.14em]">REWARD UNLOCKED AT 3 / 3</p>
+              <h3 className="mt-3 font-serif text-3xl font-black uppercase leading-none">Street<br />Guardian</h3>
+              <p className="mt-4 text-sm font-semibold">Earn a CivicEye badge and an appreciation certificate for verified community action.</p>
+              <button disabled={!missionComplete} onClick={() => { setCertificateOpen(true); setCertificateIssued(false); sound([523, 659, 784, 1046]); }} className="mt-6 border-3 border-[#172b44] bg-[#ffd630] px-4 py-3 text-sm font-black shadow-[4px_4px_0_#172b44] disabled:cursor-not-allowed disabled:bg-[#d9d3bd] disabled:text-[#59626a] disabled:shadow-none">{missionComplete ? 'VIEW CITY HERO REWARDS ✦' : `LOCKED — COMPLETE ${3 - missionProgress} MORE REPORT`}</button>
+            </div>
           </div>
-        </Reveal>
+        </div>
       </section>
-    </>
+
+      <button onClick={() => { const next = !soundOn; setSoundOn(next); setComicSoundOn(next); if (next) sound([523, 659, 784]); }} className={`fixed right-5 top-[calc(var(--nav-height)+1rem)] z-[60] border-3 border-[#172b44] px-3 py-2 text-xs font-black shadow-[4px_4px_0_#172b44] ${soundOn ? 'bg-[#91dcc4]' : 'bg-[#ffd630]'}`} aria-pressed={soundOn}>♬ SOUND: {soundOn ? 'ON' : 'OFF'}</button>
+      <button onClick={() => { setPromoOpen(true); sound([196, 392, 784]); }} className="fixed bottom-5 right-5 z-40 border-[3px] border-[#172b44] bg-[#ef6b59] px-4 py-3 text-xs font-black shadow-[5px_5px_0_#172b44]">▶ WATCH THE CIVICEYE STORY</button>
+      {certificateOpen ? <div role="dialog" aria-label="Civic Hero certificate" className="fixed inset-0 z-[70] grid place-items-center bg-[#172b44]/90 p-5" onClick={() => setCertificateOpen(false)}>
+        <div className="w-full max-w-2xl border-[6px] border-[#172b44] bg-[#fff8e7] p-6 shadow-[10px_10px_0_#ffd630] sm:p-10" onClick={(e) => e.stopPropagation()}>
+          {!certificateIssued ? <>
+            <p className="inline-block bg-[#ef6b59] px-3 py-2 text-xs font-black tracking-[.14em]">CITY HERO CERTIFICATE</p>
+            <h2 className="mt-4 font-serif text-4xl font-black uppercase leading-none text-[#172b44]">Tell us who<br />saved the block.</h2>
+            <p className="mt-3 font-semibold text-[#172b44]">Enter your name and neighbourhood to create your personalised Street Guardian appreciation certificate.</p>
+            <label className="mt-6 block text-xs font-black tracking-[.14em]">YOUR NAME<input value={certificateName} onChange={(e) => setCertificateName(e.target.value)} className="mt-2 w-full border-3 border-[#172b44] bg-[#fffdf4] p-3 text-base font-bold" placeholder="Your name" /></label>
+            <label className="mt-4 block text-xs font-black tracking-[.14em]">YOUR PLACE / WARD<input value={certificatePlace} onChange={(e) => setCertificatePlace(e.target.value)} className="mt-2 w-full border-3 border-[#172b44] bg-[#fffdf4] p-3 text-base font-bold" placeholder="Example: Koramangala, Bengaluru" /></label>
+            <button disabled={!certificateName.trim() || !certificatePlace.trim()} onClick={() => { setCertificateIssued(true); downloadCertificate(); sound([523, 659, 784, 1046]); }} className="mt-6 border-3 border-[#172b44] bg-[#ffd630] px-5 py-3 font-black shadow-[4px_4px_0_#172b44] disabled:opacity-40">GENERATE & DOWNLOAD JPG ✦</button>
+          </> : <div className="relative overflow-hidden border-[5px] border-[#172b44] bg-[repeating-linear-gradient(135deg,#91dcc4_0_18px,#b9f0df_18px_36px)] p-7 text-center shadow-[8px_8px_0_#ef6b59] animate-[bounce_0.55s_ease-out]">
+            <span className="absolute left-5 top-5 rotate-[-12deg] border-3 border-[#172b44] bg-[#ffd630] px-2 py-1 text-xs font-black shadow-[2px_2px_0_#172b44]">UNLOCKED!</span>
+            <span className="absolute right-5 top-5 rotate-[12deg] text-3xl">✦</span>
+            <p className="text-xs font-black tracking-[.18em]">CIVICEYE CITY HERO CERTIFICATE</p>
+            <h2 className="mt-5 font-serif text-5xl font-black uppercase leading-none">Street Guardian</h2>
+            <p className="mt-6 font-serif text-3xl font-black">{certificateName}</p>
+            <p className="mt-4 font-semibold">is recognised for verified civic action in<br /><strong>{certificatePlace}</strong></p>
+            <p className="mt-6 text-xs font-black tracking-[.14em]">ISSUE #004 · COMMUNITY POWER AWARDED</p>
+            {certificateImage ? <img src={certificateImage} alt="Generated CivicEye certificate" className="mx-auto mt-6 max-h-64 border-3 border-[#172b44] shadow-[4px_4px_0_#172b44]" /> : null}
+            <div className="mt-6 flex flex-wrap justify-center gap-3"><a href={certificateImage || '#'} download={`CivicEye-Street-Guardian-${certificateName || 'Certificate'}.jpg`} className="border-3 border-[#172b44] bg-[#ffd630] px-5 py-3 font-black shadow-[4px_4px_0_#172b44]">DOWNLOAD JPG CERTIFICATE ✦</a><a href={certificateImage || '#'} target="_blank" rel="noopener" className="border-3 border-[#172b44] bg-[#fff8e7] px-5 py-3 font-black shadow-[4px_4px_0_#172b44]">OPEN JPG TO SAVE</a><button onClick={downloadCertificate} className="border-3 border-[#172b44] bg-[#ffd630] px-5 py-3 font-black shadow-[4px_4px_0_#172b44]">REGENERATE JPG</button><button onClick={() => { setCertificateIssued(false); setCertificateName(''); setCertificatePlace(''); }} className="border-3 border-[#172b44] bg-[#fff8e7] px-5 py-3 font-black shadow-[4px_4px_0_#172b44]">CREATE ANOTHER</button></div>
+          </div>}
+        </div>
+      </div> : null}
+      {promoOpen ? <div role="dialog" aria-label="CivicEye story" className="fixed inset-0 z-50 grid place-items-center bg-[#172b44]/90 p-5" onClick={() => setPromoOpen(false)}>
+        <div className="relative w-full max-w-5xl overflow-hidden border-[5px] border-[#172b44] bg-[#fff8e7] shadow-[10px_10px_0_#ffd630]" onClick={(e) => e.stopPropagation()}>
+          <button onClick={() => setPromoOpen(false)} className="absolute right-3 top-3 z-10 h-10 w-10 border-3 border-[#172b44] bg-[#ffd630] text-xl font-black">×</button>
+          <img src="/comic-assets/civiceye-talking-characters.gif" alt="Animated CivicEye awareness story" className="aspect-video w-full object-cover" />
+          <div className="absolute bottom-8 left-[7%] border-4 border-[#172b44] bg-[#ffd630] px-5 py-4 font-serif text-3xl font-black uppercase leading-none shadow-[5px_5px_0_#172b44] sm:text-5xl">See it.<br />Speak up.</div>
+        </div>
+      </div> : null}
+    </div>
   );
 }

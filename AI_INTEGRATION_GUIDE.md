@@ -523,7 +523,6 @@ dist/assets/ort-wasm-simd-threaded.jsep-*.wasm ~23.9 MB ← model runtime (lazy)
 The two last chunks are **only downloaded when the user first clicks Analyse** — that
 lazy loading is what keeps the initial page fast.
 
-For screenshots/demos without keys:
 
 ```bash
 VITE_DEMO_MODE=true npm run build

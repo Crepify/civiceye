@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
+import { founderThemes } from '@/utils/comicSound';
 import { Link } from 'react-router-dom';
-import { Compass, GraduationCap, Heart, Lightbulb, MapPin, ShieldCheck } from 'lucide-react';
+import { Compass, GraduationCap, Heart, Lightbulb, MapPin, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { SectionHeading } from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
@@ -51,8 +53,61 @@ const TIMELINE = [
   },
 ];
 
+const CREATORS = [
+  {
+    badge: 'AR',
+    name: 'Archit Ranjeev',
+    role: 'Founder · Backend',
+    tint: '#ffd630',
+    lines: [
+      'I’m a big optimist when it comes to building, and CivicEye holds a special place in my heart. What began as a small idea quickly evolved into a platform designed to serve others, driven by a simple question: with so many tools at our fingertips to create change, why not us? I’m immensely proud of our team for turning that spark into reality—and I’d build it all over again in a heartbeat.',
+    ],
+  },
+  {
+    badge: 'AS',
+    name: 'Aswathram',
+    role: 'Founder · AI & Backend',
+    tint: '#91dcc4',
+    lines: [
+      'Built the photo analysis and data layers so a snapped pothole becomes a classified, mapped pin in seconds.',
+    ],
+  },
+  {
+    badge: 'KI',
+    name: 'Kiushki',
+    role: 'Founder · UI Designer',
+    tint: '#ef6b59',
+    lines: [
+      'Designed the citizen-facing experience — reporting in seconds, with every status legible at a glance.',
+    ],
+  },
+  {
+    badge: 'SH',
+    name: 'S. Himeshkara',
+    role: 'Founder · UI Designer',
+    tint: '#28627a',
+    lines: [
+      'I’m one of the UI designers behind CivicEye, part of a four-member team building a safer Bharath — one report at a time. My goal was simple: design a page that stays with you, so you never forget that help is just a click away.',
+      'CivicEye lets citizens report everyday hazards — broken streetlights, fallen trees, potholes — before they turn into tragedies. And with our SOS button, women can alert the police directly the moment they feel unsafe.',
+    ],
+    quote: 'Because safety shouldn’t be a privilege — it should be a right.',
+  },
+];
+
+/** Why the team built CivicEye — written by the founders. */
+const MISSION =
+  'Our team of four built CivicEye to solve a specific problem: urban hazards are frequently ignored until they cause harm. CivicEye is a reporting platform that allows citizens across India to document and track infrastructure failures like potholes and broken streetlights. Beyond infrastructure, we prioritize personal security. The platform features an SOS button designed specifically for women to instantly alert local law enforcement during emergencies. CivicEye exists to give citizens a practical tool to improve their surroundings and ensure their safety.';
+
 /** About page. */
 export function About() {
+  useEffect(() => {
+    if (window.location.hash !== '#creators') return;
+    const timer = window.setTimeout(() => {
+      document.getElementById('creators')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 420);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
     <>
       <PageHeader
@@ -121,6 +176,67 @@ export function About() {
               </div>
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      <section id="creators" className="scroll-mt-32 border-y-[7px] border-[#172b44] bg-[#172b44] py-14 text-[#fff8e7] sm:py-20">
+        <div className="section-pad relative">
+          <div className="pointer-events-none absolute inset-0 opacity-25 [background:repeating-linear-gradient(145deg,transparent_0_60px,rgba(145,220,196,.25)_61px_64px,transparent_65px_100px)]" />
+          <p className="relative inline-block border-2 border-[#172b44] bg-[#ffd630] px-3 py-1 text-xs font-black tracking-[.14em] text-[#172b44]">ABOUT US — THE FOUR FOUNDERS</p>
+          <h2 className="relative mt-4 max-w-4xl font-serif text-4xl font-black uppercase tracking-[-.05em] sm:text-5xl">Built because hazards get ignored until someone gets hurt</h2>
+          <p className="relative mt-5 max-w-3xl border-l-[6px] border-[#ffd630] pl-4 text-base font-semibold leading-relaxed text-[#fff8e7]/95 sm:text-lg">
+            {MISSION}
+          </p>
+
+          <div className="relative mt-8 grid gap-4 border-4 border-[#ef6b59] bg-[#102b3d] p-6 sm:grid-cols-[auto_1fr] sm:items-center">
+            <span className="flex h-16 w-16 items-center justify-center border-[3px] border-[#172b44] bg-[#ef6b59] shadow-[4px_4px_0_#ffd630]">
+              <ShieldAlert className="h-9 w-9 text-[#ffd630]" strokeWidth={2.8} />
+            </span>
+            <div>
+              <p className="text-xs font-black tracking-[.14em] text-[#ffd630]">SAFETY FIRST — SOS FOR WOMEN</p>
+              <p className="mt-2 text-sm font-semibold leading-relaxed text-[#fff8e7]/90">
+                One tap sends an instant alert to local law enforcement during an emergency, with the
+                citizen&apos;s live location attached — built for the moments when reporting a pothole
+                is not the priority.
+              </p>
+            </div>
+          </div>
+
+          <p className="relative mt-8 font-serif text-5xl font-black leading-[.9] tracking-[-.03em] text-[#fff8e7] [text-shadow:4px_4px_0_#ef6b59,9px_9px_0_#172b44] sm:text-6xl lg:text-7xl">
+            Alert Today, Alive Tomorrow.
+          </p>
+
+          <div className="relative mt-8 grid gap-5 sm:grid-cols-2">
+            {CREATORS.map((creator, index) => (
+              <article
+                key={creator.name}
+                tabIndex={0}
+                onMouseEnter={() => founderThemes[index]?.()}
+                onFocus={() => founderThemes[index]?.()}
+                onClick={() => founderThemes[index]?.()}
+                className="border-4 border-[#fff8e7] bg-[#102b3d] p-6 text-[#fff8e7] shadow-[6px_6px_0_#ef6b59] transition hover:-translate-y-2 hover:rotate-[-1deg] hover:shadow-[8px_9px_0_#ffd630]"
+              >
+                <span
+                  className="flex h-14 w-14 items-center justify-center border-[3px] border-[#172b44] font-serif text-2xl font-black text-[#172b44] shadow-[3px_3px_0_#172b44]"
+                  style={{ background: creator.tint }}
+                >
+                  {creator.badge}
+                </span>
+                <h3 className="mt-5 font-serif text-2xl font-black uppercase leading-none">{creator.name}</h3>
+                <p className="mt-2 text-xs font-black tracking-[.12em] text-[#ffd630]">{creator.role}</p>
+                <div className="mt-4 space-y-3">
+                  {creator.lines.map((line) => (
+                    <p key={line.slice(0, 24)} className="text-sm font-semibold leading-relaxed text-[#fff8e7]/85">{line}</p>
+                  ))}
+                  {creator.quote ? <p className="pt-1 font-serif text-lg font-black leading-snug text-[#ffd630]">{creator.quote}</p> : null}
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="relative mt-8 flex flex-wrap gap-3">
+            <Link to="/report" className="comic-button bg-[#ffd630]">Report a hazard →</Link>
+            <Link to="/contact" className="comic-button bg-[#91dcc4]">Talk to the four founders</Link>
+          </div>
         </div>
       </section>
 

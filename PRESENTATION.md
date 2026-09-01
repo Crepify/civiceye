@@ -1,6 +1,5 @@
 # 🎓 CivicEye — College Presentation Pack
 
-> Screenshots are in **`screenshots/present/`** (login, landing, map, community,
 > dashboard, live AI, about). Word them below is ready to drop into slides.
 
 ---

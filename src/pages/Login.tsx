@@ -137,7 +137,19 @@ export function Login() {
   };
 
   if (!configured) {
-    return <SupabaseSetupScreen />;
+    // Preview mode: lets reviewers navigate the visual prototype without exposing
+    // credentials or requiring a real Supabase project.
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#fff8e7] px-4 py-16 text-[#172b44]">
+        <div className="w-full max-w-lg border-[5px] border-[#172b44] bg-[#fffdf4] p-8 text-center shadow-[10px_10px_0_#ef6b59]">
+          <Logo to="/" className="justify-center" />
+          <p className="mt-7 inline-block bg-[#ffd630] px-3 py-2 text-xs font-black tracking-[.14em]">PREVIEW ACCESS</p>
+          <h1 className="mt-5 font-serif text-4xl font-black uppercase leading-none">Join the city squad.</h1>
+          <p className="mt-4 font-semibold">Supabase is not connected in this preview. Continue as a demo citizen to review every CivicEye page.</p>
+          <button onClick={() => navigate(next)} className="mt-7 border-3 border-[#172b44] bg-[#91dcc4] px-5 py-3 font-black shadow-[4px_4px_0_#172b44]">CONTINUE AS DEMO CITIZEN ✦</button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -392,7 +404,9 @@ export function Login() {
 /* "Connect Supabase" screen — shown when env keys are missing         */
 /* ------------------------------------------------------------------ */
 
-function SupabaseSetupScreen() {
+// Kept exported: the comic "PREVIEW ACCESS" screen replaces this one in the
+// landing flow, but the setup guide is still used once real Supabase keys ship.
+export function SupabaseSetupScreen() {
   const { meta } = useBrand();
   return (
     <div className="flex min-h-screen items-center justify-center px-4 pb-16 pt-24">

@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { primeComicAudio } from '@/utils/comicSound';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -27,6 +29,21 @@ import { NotFound } from '@/pages/NotFound';
  */
 export default function App() {
   const location = useLocation();
+
+  // Browsers gate audio behind a user gesture; arm it once per visit.
+  useEffect(() => {
+    primeComicAudio();
+  }, []);
+
+  // Land on the right spot for anchor links like /about#creators.
+  useEffect(() => {
+    if (!location.hash) return;
+    const timer = window.setTimeout(() => {
+      const target = document.querySelector(location.hash);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [location.pathname, location.hash]);
 
   // Auth pages are full-screen and skip the site chrome.
   const isAuthPage =

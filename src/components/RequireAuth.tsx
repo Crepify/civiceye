@@ -15,8 +15,10 @@ export function RequireAuth({ children }: RequireAuthProps) {
   const { configured, loading, user } = useAuth();
   const location = useLocation();
 
+  // Demo/local-preview mode remains navigable without credentials. When
+  // Supabase is configured, normal sign-in protection still applies.
   if (!configured) {
-    return <Navigate to="/login" replace />;
+    return <>{children}</>;
   }
 
   if (loading) {

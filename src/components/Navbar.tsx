@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, GraduationCap, LogOut, Menu, Plus, ShieldCheck, User } from 'lucide-react';
+import { ChevronRight, GraduationCap, House, LogOut, Menu, Plus, ShieldCheck, User } from 'lucide-react';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { Drawer } from './Drawer';
@@ -121,6 +121,22 @@ export function Navbar() {
           </ul>
 
           <div className="flex flex-1 items-center justify-end gap-2">
+            <NavLink
+              to="/"
+              end
+              title="Home"
+              aria-label="Go to Home page"
+              className={({ isActive }) =>
+                cn(
+                  'flex h-9 w-9 items-center justify-center rounded-xl border transition-all',
+                  isActive
+                    ? 'border-primary-500 bg-primary-500/10 text-primary-700 dark:border-primary-400/50 dark:text-primary-300'
+                    : 'border-slate-200 bg-white/70 text-slate-600 hover:border-primary-300 hover:text-primary-600 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-300',
+                )
+              }
+            >
+              <House className="h-4 w-4" />
+            </NavLink>
             {isAdmin ? (
               <NavLink
                 to="/admin"
