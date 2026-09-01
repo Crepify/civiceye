@@ -421,6 +421,11 @@ html.dark header nav { background:#0d2030!important; }
 html.dark header nav a,html.dark header nav button { color:#fff8e7!important; }
 html.dark header nav ul a:hover { background:#ef6b59!important; color:#172b44!important; }
 html.dark .comic-page { background:#081521!important; color:#fff8e7!important; }
+/* Night ink: headlines go comic yellow, links go mint, body stays warm cream. */
+html.dark .comic-page h1,html.dark .comic-page h2,html.dark .comic-page h3 { color:#ffd630!important; text-shadow:2px 2px 0 #172b44; }
+html.dark .comic-page a:not([class*="bg-["]) { color:#91dcc4; }
+/* ...but paper panels and dialog sheets keep navy headlines. */
+html.dark .comic-page [class*="bg-[#fff8e7]"] h1,html.dark .comic-page [class*="bg-[#fff8e7]"] h2,html.dark .comic-page [class*="bg-[#fff8e7]"] h3,html.dark .comic-page [class*="bg-[#fffdf4]"] h1,html.dark .comic-page [class*="bg-[#fffdf4]"] h2,html.dark .comic-page [class*="bg-[#fffdf4]"] h3,html.dark .comic-page [class*="bg-[#ffd630]"] h1,html.dark .comic-page [class*="bg-[#ffd630]"] h2,html.dark .comic-page [class*="bg-[#ffd630]"] h3,html.dark .comic-page [class*="bg-[#91dcc4]"] h1,html.dark .comic-page [class*="bg-[#91dcc4]"] h2,html.dark .comic-page [class*="bg-[#91dcc4]"] h3,html.dark [role="dialog"] h1,html.dark [role="dialog"] h2,html.dark [role="dialog"] h3 { color:#172b44!important; text-shadow:none; }
 /* Paper panels stay paper at night: light comic surfaces keep navy ink,
    so cards, stickers, badges and buttons remain readable on midnight. */
 html.dark .comic-page [class*="bg-[#fff8e7]"],html.dark .comic-page [class*="bg-[#fffdf4]"],html.dark .comic-page [class*="bg-[#ffd630]"],html.dark .comic-page [class*="bg-[#91dcc4]"] { color:#172b44!important; }
