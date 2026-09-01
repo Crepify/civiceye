@@ -54,10 +54,12 @@ export function MapPage() {
   const debouncedSearch = useDebounce(filters.search, 250);
 
   // This route alone uses the comic field-guide skin; it never changes Home.
+  // Amrita Eye keeps its own clean campus map (no comic skin).
   useEffect(() => {
+    if (isAmrita) return;
     document.body.classList.add('comic-map-route');
     return () => document.body.classList.remove('comic-map-route');
-  }, []);
+  }, [isAmrita]);
 
   const visibleReports = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();

@@ -29,16 +29,25 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const [brand, setBrand] = useState<BrandId>(initialBrand);
 
   /* Effective brand:
+     - ?brand=amrita|civiceye in the URL explicitly forces a brand (demo/dev
+       preview tool — lets you preview the Amrita Eye experience without an
+       Amrita login, and vice-versa).
      - The /amrita route ALWAYS forces the Amrita brand (so it never shows
        CivicEye branding, even for logged-out visitors).
      - Otherwise: Amrita emails → Amrita Eye; everyone else → CivicEye. */
   useEffect(() => {
     if (loading) return;
     const routeAmrita = location.pathname.startsWith('/amrita');
-    const next: BrandId = routeAmrita || (isAmrita && user) ? 'amrita' : 'civiceye';
+    const q = new URLSearchParams(location.search).get('brand');
+    let next: BrandId;
+    if (q === 'amrita' || q === 'civiceye') {
+      next = q;
+    } else {
+      next = routeAmrita || (isAmrita && user) ? 'amrita' : 'civiceye';
+    }
     setBrand(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAmrita, user?.id, loading, location.pathname]);
+  }, [isAmrita, user?.id, loading, location.pathname, location.search]);
 
   /* Apply the brand class + document title + favicon + meta. */
   useEffect(() => {

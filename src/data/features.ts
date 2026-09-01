@@ -58,7 +58,7 @@ export const HOW_IT_WORKS: { step: number; title: string; description: string }[
     step: 1,
     title: 'Spot the problem',
     description:
-      'Notice a pothole, a dark street or an open manhole? Open CivicEye and pick a category.',
+      'Notice a pothole, a dark street or an open manhole? Open the app and pick a category.',
   },
   {
     step: 2,

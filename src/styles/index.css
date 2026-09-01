@@ -325,16 +325,18 @@
   }
 }
 
-/* Comic CivicEye production theme: removes the former navy/glass landing aesthetic. */
+/* Comic CivicEye production theme: removes the former navy/glass landing aesthetic.
+   Scoped to CivicEye ONLY (html:not(.amrita)) — Amrita Eye keeps its own clean
+   campus look (maroon palette) and must never inherit the comic cream/navy skin. */
 @layer base {
-  :root {
+  html:not(.amrita) {
     --c-primary-50: 255 249 231; --c-primary-100: 255 240 190; --c-primary-200: 255 222 119;
     --c-primary-300: 255 211 48; --c-primary-400: 243 191 32; --c-primary-500: 224 169 46;
     --c-primary-600: 190 126 19; --c-primary-700: 145 82 14; --c-primary-800: 95 55 17;
     --c-primary-900: 54 40 25; --c-primary-950: 35 29 20;
     --c-accent-300: 174 230 209; --c-accent-400: 145 220 196; --c-accent-500: 91 174 145; --c-accent-600: 59 126 101;
   }
-  body, html.dark body { background:#fff8e7; color:#172b44; }
+  html:not(.amrita) body { background:#fff8e7; color:#172b44; }
 }
 @layer components {
   .comic-page .btn-primary { background:#ffd630; color:#172b44; box-shadow:4px 4px 0 #172b44; border:2px solid #172b44; }
@@ -358,91 +360,81 @@ body.comic-map-route .comic-map-page .border-slate-200\/70 { border-color:#172b4
 
 /* Product-wide comic operating system — applies to every existing route. */
 @layer components {
-  body { background-color:#fff8e7; background-image:radial-gradient(rgba(23,43,68,.13) 1px,transparent 1.2px); background-size:10px 10px; }
-  .card { border:3px solid #172b44!important; border-radius:0!important; background:#fffdf4!important; box-shadow:5px 5px 0 #172b44!important; }
-  .card:hover { transform:translate(-2px,-3px) rotate(-.25deg); box-shadow:8px 8px 0 #ef6b59!important; }
-  .glass,.glass-strong { border:3px solid #172b44!important; border-radius:0!important; background:#fff8e7!important; box-shadow:4px 4px 0 #172b44!important; backdrop-filter:none!important; }
-  .btn,.btn-primary,.btn-secondary,.btn-ghost { border:3px solid #172b44!important; border-radius:0!important; font-weight:900!important; box-shadow:4px 4px 0 #172b44!important; }
-  .btn-primary { background:#ffd630!important; color:#172b44!important; }
-  .btn-secondary { background:#fffdf4!important; color:#172b44!important; }
-  .btn:hover,.btn-primary:hover,.btn-secondary:hover,.btn-ghost:hover { transform:translate(-2px,-2px) rotate(-.5deg)!important; box-shadow:6px 6px 0 #ef6b59!important; }
-  .chip { border:2px solid #172b44!important; border-radius:0!important; background:#91dcc4!important; color:#172b44!important; font-weight:800!important; }
-  .input-base { border:3px solid #172b44!important; border-radius:0!important; background:#fffdf4!important; color:#172b44!important; box-shadow:3px 3px 0 #172b44!important; }
-  .input-base:focus { border-color:#ef6b59!important; box-shadow:5px 5px 0 #ef6b59!important; }
-  .heading-xl,.heading-lg { font-family:Georgia,serif!important; text-transform:uppercase; letter-spacing:-.045em!important; color:#172b44!important; }
+  html:not(.amrita) body { background-color:#fff8e7; background-image:radial-gradient(rgba(23,43,68,.13) 1px,transparent 1.2px); background-size:10px 10px; }
+  html:not(.amrita) .card { border:3px solid #172b44!important; border-radius:0!important; background:#fffdf4!important; box-shadow:5px 5px 0 #172b44!important; }
+  html:not(.amrita) .card:hover { transform:translate(-2px,-3px) rotate(-.25deg); box-shadow:8px 8px 0 #ef6b59!important; }
+  html:not(.amrita) .glass,html:not(.amrita) .glass-strong { border:3px solid #172b44!important; border-radius:0!important; background:#fff8e7!important; box-shadow:4px 4px 0 #172b44!important; backdrop-filter:none!important; }
+  html:not(.amrita) .btn,html:not(.amrita) .btn-primary,html:not(.amrita) .btn-secondary,html:not(.amrita) .btn-ghost { border:3px solid #172b44!important; border-radius:0!important; font-weight:900!important; box-shadow:4px 4px 0 #172b44!important; }
+  html:not(.amrita) .btn-primary { background:#ffd630!important; color:#172b44!important; }
+  html:not(.amrita) .btn-secondary { background:#fffdf4!important; color:#172b44!important; }
+  html:not(.amrita) .btn:hover,html:not(.amrita) .btn-primary:hover,html:not(.amrita) .btn-secondary:hover,html:not(.amrita) .btn-ghost:hover { transform:translate(-2px,-2px) rotate(-.5deg)!important; box-shadow:6px 6px 0 #ef6b59!important; }
+  html:not(.amrita) .chip { border:2px solid #172b44!important; border-radius:0!important; background:#91dcc4!important; color:#172b44!important; font-weight:800!important; }
+  html:not(.amrita) .input-base { border:3px solid #172b44!important; border-radius:0!important; background:#fffdf4!important; color:#172b44!important; box-shadow:3px 3px 0 #172b44!important; }
+  html:not(.amrita) .input-base:focus { border-color:#ef6b59!important; box-shadow:5px 5px 0 #ef6b59!important; }
+  html:not(.amrita) .heading-xl,html:not(.amrita) .heading-lg { font-family:Georgia,serif!important; text-transform:uppercase; letter-spacing:-.045em!important; color:#172b44!important; }
 }
 
 /* Comic navigation bar — one strong street-sign header on every page. */
 @layer components {
-  :root { --nav-height: 5.65rem; }
-  header { background:#fff8e7!important; border-bottom:4px solid #172b44; box-shadow:0 5px 0 #ef6b59; }
-  header nav { min-height:4.9rem!important; height:auto!important; max-width:none!important; border:0!important; border-radius:0!important; background:#fff8e7!important; box-shadow:none!important; padding-inline:1rem!important; }
-  header nav ul { gap:.45rem!important; }
-  header nav ul a { border:2px solid transparent!important; color:#172b44!important; font-weight:900!important; padding:.5rem .65rem!important; }
-  header nav ul a:hover,header nav ul a:focus-visible { background:#ffd630!important; border-color:#172b44!important; box-shadow:3px 3px 0 #172b44; transform:translate(-2px,-2px) rotate(-1deg); }
-  header nav .btn-primary { background:#ffd630!important; color:#172b44!important; border:3px solid #172b44!important; box-shadow:4px 4px 0 #172b44!important; }
-  header nav .btn-secondary { background:#91dcc4!important; border:3px solid #172b44!important; }
-  header nav button { border:2px solid #172b44!important; background:#fffdf4!important; box-shadow:2px 2px 0 #172b44; }
+  html:not(.amrita) { --nav-height: 5.65rem; }
+  html:not(.amrita) header { background:#fff8e7!important; border-bottom:4px solid #172b44; box-shadow:0 5px 0 #ef6b59; }
+  html:not(.amrita) header nav { min-height:4.9rem!important; height:auto!important; max-width:none!important; border:0!important; border-radius:0!important; background:#fff8e7!important; box-shadow:none!important; padding-inline:1rem!important; }
+  html:not(.amrita) header nav ul { gap:.45rem!important; }
+  html:not(.amrita) header nav ul a { border:2px solid transparent!important; color:#172b44!important; font-weight:900!important; padding:.5rem .65rem!important; }
+  html:not(.amrita) header nav ul a:hover,html:not(.amrita) header nav ul a:focus-visible { background:#ffd630!important; border-color:#172b44!important; box-shadow:3px 3px 0 #172b44; transform:translate(-2px,-2px) rotate(-1deg); }
+  html:not(.amrita) header nav .btn-primary { background:#ffd630!important; color:#172b44!important; border:3px solid #172b44!important; box-shadow:4px 4px 0 #172b44!important; }
+  html:not(.amrita) header nav .btn-secondary { background:#91dcc4!important; border:3px solid #172b44!important; }
+  html:not(.amrita) header nav button { border:2px solid #172b44!important; background:#fffdf4!important; box-shadow:2px 2px 0 #172b44; }
 }
 
 /* Header spacing repair: fixed comic header never sits on top of page titles/controls. */
 @layer components {
-  header { z-index:80!important; }
-  main { position:relative; z-index:1; }
+  html:not(.amrita) header { z-index:80!important; }
+  html:not(.amrita) main { position:relative; z-index:1; }
   @media (max-width: 1023px) {
-    :root { --nav-height: 7.75rem; }
-    header nav { min-height:6.35rem!important; align-items:center!important; }
-    header nav > * { min-width:0; }
-    header nav .logo { max-width:45%; }
-    .comic-map-page { padding-top:calc(var(--nav-height) + .75rem)!important; }
+    html:not(.amrita) { --nav-height: 7.75rem; }
+    html:not(.amrita) header nav { min-height:6.35rem!important; align-items:center!important; }
+    html:not(.amrita) header nav > * { min-width:0; }
+    html:not(.amrita) header nav .logo { max-width:45%; }
+    html:not(.amrita) .comic-map-page { padding-top:calc(var(--nav-height) + .75rem)!important; }
   }
   @media (max-width: 640px) {
-    :root { --nav-height: 6.7rem; }
-    header nav { min-height:5.4rem!important; padding-inline:.65rem!important; }
-    .comic-map-page { padding-top:calc(var(--nav-height) + .5rem)!important; }
+    html:not(.amrita) { --nav-height: 6.7rem; }
+    html:not(.amrita) header nav { min-height:5.4rem!important; padding-inline:.65rem!important; }
+    html:not(.amrita) .comic-map-page { padding-top:calc(var(--nav-height) + .5rem)!important; }
   }
 }
 
 /* Mobile header and menu repair — no controls can escape/overlap the viewport. */
 @media (max-width: 767px) {
-  header nav .btn-secondary, header nav .btn-primary, header nav button[title] { display:none!important; }
-  header nav { gap:.45rem!important; }
-  header nav > :first-child { flex:1 1 auto!important; min-width:0!important; }
-  header nav > :last-child { flex:0 0 auto!important; }
-  [role="dialog"] > div:last-child { background:#fff8e7!important; border:4px solid #172b44!important; box-shadow:8px 0 0 #ef6b59!important; }
-  [role="dialog"] > div:last-child > div:first-child { background:#ffd630!important; border-bottom:4px solid #172b44!important; }
-  [role="dialog"] > div:last-child h2 { font-family:Georgia,serif!important; font-weight:900!important; color:#172b44!important; }
-  [role="dialog"] > div:last-child button { border:2px solid #172b44!important; background:#fffdf4!important; }
+  html:not(.amrita) header nav .btn-secondary, html:not(.amrita) header nav .btn-primary, html:not(.amrita) header nav button[title] { display:none!important; }
+  html:not(.amrita) header nav { gap:.45rem!important; }
+  html:not(.amrita) header nav > :first-child { flex:1 1 auto!important; min-width:0!important; }
+  html:not(.amrita) header nav > :last-child { flex:0 0 auto!important; }
+  html:not(.amrita) [role="dialog"] > div:last-child { background:#fff8e7!important; border:4px solid #172b44!important; box-shadow:8px 0 0 #ef6b59!important; }
+  html:not(.amrita) [role="dialog"] > div:last-child > div:first-child { background:#ffd630!important; border-bottom:4px solid #172b44!important; }
+  html:not(.amrita) [role="dialog"] > div:last-child h2 { font-family:Georgia,serif!important; font-weight:900!important; color:#172b44!important; }
+  html:not(.amrita) [role="dialog"] > div:last-child button { border:2px solid #172b44!important; background:#fffdf4!important; }
 }
 
 /* Night Issue mode — a distinct midnight comic UI, not a dimmed light page. */
-html.dark body { background:#081521!important; color:#eaf5f0!important; background-image:radial-gradient(rgba(145,220,196,.16) 1px,transparent 1.2px)!important; background-size:10px 10px; }
-html.dark header { background:#0d2030!important; border-bottom-color:#ffd630!important; box-shadow:0 5px 0 #ef6b59!important; }
-html.dark header nav { background:#0d2030!important; }
-html.dark header nav a,html.dark header nav button { color:#fff8e7!important; }
-html.dark header nav ul a:hover { background:#ef6b59!important; color:#172b44!important; }
-html.dark .comic-page { background:#081521!important; color:#fff8e7!important; }
-/* Night ink: headlines go comic yellow, links go mint, body stays warm cream. */
-html.dark .comic-page h1,html.dark .comic-page h2,html.dark .comic-page h3 { color:#ffd630!important; text-shadow:2px 2px 0 #172b44; }
-html.dark .comic-page a:not([class*="bg-["]) { color:#91dcc4; }
-/* ...but paper panels and dialog sheets keep navy headlines. */
-html.dark .comic-page [class*="bg-[#fff8e7]"] h1,html.dark .comic-page [class*="bg-[#fff8e7]"] h2,html.dark .comic-page [class*="bg-[#fff8e7]"] h3,html.dark .comic-page [class*="bg-[#fffdf4]"] h1,html.dark .comic-page [class*="bg-[#fffdf4]"] h2,html.dark .comic-page [class*="bg-[#fffdf4]"] h3,html.dark .comic-page [class*="bg-[#ffd630]"] h1,html.dark .comic-page [class*="bg-[#ffd630]"] h2,html.dark .comic-page [class*="bg-[#ffd630]"] h3,html.dark .comic-page [class*="bg-[#91dcc4]"] h1,html.dark .comic-page [class*="bg-[#91dcc4]"] h2,html.dark .comic-page [class*="bg-[#91dcc4]"] h3,html.dark [role="dialog"] h1,html.dark [role="dialog"] h2,html.dark [role="dialog"] h3 { color:#172b44!important; text-shadow:none; }
-/* Paper panels stay paper at night: light comic surfaces keep navy ink,
-   so cards, stickers, badges and buttons remain readable on midnight. */
-html.dark .comic-page [class*="bg-[#fff8e7]"],html.dark .comic-page [class*="bg-[#fffdf4]"],html.dark .comic-page [class*="bg-[#ffd630]"],html.dark .comic-page [class*="bg-[#91dcc4]"] { color:#172b44!important; }
-html.dark .comic-page [class*="bg-[#ffd630]"] a,html.dark .comic-page [class*="bg-[#ffd630]"] button,html.dark .comic-page [class*="bg-[#91dcc4]"] a,html.dark .comic-page [class*="bg-[#91dcc4]"] button { color:#172b44!important; }
-/* Modal sheets are cream paper — ink stays navy inside every dialog. */
-html.dark [role="dialog"] { color:#172b44!important; }
-html.dark .card,html.dark .glass,html.dark .glass-strong { background:#102b3d!important; border-color:#91dcc4!important; box-shadow:5px 5px 0 #ef6b59!important; }
-html.dark .btn-primary { background:#ffd630!important; color:#172b44!important; }
-html.dark .btn-secondary,html.dark .btn-ghost { background:#102b3d!important; border-color:#91dcc4!important; color:#fff8e7!important; }
-html.dark .input-base { background:#0d2030!important; border-color:#91dcc4!important; color:#fff8e7!important; }
-html.dark .chip { background:#173d50!important; border-color:#91dcc4!important; color:#fff8e7!important; }
-html.dark .comic-map-page { background:#081521!important; color:#fff8e7!important; }
-html.dark .comic-map-page aside { background:#173d50!important; }
-html.dark .comic-map-page .text-slate-900,html.dark .comic-map-page .text-slate-800,html.dark .comic-map-page .text-slate-700 { color:#fff8e7!important; }
-html.dark .comic-map-page .text-slate-500,html.dark .comic-map-page .text-slate-400 { color:#b7d4cb!important; }
-html.dark .comic-map-page .bg-\[\#fff8e7\],html.dark .comic-map-page .bg-\[\#fffdf4\] { background:#102b3d!important; }
+html:not(.amrita).dark body { background:#081521!important; color:#eaf5f0!important; background-image:radial-gradient(rgba(145,220,196,.16) 1px,transparent 1.2px)!important; background-size:10px 10px; }
+html:not(.amrita).dark header { background:#0d2030!important; border-bottom-color:#ffd630!important; box-shadow:0 5px 0 #ef6b59!important; }
+html:not(.amrita).dark header nav { background:#0d2030!important; }
+html:not(.amrita).dark header nav a,html:not(.amrita).dark header nav button { color:#fff8e7!important; }
+html:not(.amrita).dark header nav ul a:hover { background:#ef6b59!important; color:#172b44!important; }
+html:not(.amrita).dark .comic-page { background:#081521!important; color:#fff8e7!important; }
+html:not(.amrita).dark .comic-page .heading-xl,html:not(.amrita).dark .comic-page .heading-lg,html:not(.amrita).dark .comic-page h1,html:not(.amrita).dark .comic-page h2,html:not(.amrita).dark .comic-page h3 { color:#fff8e7!important; }
+html:not(.amrita).dark .card,html:not(.amrita).dark .glass,html:not(.amrita).dark .glass-strong { background:#102b3d!important; border-color:#91dcc4!important; box-shadow:5px 5px 0 #ef6b59!important; }
+html:not(.amrita).dark .btn-primary { background:#ffd630!important; color:#172b44!important; }
+html:not(.amrita).dark .btn-secondary,html:not(.amrita).dark .btn-ghost { background:#102b3d!important; border-color:#91dcc4!important; color:#fff8e7!important; }
+html:not(.amrita).dark .input-base { background:#0d2030!important; border-color:#91dcc4!important; color:#fff8e7!important; }
+html:not(.amrita).dark .chip { background:#173d50!important; border-color:#91dcc4!important; color:#fff8e7!important; }
+html:not(.amrita).dark .comic-map-page { background:#081521!important; color:#fff8e7!important; }
+html:not(.amrita).dark .comic-map-page aside { background:#173d50!important; }
+html:not(.amrita).dark .comic-map-page .text-slate-900,html.dark .comic-map-page .text-slate-800,html.dark .comic-map-page .text-slate-700 { color:#fff8e7!important; }
+html:not(.amrita).dark .comic-map-page .text-slate-500,html.dark .comic-map-page .text-slate-400 { color:#b7d4cb!important; }
+html:not(.amrita).dark .comic-map-page .bg-\[\#fff8e7\],html.dark .comic-map-page .bg-\[\#fffdf4\] { background:#102b3d!important; }
 
 /* Certificate controls remain readable in Night Issue mode. */
 html.dark [aria-label="Civic Hero certificate"] a,html.dark [aria-label="Civic Hero certificate"] button { color:#172b44!important; }
@@ -468,8 +460,15 @@ html.dark [aria-label="Civic Hero certificate"] a.bg-\[\#ffd630\],html.dark [ari
 .about-us-cta:hover { transform: translate(-2px,-2px) rotate(-1deg); }
 
 /* Night Issue mode keeps the spotlight readable on midnight panels. */
-html.dark #about-us { background: #102b3d !important; border-color: #91dcc4 !important; color: #eaf5f0 !important; }
+html.dark #about-us { background: #102b3d !important; border-color: #91dcc4 !important; }
 html.dark #about-us h2 { color: #fff8e7 !important; text-shadow: 3px 3px 0 #ef6b59 !important; }
+html.dark #about-us > div > div > p { color: #eaf5f0 !important; }
+html.dark #about-us .bg-\[\#fffdf4\] { background: #173d50 !important; }
+html.dark #about-us .bg-\[\#fffdf4\] span { color: #eaf5f0 !important; }
+/* Creator badge keeps navy numerals even on midnight mode. */
+html.dark #about-us .bg-\[\#fffdf4\] > span:first-child { color: #172b44 !important; }
+/* SOS chip stays yellow-on-navy. */
+html.dark #about-us .bg-\[\#172b44\] { background: #172b44 !important; }
 html.dark #about-us .bg-\[\#172b44\], html.dark #about-us .bg-\[\#172b44\] * { color: #ffd630 !important; }
 html.dark #about-us .about-us-cta { color: #ffd630 !important; }
 html.dark #creators .comic-button { color: #172b44 !important; }
@@ -477,3 +476,36 @@ html.dark .about-us-pill { background: #ffd630 !important; color: #172b44 !impor
 html.dark #creators { border-color: #91dcc4 !important; }
 /* Keep the safety slogan legible when the ABOUT US panel turns midnight. */
 html.dark #about-us .text-\[\#ffd630\] { color: #ffd630 !important; text-shadow: 3px 3px 0 #ef6b59, 7px 7px 0 #081521 !important; }
+
+/* ===================================================================
+   AMRITA EYE — neutralise the comic CivicEye skin on shared pages.
+   When html.amrita is active (Amrita Eye), any leftover comic navy/
+   yellow/cream inline classes render in the Amrita maroon palette so
+   NO CivicEye comic elements ever appear in the Amrita experience.
+   =================================================================== */
+html.amrita .bg-\[\#172b44\] { background-color: rgb(var(--c-primary-800)); }
+html.amrita .text-\[\#172b44\] { color: rgb(var(--c-primary-800)); }
+html.amrita .border-\[\#172b44\] { border-color: rgb(var(--c-primary-700)); }
+html.amrita .bg-\[\#ffd630\] { background-color: rgb(var(--c-accent-500)); }
+html.amrita .text-\[\#ffd630\] { color: rgb(var(--c-accent-500)); }
+html.amrita .border-\[\#ffd630\] { border-color: rgb(var(--c-accent-500)); }
+html.amrita .bg-\[\#fff8e7\] { background-color: rgb(var(--c-primary-50)); }
+html.amrita .text-\[\#fff8e7\] { color: rgb(var(--c-primary-50)); }
+html.amrita .border-\[\#fff8e7\] { border-color: rgb(var(--c-primary-50)); }
+html.amrita .bg-\[\#fffdf4\] { background-color: rgb(var(--c-primary-50)); }
+html.amrita .bg-\[\#91dcc4\] { background-color: rgb(var(--c-accent-500)); }
+html.amrita .bg-\[\#ef6b59\] { background-color: rgb(var(--c-primary-500)); }
+html.amrita .border-\[\#ef6b59\] { border-color: rgb(var(--c-primary-500)); }
+html.amrita .bg-\[\#102b3d\] { background-color: rgb(var(--c-primary-900)); }
+html.amrita .text-\[\#102b3d\] { color: rgb(var(--c-primary-900)); }
+html.amrita .shadow-\[4px_4px_0_\#172b44\] { box-shadow: 4px 4px 0 rgb(var(--c-primary-700)); }
+html.amrita .shadow-\[3px_3px_0_\#172b44\] { box-shadow: 3px 3px 0 rgb(var(--c-primary-700)); }
+html.amrita .shadow-\[8px_9px_0_\#ffd630\] { box-shadow: 8px 9px 0 rgb(var(--c-accent-500)); }
+html.amrita .shadow-\[4px_4px_0_\#ffd630\] { box-shadow: 4px 4px 0 rgb(var(--c-accent-500)); }
+html.amrita .shadow-\[8px_8px_0_\#ef6b59\] { box-shadow: 8px 8px 0 rgb(var(--c-primary-600)); }
+html.amrita .shadow-\[6px_6px_0_\#ef6b59\] { box-shadow: 6px 6px 0 rgb(var(--c-primary-600)); }
+html.amrita .shadow-\[5px_5px_0_\#ef6b59\] { box-shadow: 5px 5px 0 rgb(var(--c-primary-600)); }
+html.amrita .shadow-\[10px_10px_0_\#ef6b59\] { box-shadow: 10px 10px 0 rgb(var(--c-primary-600)); }
+html.amrita .shadow-\[0_5px_0_\#ef6b59\] { box-shadow: 0 5px 0 rgb(var(--c-primary-600)); }
+/* Give the Amrita campus map a little breathing room under the floating pill nav. */
+html.amrita .comic-map-page { padding-top: 6.5rem !important; }
