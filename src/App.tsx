@@ -4,6 +4,8 @@ import { primeComicAudio } from '@/utils/comicSound';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { NavbarAmrita } from '@/components/NavbarAmrita';
+import { FooterAmrita } from '@/components/FooterAmrita';
 import { RequireAuth } from '@/components/RequireAuth';
 import { Landing } from '@/pages/Landing';
 import { AmritaEye } from '@/pages/AmritaEye';
@@ -32,6 +34,9 @@ import { NotFound } from '@/pages/NotFound';
 export default function App() {
   const location = useLocation();
   const { isAmrita } = useBrand();
+  // Show the Amrita Eye chrome on the /amrita route too, not just for
+  // @amrita.edu logins — matches the koushikkkkkkkkkk.github.io preview.
+  const amritaChrome = isAmrita || location.pathname.startsWith('/amrita');
 
   // Browsers gate audio behind a user gesture; arm it once per visit.
   useEffect(() => {
@@ -91,7 +96,9 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {!isAuthPage ? <Navbar /> : null}
+      {/* Brand-aware chrome: Amrita Eye users get the Amrita Eye top bar +
+          footer (the koushikkkkkkkkkk.github.io/civiceye design). */}
+      {!isAuthPage ? (amritaChrome ? <NavbarAmrita /> : <Navbar />) : null}
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
@@ -104,7 +111,7 @@ export default function App() {
           {isAuthPage ? authRoutes : demoMode ? gatedRoutes : <RequireAuth>{gatedRoutes}</RequireAuth>}
         </motion.main>
       </AnimatePresence>
-      {!isAuthPage ? <Footer /> : null}
+      {!isAuthPage ? (amritaChrome ? <FooterAmrita /> : <Footer />) : null}
     </div>
   );
 }
