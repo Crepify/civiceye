@@ -38,6 +38,15 @@ export default function App() {
   // @amrita.edu logins — matches the koushikkkkkkkkkk.github.io preview.
   const amritaChrome = isAmrita || location.pathname.startsWith('/amrita');
 
+  // About + Map are minimalist pages for BOTH brands — mark them so the comic
+  // CivicEye skin (scoped to html:not(.amrita):not(.clean-route)) never
+  // paints them bright cream/navy.
+  useEffect(() => {
+    const clean = location.pathname === '/about' || location.pathname === '/map';
+    document.documentElement.classList.toggle('clean-route', clean);
+    return () => document.documentElement.classList.remove('clean-route');
+  }, [location.pathname]);
+
   // Browsers gate audio behind a user gesture; arm it once per visit.
   useEffect(() => {
     primeComicAudio();

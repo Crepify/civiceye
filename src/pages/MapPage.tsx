@@ -53,13 +53,7 @@ export function MapPage() {
 
   const debouncedSearch = useDebounce(filters.search, 250);
 
-  // This route alone uses the comic field-guide skin; it never changes Home.
-  // Amrita Eye keeps its own clean campus map (no comic skin).
-  useEffect(() => {
-    if (isAmrita) return;
-    document.body.classList.add('comic-map-route');
-    return () => document.body.classList.remove('comic-map-route');
-  }, [isAmrita]);
+  // Clean, brand-consistent map for both CivicEye and Amrita Eye — no comic skin.
 
   const visibleReports = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
@@ -111,12 +105,12 @@ export function MapPage() {
     setFilters({ ...DEFAULT_FILTERS, scope: isAmrita ? 'campus' : 'city' });
 
   return (
-    <div className="comic-map-page flex h-[calc(100vh-var(--nav-height))] flex-col bg-[#fff8e7] pt-[var(--nav-height)] text-[#172b44]">
+    <div className="flex h-[calc(100vh-var(--nav-height))] flex-col bg-slate-50 pt-[var(--nav-height)] dark:bg-slate-950">
       {/* Header bar */}
-      <div className="z-20 border-b-4 border-[#172b44] bg-[#ffd630] shadow-[0_5px_0_#ef6b59]">
+      <div className="z-20 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/5 dark:bg-white/[0.02]">
         <div className="flex flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="flex items-center gap-2 font-serif text-xl font-black uppercase text-[#172b44]">
+            <h1 className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
               <Layers className="h-5 w-5 text-primary-500" />
               Live issue map
             </h1>
@@ -137,8 +131,8 @@ export function MapPage() {
               className={cn(
                 'flex h-11 items-center gap-2 rounded-xl border px-3.5 text-sm font-semibold transition-all',
                 heatmap
-                  ? 'border-amber-400 bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                  : 'border-slate-200 bg-white/70 text-slate-600 hover:border-amber-300 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300',
+                  ? 'border-primary-400 bg-primary-500/10 text-primary-600 dark:text-primary-400'
+                  : 'border-slate-200 bg-white/70 text-slate-600 hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300',
               )}
             >
               <Thermometer className="h-4 w-4" />
@@ -158,7 +152,7 @@ export function MapPage() {
       {/* Body */}
       <div className="grid min-h-0 flex-1 grid-rows-[1fr_auto] lg:grid-cols-[1fr_340px] lg:grid-rows-1">
         {/* Map */}
-        <div className="relative min-h-[320px] bg-[#fff8e7] p-4 sm:p-5">
+        <div className="relative min-h-[320px] bg-slate-50 p-4 dark:bg-slate-950 sm:p-5">
           <MapView
             reports={visibleReports}
             selectedId={selectedId}
@@ -167,11 +161,11 @@ export function MapPage() {
             zoom={view.zoom}
             onViewChange={(center, zoom) => setView({ center, zoom })}
             heatmap={heatmap}
-            className="h-full min-h-[320px] border-[5px] border-[#172b44] shadow-[8px_8px_0_#ef6b59]"
+            className="h-full min-h-[320px] overflow-hidden rounded-2xl border border-slate-200/80 shadow-soft dark:border-white/10"
           />
 
           {/* Legend */}
-          <div className="pointer-events-none absolute bottom-8 left-8 z-20 hidden border-[3px] border-[#172b44] bg-[#fff8e7] px-4 py-3 shadow-[4px_4px_0_#172b44] sm:block">
+          <div className="pointer-events-none absolute bottom-8 left-8 z-20 hidden rounded-2xl border border-slate-200/70 bg-white/90 px-4 py-3 shadow-soft backdrop-blur dark:border-white/10 dark:bg-slate-900/90 sm:block">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
               Severity
             </p>
@@ -213,7 +207,7 @@ export function MapPage() {
         </div>
 
         {/* Side list (desktop) */}
-        <aside className="hidden min-h-0 flex-col overflow-hidden border-l-[5px] border-[#172b44] bg-[#91dcc4] lg:flex">
+        <aside className="hidden min-h-0 flex-col overflow-hidden border-l border-slate-200/70 bg-white/70 dark:border-white/5 dark:bg-white/[0.02] lg:flex">
           <div className="flex items-center justify-between border-b border-slate-200/70 px-4 py-3 dark:border-white/5">
             <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Visible reports</p>
             {hasActiveFilters ? (
