@@ -21,9 +21,9 @@ const features = [
 
 /** The four founders of CivicEye — initials stand in until real photos are added. */
 const creators = [
-  ['AR', 'Archit Ranjeev', 'Founder · Backend', '#ffd630'],
+  ['AR', 'Archit Renjeev', 'Founder · Backend', '#ffd630'],
   ['AS', 'Aswathram', 'Founder · AI & Backend', '#91dcc4'],
-  ['KI', 'Kiushki', 'Founder · UI Designer', '#ef6b59'],
+  ['KI', 'Koushik', 'Founder · UI Designer', '#ef6b59'],
   ['SH', 'S. Himeshkara', 'Founder · UI Designer', '#28627a'],
 ];
 

@@ -57,7 +57,7 @@ const TIMELINE = [
 const CREATORS = [
   {
     badge: 'AR',
-    name: 'Archit Ranjeev',
+    name: 'Archit Renjeev',
     role: 'Founder · Backend',
     tint: '#ffd630',
     lines: [
@@ -75,7 +75,7 @@ const CREATORS = [
   },
   {
     badge: 'KI',
-    name: 'Kiushki',
+    name: 'Koushik',
     role: 'Founder · UI Designer',
     tint: '#ef6b59',
     lines: [

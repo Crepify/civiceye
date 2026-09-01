@@ -37,23 +37,46 @@
      or locally by any .amrita wrapper (e.g. the login page). */
   html.amrita,
   .amrita {
-    --c-primary-50: 255 241 243;
-    --c-primary-100: 255 228 233;
-    --c-primary-200: 255 205 216;
-    --c-primary-300: 255 160 180;
-    --c-primary-400: 255 105 135;
-    --c-primary-500: 228 0 43; /* Amrita red */
-    --c-primary-600: 190 0 40;
-    --c-primary-700: 155 0 35;
-    --c-primary-800: 120 0 30;
-    --c-primary-900: 90 0 25;
-    --c-primary-950: 60 0 15;
+    /* Amrita Eye palette — matches the home page exactly:
+       maroon #A51636 (primary) + berry #E52B50 (accent). */
+    --c-primary-50: 253 240 243;
+    --c-primary-100: 250 225 230;
+    --c-primary-200: 244 195 204;
+    --c-primary-300: 234 148 164;
+    --c-primary-400: 216 93 120;
+    --c-primary-500: 165 22 54;   /* #A51636 maroon */
+    --c-primary-600: 132 18 43;   /* #84122B */
+    --c-primary-700: 100 14 33;
+    --c-primary-800: 70 10 23;
+    --c-primary-900: 45 6 15;
+    --c-primary-950: 28 4 9;
 
-    /* Accent becomes warm yellow */
-    --c-accent-300: 252 211 77;
-    --c-accent-400: 251 191 36;
-    --c-accent-500: 245 158 11;
-    --c-accent-600: 217 119 6;
+    /* Accent = berry (bright call-to-action pink-red) */
+    --c-accent-300: 241 130 158;
+    --c-accent-400: 235 86 118;
+    --c-accent-500: 229 43 80;    /* #E52B50 berry */
+    --c-accent-600: 190 35 66;
+    --c-accent-700: 150 28 52;
+  }
+
+  /* Dark mode: the home page flips maroon → bright berry and uses deep
+     maroon-charcoal backgrounds. */
+  html.amrita.dark {
+    --c-primary-50: 45 6 15;
+    --c-primary-100: 60 8 20;
+    --c-primary-200: 80 11 27;
+    --c-primary-300: 110 15 37;
+    --c-primary-400: 140 20 48;
+    --c-primary-500: 229 43 80;   /* #E52B50 bright berry */
+    --c-primary-600: 235 86 118;
+    --c-primary-700: 241 130 158;
+    --c-primary-800: 247 175 193;
+    --c-primary-900: 252 220 228;
+    --c-primary-950: 255 240 243;
+    --c-accent-300: 255 190 205;
+    --c-accent-400: 235 86 118;
+    --c-accent-500: 229 43 80;
+    --c-accent-600: 190 35 66;
   }
 
   html.dark {
@@ -520,3 +543,144 @@ html.amrita .bg-violet-500 { background-color: rgb(var(--c-primary-500)); }
 html.amrita .bg-violet-500\/10 { background-color: rgb(var(--c-primary-500) / 0.1); }
 html.amrita .from-primary-500 { --tw-gradient-from: rgb(var(--c-primary-500)); }
 html.amrita .to-primary-600 { --tw-gradient-to: rgb(var(--c-primary-600)); }
+
+/* ===================================================================
+   AMRITA EYE — SHARED-TAB THEME
+   Makes every tab (map, live, community, dashboard, about, contact,
+   features, report, admin) match the Amrita Eye home page:
+   warm #FFF5F7 light / deep maroon-charcoal dark, Playfair serif
+   headings, maroon → berry accents, white rounded cards.
+   =================================================================== */
+html.amrita body {
+  background-color: #fff5f7;
+  color: #1d1d1f;
+}
+html.amrita.dark body {
+  background-color: #1a030a;
+  color: #f5f5f7;
+}
+
+/* Headings — Playfair serif like the home page. */
+html.amrita .heading-xl,
+html.amrita .heading-lg,
+html.amrita h1,
+html.amrita h2,
+html.amrita h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: -0.01em;
+}
+html.amrita .heading-xl,
+html.amrita .heading-lg {
+  color: #a51636;
+}
+html.amrita.dark .heading-xl,
+html.amrita.dark .heading-lg,
+html.amrita.dark h1,
+html.amrita.dark h2,
+html.amrita.dark h3 {
+  color: #f5f5f7;
+}
+
+/* Cards — white, rounded-2xl, soft maroon-tinted borders (home style). */
+html.amrita .card {
+  background-color: #ffffff;
+  border: 1px solid #f0dfe3;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(165, 22, 54, 0.06);
+}
+html.amrita.dark .card {
+  background-color: #161618;
+  border-color: #2a2a2e;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+html.amrita .card:hover {
+  transform: none;
+  box-shadow: 0 10px 34px rgba(165, 22, 54, 0.1);
+}
+
+/* Glass surfaces — soft white-pink glass in light, maroon-charcoal in dark. */
+html.amrita .glass,
+html.amrita .glass-strong {
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(165, 22, 54, 0.12);
+  border-radius: 1rem;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 30px rgba(165, 22, 54, 0.07);
+}
+html.amrita.dark .glass,
+html.amrita.dark .glass-strong {
+  background-color: rgba(22, 22, 24, 0.8);
+  border-color: rgba(229, 43, 80, 0.2);
+}
+
+/* Buttons — rounded-full pill like the home CTA (maroon → berry). */
+html.amrita .btn,
+html.amrita .btn-primary {
+  border-radius: 9999px;
+}
+html.amrita .btn-primary {
+  background-color: #a51636;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(165, 22, 54, 0.35);
+}
+html.amrita .btn-primary:hover {
+  background-color: #84122b;
+}
+html.amrita.dark .btn-primary {
+  background-color: #e52b50;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(229, 43, 80, 0.35);
+}
+html.amrita.dark .btn-primary:hover {
+  background-color: #be2342;
+}
+html.amrita .btn-secondary {
+  background-color: #ffffff;
+  border-color: #e8ccd2;
+  color: #4a1c27;
+}
+html.amrita.dark .btn-secondary {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f5f5f7;
+}
+
+/* Inputs — white rounded-xl with maroon focus ring. */
+html.amrita .input-base {
+  background-color: #ffffff;
+  border: 1px solid #ead6db;
+  border-radius: 0.75rem;
+  color: #1d1d1f;
+  box-shadow: none;
+}
+html.amrita .input-base:focus {
+  border-color: #a51636;
+  box-shadow: 0 0 0 3px rgba(165, 22, 54, 0.15);
+}
+html.amrita.dark .input-base {
+  background-color: #161618;
+  border-color: #2f2f34;
+  color: #f5f5f7;
+}
+
+/* Chips / badges — soft maroon tint. */
+html.amrita .chip {
+  background-color: rgba(165, 22, 54, 0.08);
+  color: #a51636;
+  border: 1px solid rgba(165, 22, 54, 0.18);
+  border-radius: 9999px;
+}
+html.amrita.dark .chip {
+  background-color: rgba(229, 43, 80, 0.14);
+  color: #ffb1c4;
+  border-color: rgba(229, 43, 80, 0.25);
+}
+
+/* Focus rings — maroon. */
+html.amrita :focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(165, 22, 54, 0.35);
+}
+html.amrita.dark :focus-visible {
+  box-shadow: 0 0 0 3px rgba(229, 43, 80, 0.4);
+}
