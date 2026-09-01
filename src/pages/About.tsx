@@ -217,7 +217,6 @@ export function About() {
               <article
                 key={creator.name}
                 tabIndex={0}
-                onMouseEnter={() => founderThemes[index]?.()}
                 onFocus={() => founderThemes[index]?.()}
                 onClick={() => founderThemes[index]?.()}
                 className="border-4 border-[#fff8e7] bg-[#102b3d] p-6 text-[#fff8e7] shadow-[6px_6px_0_#ef6b59] transition hover:-translate-y-2 hover:rotate-[-1deg] hover:shadow-[8px_9px_0_#ffd630]"
