@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <AlertTriangle className="h-7 w-7" />
             </div>
             <h1 className="text-lg font-extrabold text-slate-900 dark:text-white">
-              CivicEye hit a snag
+              Something hit a snag
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
               Something crashed while loading the app. The details were printed to the browser

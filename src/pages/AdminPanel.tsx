@@ -260,7 +260,7 @@ export function AdminPanel() {
             Mark reports as campus
           </h2>
           <p className="mb-3 text-xs text-slate-400">
-            Move reports between the city feed (CivicEye) and the campus feed (Amrita Eye). Campus
+            Move reports between the city feed (public) and the campus feed (Amrita Eye). Campus
             reports are only visible to Amrita accounts.
           </p>
           <div className="card overflow-hidden">

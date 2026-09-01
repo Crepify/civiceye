@@ -156,7 +156,8 @@ export function escalationEmailText(
   message?: string,
 ): { subject: string; body: string } {
   const url = `${window.location.origin}/report/${report.id}`;
-  const subject = `[CivicEye] ${report.title} — report ${report.code ?? report.id}`;
+  const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
+  const subject = `[${appName}] ${report.title} — report ${report.code ?? report.id}`;
   const body = [
     `To: ${authority.name} (${authority.department})`,
     ``,
@@ -173,7 +174,7 @@ export function escalationEmailText(
     report.description,
     message ? `\nNote:\n${message}` : '',
     ``,
-    `— Sent from CivicEye`,
+    `— Sent from ${report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye'}`,
   ].join('\n');
   return { subject, body };
 }
@@ -183,8 +184,9 @@ export function escalationWhatsAppTargets(
   report: Report,
   authority: Authority,
 ): { number: string; url: string }[] {
+  const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const text = [
-    `CivicEye report: ${report.title}`,
+    `${appName} report: ${report.title}`,
     `Category: ${report.category} · Severity: ${report.severity}`,
     `Location: ${report.locationName}`,
     `Details: ${window.location.origin}/report/${report.id}`,
@@ -194,8 +196,9 @@ export function escalationWhatsAppTargets(
 
 /** The SMS deep link for texting the authority about a report. */
 export function escalationSmsUrl(report: Report, authority: Authority): string | undefined {
+  const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const text = [
-    `CivicEye report: ${report.title}`,
+    `${appName} report: ${report.title}`,
     `Category: ${report.category} · Severity: ${report.severity}`,
     `Location: ${report.locationName} (${report.coordinates.lat}, ${report.coordinates.lng})`,
     `Details: ${window.location.origin}/report/${report.id}`,

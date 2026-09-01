@@ -46,7 +46,8 @@ const DETAILS = [
 /** Features page. */
 export function Features() {
   const { reports } = useReports();
-  const { isAmrita } = useBrand();
+  const { isAmrita, meta } = useBrand();
+  const appName = meta.appName;
   // Only the active brand's reports for the live map preview.
   const scoped = useMemo(
     () => reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city')).slice(0, 40),
@@ -58,7 +59,7 @@ export function Features() {
       <PageHeader
         eyebrow="Features"
         title="Everything you need to fix your street"
-        description="CivicEye is a full product: a 60-second reporting flow, an AI assistant, a live map, community trust signals and a command centre for authorities."
+        description={`${appName} is a full product: a 60-second reporting flow, an AI assistant, a live map, community trust signals and a command centre for authorities.`}
       >
         <div className="flex flex-wrap gap-3">
           <Link to="/report" className="btn-primary">
@@ -182,7 +183,7 @@ export function Features() {
               Ready to make your street safer?
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-white/85 sm:text-base">
-              The fastest way to understand CivicEye is to file a report. It takes less than a
+              The fastest way to understand {appName} is to file a report. It takes less than a
               minute.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">

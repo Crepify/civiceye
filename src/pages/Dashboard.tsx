@@ -41,7 +41,7 @@ const SEVERITY_HEX: Record<Severity, string> = {
 export function Dashboard() {
   const { reports, loading, markResolved, assignToAuthority, rejectAsAuthority, refresh } =
     useReports();
-  const { isAmrita } = useBrand();
+  const { isAmrita, meta } = useBrand();
   const toast = useToast();
   const notifications = useNotifications();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -154,7 +154,7 @@ export function Dashboard() {
         ),
       '',
       '=================================================================',
-      '  This report was generated from the CivicEye prototype.',
+      `  This report was generated from the ${meta.appName} prototype.`,
       '  All data is simulated for demonstration purposes.',
       '=================================================================',
     ];

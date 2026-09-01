@@ -419,7 +419,7 @@ export function FallbackMapView({
 
       {/* Attribution */}
       <div className="pointer-events-none absolute bottom-1.5 left-1.5 rounded-lg bg-white/70 px-2 py-1 text-[9px] font-medium text-slate-500 backdrop-blur dark:bg-slate-900/70 dark:text-slate-400">
-        CivicEye map · no API key configured · {reports.length} reports
+        Community map · no API key configured · {reports.length} reports
       </div>
     </div>
   );

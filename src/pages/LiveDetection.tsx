@@ -168,7 +168,7 @@ function boxesOverlap(a: DetectionBox, b: DetectionBox): boolean {
 export function LiveDetection() {
   const toast = useToast();
   const { user, profile } = useAuth();
-  const { isAmrita } = useBrand();
+  const { isAmrita, meta } = useBrand();
   const { addReport } = useReports();
 
   const [camera, setCamera] = useState<LiveCamera>(LIVE_CAMERAS[0]);
@@ -363,7 +363,7 @@ export function LiveDetection() {
         const photoUrl = await uploadReportPhoto(event.image, user.id);
         const report = await addReport({
           title: `Live ${categoryById(event.category).label} detected on ${event.camera.name}`,
-          description: `${event.summary} Captured from the CivicEye Live AI full-road frame. Please verify the issue before taking action.`,
+          description: `${event.summary} Captured from the ${meta.appName} Live AI full-road frame. Please verify the issue before taking action.`,
           coordinates: event.camera.coords,
           locationName: event.camera.area,
           category: event.category,
@@ -397,7 +397,7 @@ export function LiveDetection() {
         autoReportInFlight.current = false;
       }
     },
-    [addReport, isAmrita, profile, toast, user],
+    [addReport, isAmrita, meta.appName, profile, toast, user],
   );
 
   /**
@@ -639,7 +639,7 @@ export function LiveDetection() {
             </p>
             <h1 className="heading-xl mt-2">Full-road frame watchtower</h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-slate-400 sm:text-base">
-              Point your device at the road or load a road recording. CivicEye sends the entire frame
+              Point your device at the road or load a road recording. {meta.appName} sends the entire frame
               to the Report AI model repeatedly and draws every returned pothole box.
             </p>
           </div>

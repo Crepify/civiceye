@@ -1294,7 +1294,7 @@ function SuccessScreen({
               onClick={() => setPortalCancelled(true)}
               className="text-xs font-semibold text-slate-500 hover:underline dark:text-slate-400"
             >
-              Stay in CivicEye
+              Stay here
             </button>
           </div>
         </div>

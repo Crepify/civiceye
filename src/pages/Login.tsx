@@ -145,7 +145,7 @@ export function Login() {
           <Logo to="/" className="justify-center" />
           <p className="mt-7 inline-block bg-[#ffd630] px-3 py-2 text-xs font-black tracking-[.14em]">PREVIEW ACCESS</p>
           <h1 className="mt-5 font-serif text-4xl font-black uppercase leading-none">Join the city squad.</h1>
-          <p className="mt-4 font-semibold">Supabase is not connected in this preview. Continue as a demo citizen to review every CivicEye page.</p>
+          <p className="mt-4 font-semibold">Supabase is not connected in this preview. Continue as a demo citizen to review every page.</p>
           <button onClick={() => navigate(next)} className="mt-7 border-3 border-[#172b44] bg-[#91dcc4] px-5 py-3 font-black shadow-[4px_4px_0_#172b44]">CONTINUE AS DEMO CITIZEN ✦</button>
         </div>
       </div>

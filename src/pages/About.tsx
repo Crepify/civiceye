@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { SectionHeading } from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
 import { Logo } from '@/components/Logo';
+import { useBrand } from '@/hooks/useBrand';
 
 const VALUES = [
   {
@@ -100,6 +101,11 @@ const MISSION =
 
 /** About page. */
 export function About() {
+  const { meta } = useBrand();
+  const appName = meta.appName;
+  // Render-time brand substitution: any "CivicEye" mention in the static
+  // story text becomes the active brand's name (e.g. "Amrita Eye").
+  const b = (s: string) => s.replace(/CivicEye/g, appName);
   useEffect(() => {
     if (window.location.hash !== '#creators') return;
     const timer = window.setTimeout(() => {
@@ -111,9 +117,9 @@ export function About() {
   return (
     <>
       <PageHeader
-        eyebrow="About CivicEye"
+        eyebrow={`About ${appName}`}
         title="Know your place before it bites"
-        description="CivicEye is a shared, living map of what\u2019s broken, dark, flooded or unsafe in your city and campus — reported and verified by the people who live it, so newcomers and locals alike know where they\u2019re going."
+        description={`${appName} is a shared, living map of what\u2019s broken, dark, flooded or unsafe in your city and campus — reported and verified by the people who live it, so newcomers and locals alike know where they\u2019re going.`}
       />
 
       <section className="section-pad py-16 sm:py-20">
@@ -134,7 +140,7 @@ export function About() {
                 time. Newcomers just don't have access to them.
               </p>
               <p>
-                CivicEye started in the hostel as exactly that missing knowledge — a place where
+                {appName} started in the hostel as exactly that missing knowledge — a place where
                 anyone can report what they see and neighbours can confirm it, so the whole map of
                 "what to avoid" and "what to fix" is built together, one report at a time.
               </p>
@@ -185,7 +191,7 @@ export function About() {
           <p className="relative inline-block border-2 border-[#172b44] bg-[#ffd630] px-3 py-1 text-xs font-black tracking-[.14em] text-[#172b44]">ABOUT US — THE FOUR FOUNDERS</p>
           <h2 className="relative mt-4 max-w-4xl font-serif text-4xl font-black uppercase tracking-[-.05em] sm:text-5xl">Built because hazards get ignored until someone gets hurt</h2>
           <p className="relative mt-5 max-w-3xl border-l-[6px] border-[#ffd630] pl-4 text-base font-semibold leading-relaxed text-[#fff8e7]/95 sm:text-lg">
-            {MISSION}
+            {b(MISSION)}
           </p>
 
           <div className="relative mt-8 grid gap-4 border-4 border-[#ef6b59] bg-[#102b3d] p-6 sm:grid-cols-[auto_1fr] sm:items-center">
@@ -226,7 +232,7 @@ export function About() {
                 <p className="mt-2 text-xs font-black tracking-[.12em] text-[#ffd630]">{creator.role}</p>
                 <div className="mt-4 space-y-3">
                   {creator.lines.map((line) => (
-                    <p key={line.slice(0, 24)} className="text-sm font-semibold leading-relaxed text-[#fff8e7]/85">{line}</p>
+                    <p key={line.slice(0, 24)} className="text-sm font-semibold leading-relaxed text-[#fff8e7]/85">{b(line)}</p>
                   ))}
                   {creator.quote ? <p className="pt-1 font-serif text-lg font-black leading-snug text-[#ffd630]">{creator.quote}</p> : null}
                 </div>
@@ -252,7 +258,7 @@ export function About() {
                   </div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">{v.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                    {v.text}
+                    {b(v.text)}
                   </p>
                 </div>
               </Reveal>
@@ -281,7 +287,7 @@ export function About() {
                     {t.title}
                   </h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                    {t.text}
+                    {b(t.text)}
                   </p>
                 </div>
               </div>
