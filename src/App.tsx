@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { RequireAuth } from '@/components/RequireAuth';
 import { Landing } from '@/pages/Landing';
 import { AmritaEye } from '@/pages/AmritaEye';
+import { useBrand } from '@/hooks/useBrand';
 import { Features } from '@/pages/Features';
 import { MapPage } from '@/pages/MapPage';
 import { ReportPage } from '@/pages/ReportPage';
@@ -30,6 +31,7 @@ import { NotFound } from '@/pages/NotFound';
  */
 export default function App() {
   const location = useLocation();
+  const { isAmrita } = useBrand();
 
   // Browsers gate audio behind a user gesture; arm it once per visit.
   useEffect(() => {
@@ -59,7 +61,10 @@ export default function App() {
   // Everything else requires a signed-in user (login-first app).
   const gatedRoutes = (
     <Routes location={location}>
-      <Route path="/" element={<Landing />} />
+      {/* Brand-aware landing: Amrita Eye users get the Amrita Eye page
+          (koushikkkkkkkkkk.github.io/civiceye design); everyone else gets
+          the CivicEye comic landing. */}
+      <Route path="/" element={isAmrita ? <AmritaEye /> : <Landing />} />
       <Route path="/amrita" element={<AmritaEye />} />
       <Route path="/features" element={<Features />} />
       <Route path="/map" element={<MapPage />} />
