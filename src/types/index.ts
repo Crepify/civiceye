@@ -172,6 +172,12 @@ export interface Authority {
   address?: string;
   /** Office hours label, e.g. "Mon–Sat 9:30–17:30". */
   hours?: string;
+  /**
+   * Official complaint/grievance portal URL for this department. When set,
+   * the post-submit screen offers to redirect the citizen there so they can
+   * also file/track the issue officially (e.g. BBMP Samparka).
+   */
+  portalUrl?: string;
 }
 
 /** A logged escalation of a report to an authority (the `authority_reports` table). */

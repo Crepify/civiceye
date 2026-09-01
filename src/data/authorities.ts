@@ -37,6 +37,8 @@ export const AUTHORITIES: Authority[] = [
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BBMP Ward 42 Office, 4th Main Road, Bengaluru — 5600XX', // TODO
     hours: 'Mon–Sat 9:30–17:30',
+    // Official grievance portal — verify it's current before demoing.
+    portalUrl: 'https://bbmp.samparka.online', // BBMP Samparka (roads/potholes)
   },
   {
     id: 'bbmp-swm',
@@ -50,6 +52,7 @@ export const AUTHORITIES: Authority[] = [
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'SWM Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
     hours: 'Mon–Sat 9:00–18:00',
+    portalUrl: 'https://bbmp.samparka.online', // BBMP Samparka (garbage/SWM)
   },
   {
     id: 'bwssb',
@@ -63,6 +66,7 @@ export const AUTHORITIES: Authority[] = [
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BWSSB, Cauvery Bhavan, KG Road, Bengaluru — 560009', // TODO
     hours: '24×7 helpline',
+    portalUrl: 'https://bwssb.karnataka.gov.in', // official BWSSB site
   },
   {
     id: 'bescom',
@@ -76,6 +80,7 @@ export const AUTHORITIES: Authority[] = [
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BESCOM Corporate Office, KR Circle, Bengaluru — 560001', // TODO
     hours: '24×7 helpline (1912)',
+    portalUrl: 'https://bescom.karnataka.gov.in', // official BESCOM site
   },
   {
     id: 'traffic-police',
@@ -89,6 +94,7 @@ export const AUTHORITIES: Authority[] = [
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Traffic Management Centre, Infantry Road, Bengaluru — 560001', // TODO
     hours: '24×7 control room',
+    portalUrl: 'https://www.bengalurucitypolice.gov.in', // Bangalore City Police
   },
   {
     id: 'forest-dept',
@@ -102,6 +108,7 @@ export const AUTHORITIES: Authority[] = [
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Forest Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
     hours: 'Mon–Sat 10:00–17:00',
+    portalUrl: 'https://bbmp.gov.in', // BBMP main site (tree cell)
   },
 
   /* ------------------------ Amrita Eye (campus) ---------------------- */

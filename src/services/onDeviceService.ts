@@ -1,5 +1,7 @@
-import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types';
+import type { AnalysisResult, CategoryId, Coordinates } from '@/types';
 import { detectBlur } from '@/utils/image';
+import { ACCEPT_CONFIDENCE, clamp01, mapLabel, severityFromConfidence } from './onDeviceMap';
+import { customYoloEnabled, analyzeWithCustomYolo } from './onDeviceYolo';
 
 /**
  * ON-DEVICE AI engine — runs a real object-detection model in the browser
@@ -7,10 +9,14 @@ import { detectBlur } from '@/utils/image';
  *
  * - Model runs on WASM/WebGPU locally: FREE, PRIVATE (photo never leaves the
  *   device), OFFLINE-capable after first download, no rate limits.
- * - The model is downloaded once (~25 MB) and cached in the browser.
- * - Because a general COCO model doesn't know "pothole", this engine only
- *   claims results it's confident about; specialized civic detection falls
- *   through to Roboflow/Hugging Face in the orchestrator.
+ * - The default model (Xenova/yolos-tiny) is trained on COCO — the 80 general
+ *   everyday classes (person, car, traffic light…). It does NOT know civic
+ *   issues (potholes, garbage, manholes…), so by default this engine only
+ *   CLAIMS results it can map to a real category; everything else hands off
+ *   to Roboflow/Hugging Face in the orchestrator.
+ * - To make on-device detect ALL kinds of civic issues, point it at a custom
+ *   YOLO ONNX model trained on YOUR categories (see onDeviceYolo.ts + docs):
+ *     VITE_ONDEVICE_YOLO_URL / VITE_ONDEVICE_YOLO_LABELS
  *
  * Env:
  *   VITE_AI_ONDEVICE = 'true' (default true) | 'false'
@@ -21,9 +27,6 @@ const MODEL = import.meta.env.VITE_ONDEVICE_MODEL?.trim() || 'Xenova/yolos-tiny'
 const ENABLED = import.meta.env.VITE_AI_ONDEVICE !== 'false';
 
 export const onDeviceEnabled = ENABLED;
-
-/** Minimum confidence for the on-device result to be trusted. */
-const ACCEPT_CONFIDENCE = 0.35;
 
 /* Lazy singleton: the model + pipeline are heavy, so we load them on first
  * use only, and keep them cached for the rest of the session. */
@@ -47,42 +50,14 @@ async function getPipeline(): Promise<(input: string) => Promise<Array<{ label: 
   >;
 }
 
-/** Map COCO-style labels the on-device model can see → CivicEye categories. */
-const ON_DEVICE_MAP: Record<string, CategoryId> = {
-  'traffic light': 'traffic-signal',
-  'traffic-light': 'traffic-signal',
-  'fire hydrant': 'water-leakage',
-  'stop sign': 'traffic-signal',
-  person: 'security',
-};
-
-function mapLabel(label: string): CategoryId {
-  const key = label.trim().toLowerCase();
-  return ON_DEVICE_MAP[key] ?? 'other';
-}
-
-function severityFromConfidence(score: number): Severity {
-  if (score > 0.82) return 'critical';
-  if (score > 0.68) return 'high';
-  if (score > 0.5) return 'medium';
-  return 'low';
-}
-
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
-
 export interface OnDeviceVerdict {
   /** True if the on-device model is confident enough to be the answer. */
   confident: boolean;
   result: AnalysisResult;
 }
 
-/**
- * Run on-device detection on a photo. Never throws for model issues — it
- * returns a low-confidence verdict so the orchestrator falls through to cloud.
- */
-export async function analyzeOnDevice(photo: string, coordinates: Coordinates | null): Promise<OnDeviceVerdict> {
-  const quality = await detectBlur(photo);
-  const base: AnalysisResult = {
+function verdictBase(coordinates: Coordinates | null, imageQuality: AnalysisResult['imageQuality']): AnalysisResult {
+  return {
     category: 'other',
     confidence: 0,
     severity: 'low',
@@ -91,12 +66,77 @@ export async function analyzeOnDevice(photo: string, coordinates: Coordinates | 
     coordinates,
     timestamp: new Date().toISOString(),
     tags: [],
-    imageQuality: quality,
+    imageQuality,
     engine: 'ondevice',
   };
+}
+
+/**
+ * Turn a ranked list of {label, score} detections into a verdict.
+ * Scans ALL detections (not just the top-1) and picks the HIGHEST-confidence
+ * one that maps to a real civic category — so a scene with "car 0.9 +
+ * person 0.5" correctly yields security 0.5 instead of giving up on "car".
+ */
+function verdictFromDetections(
+  ranked: Array<{ label: string; score: number }>,
+  coordinates: Coordinates | null,
+  quality: AnalysisResult['imageQuality'],
+  sourceNote: string,
+): OnDeviceVerdict {
+  const base = verdictBase(coordinates, quality);
+  if (ranked.length === 0) {
+    base.description = `${sourceNote} found no objects in this photo.`;
+    return { confident: false, result: base };
+  }
+
+  const objects = ranked
+    .slice(0, 6)
+    .map((d) => `${d.label} (${Math.round(d.score * 100)}%)`);
+  base.objects = objects;
+  base.tags = ranked.slice(0, 5).map((d) => d.label);
+  base.confidence = clamp01(ranked[0].score);
+
+  // Best detection that actually maps to a civic category.
+  const confidentMatch =
+    ranked.find((d) => mapLabel(d.label) !== 'other' && d.score >= ACCEPT_CONFIDENCE) ?? null;
+  const category: CategoryId = confidentMatch ? mapLabel(confidentMatch.label) : 'other';
+
+  base.category = category;
+  base.severity = severityFromConfidence(confidentMatch ? confidentMatch.score : ranked[0].score);
+  base.description =
+    `${sourceNote}: found ${ranked.length} object type(s) — ` +
+    `top: ${ranked[0].label} (${Math.round(ranked[0].score * 100)}%). ` +
+    (confidentMatch
+      ? `Best match: "${confidentMatch.label}" → ${category.replace(/-/g, ' ')}.`
+      : 'No specific civic issue recognised on-device — the cloud engine will take a closer look.');
+
+  return { confident: Boolean(confidentMatch), result: base };
+}
+
+/**
+ * Run on-device detection on a photo. Never throws for model issues — it
+ * returns a low-confidence verdict so the orchestrator falls through to cloud.
+ */
+export async function analyzeOnDevice(photo: string, coordinates: Coordinates | null): Promise<OnDeviceVerdict> {
+  const quality = await detectBlur(photo).catch(() => 'clear' as const);
+  const base = verdictBase(coordinates, quality);
 
   if (!ENABLED) return { confident: false, result: base };
 
+  // 1) Custom civic-trained YOLO model, if configured — this is the upgrade
+  //    that detects potholes/garbage/manholes/etc. on-device.
+  if (customYoloEnabled) {
+    try {
+      const verdict = await analyzeWithCustomYolo(photo, coordinates, quality);
+      if (verdict.confident) return verdict;
+      console.warn('[CivicEye] custom on-device YOLO not confident — trying the general model.');
+    } catch (err) {
+      console.warn('[CivicEye] custom on-device YOLO unavailable:', err);
+    }
+  }
+
+  // 2) General Transformers.js model (COCO). Only claims civic categories
+  //    it can map (traffic light / stop sign / fire hydrant / person).
   try {
     const detector = await getPipeline();
     const detections = await detector(photo);
@@ -108,30 +148,12 @@ export async function analyzeOnDevice(photo: string, coordinates: Coordinates | 
     }
     const ranked = [...bestByLabel.entries()].sort((a, b) => b[1] - a[1]);
 
-    if (ranked.length === 0) {
-      base.description = 'On-device model found no objects in this photo.';
-      return { confident: false, result: base };
-    }
-
-    const [topLabel, topScore] = ranked[0];
-    const confidence = clamp(topScore, 0, 1);
-    const category = mapLabel(topLabel);
-
-    const objects = ranked.slice(0, 6).map(([l, s]) => `${l} (${Math.round(s * 100)}%)`);
-    base.confidence = confidence;
-    base.category = category;
-    base.severity = severityFromConfidence(confidence);
-    base.objects = objects;
-    base.tags = ranked.slice(0, 5).map(([l]) => l);
-    base.description =
-      `Analysed on your device: found ${ranked.length} object type(s). ` +
-      `Top: ${topLabel} (${Math.round(confidence * 100)}%). ` +
-      (category !== 'other'
-        ? `This maps to ${category.replace(/-/g, ' ')}.`
-        : 'No specific civic issue recognised locally — the cloud engine will take a closer look.');
-
-    // Only confident when it actually maps to a real civic category.
-    return { confident: category !== 'other' && confidence >= ACCEPT_CONFIDENCE, result: base };
+    return verdictFromDetections(
+      ranked.map(([label, score]) => ({ label, score })),
+      coordinates,
+      quality,
+      'On-device model',
+    );
   } catch (err) {
     base.description = 'On-device model unavailable on this browser.';
     console.warn('[CivicEye] on-device AI unavailable:', err);

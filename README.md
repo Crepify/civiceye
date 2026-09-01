@@ -83,6 +83,7 @@ All keys are stored on **Vercel** (or `.env` locally). Every `VITE_` var is read
 | `VITE_ROBOFLOW_WORKFLOW_ID` | Roboflow workflow slug (your pothole workflow) |
 | `VITE_ROBOFLOW_PROXY_URL` | Cloudflare Worker URL for Roboflow (30s timeout; else Vercel `/api/roboflow`) |
 | `VITE_AI_ONDEVICE` · `VITE_ONDEVICE_MODEL` | On-device AI (default `true`, model `Xenova/yolos-tiny`) |
+| `VITE_ONDEVICE_YOLO_URL` · `VITE_ONDEVICE_YOLO_LABELS` | Custom civic YOLO ONNX model (optional — detect potholes etc. on-device) |
 | `VITE_HF_API_TOKEN` · `VITE_HF_MODEL` | Hugging Face backup (default `facebook/detr-resnet-50`) |
 | `VITE_ADMIN_EMAILS` | Extra comma-separated admin emails |
 | `VITE_APP_URL` | Public origin (QR + magic links) |
@@ -94,9 +95,10 @@ All keys are stored on **Vercel** (or `.env` locally). Every `VITE_` var is read
 ## 🧠 AI engines (order)
 
 1. **On-device (Transformers.js)** — runs a real model in your browser (WASM/WebGPU). Free, private (photo never leaves the device), offline-capable after first download. Only trusted when it confidently maps to a civic category — otherwise the cloud takes over.
-2. **CivicLENS AI (Roboflow)** — primary cloud engine, trained on civic issues. Runs via a proxy (Cloudflare Worker preferred, or `/api/roboflow`).
-3. **Hugging Face Inference API** — cloud backup (needs `VITE_HF_API_TOKEN`).
-4. **Built-in estimate** — last resort, clearly labeled.
+2. **Custom on-device YOLO** *(optional)* — if `VITE_ONDEVICE_YOLO_URL` is set, runs your own Roboflow-trained YOLOv8/YOLO11 ONNX model in the browser (this is what detects potholes/garbage/manholes on-device — see `AI_INTEGRATION_GUIDE.md` Step 10).
+3. **CivicLENS AI (Roboflow)** — primary cloud engine, trained on civic issues. Runs via a proxy (Cloudflare Worker preferred, or `/api/roboflow`).
+4. **Hugging Face Inference API** — cloud backup (needs `VITE_HF_API_TOKEN`).
+5. **Built-in estimate** — last resort, clearly labeled.
 
 Photos are compressed before sending (768px, JPEG ~72) to stay within free-tier quotas.
 
@@ -130,7 +132,8 @@ Photos are compressed before sending (768px, JPEG ~72) to stay within free-tier 
 ## 🚀 Deployment
 
 - **Host:** Vercel (auto-deploys from GitHub). Build: `npm run build` → output `dist`.
-- **Supabase:** free project for auth/data/storage — run `supabase/schema.sql` (re-runnable), plus `supabase/storage-fix.sql` if uploads fail with RLS errors.
+- **Supabase:** free project for auth/data/storage — run `supabase/schema.sql` (re-runnable), plus `supabase/storage-fix.sql` if uploads fail with RLS errors. For live cross-user updates (confirm counts, resolves, new reports), enable Realtime on the `reports` table: Database → Replication → `supabase_realtime` → toggle `reports` ON, or run `supabase/realtime-fix.sql`.
+- **Email links (magic link / confirm / reset):** the app uses the PKCE flow and routes links through `/auth/callback`. In Supabase → **Authentication → URL Configuration** set **Site URL** to `https://<your-app>.vercel.app` and add these **Redirect URLs**: `https://<your-app>.vercel.app/auth/callback`, `https://<your-app>.vercel.app/**`, and `http://localhost:5173/**` for dev. If a confirmation link still lands on a "sign in to Vercel" page, that's Vercel **Deployment Protection** on a preview URL — use the production domain, or turn it off in Vercel → Settings → Deployment Protection.
 - **Roboflow proxy:** deploy `worker/roboflow-proxy.js` as a Cloudflare Worker (see `worker/README.md`) and set `VITE_ROBOFLOW_PROXY_URL` — avoids Vercel's 10s serverless timeout.
 
 ---

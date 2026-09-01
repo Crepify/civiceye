@@ -116,7 +116,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: { full_name: fullName },
+        // Send the confirmation link to /auth/callback (PKCE) so the click
+        // actually signs the user in — instead of landing on / and getting
+        // bounced to /login with the token hash stripped.
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     if (error) throw error;
     // When "Confirm email" is off, Supabase returns a session immediately.

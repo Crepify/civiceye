@@ -46,7 +46,7 @@ You need **3 free accounts** for the cloud engines (all have free tiers, no cred
 
 | # | Provider | Sign up at | What to create | Key looks like | Free quota |
 |---|----------|-----------|----------------|----------------|------------|
-| 1 | **Roboflow** (primary cloud) | https://roboflow.com → **Sign up** | API key at **app.roboflow.com → Settings → API** | `pH4Y...` (plain) | ~1000 credits/mo (≈1 credit per analyse) |
+| 1 | **Roboflow** (primary cloud) | https://roboflow.com → **Sign up** | API key at **app.roboflow.com → Settings → API** | `<plain text key>` | ~1000 credits/mo (≈1 credit per analyse) |
 | 2 | **Hugging Face** (cloud backup) | https://huggingface.co → **Join** | **Settings → Access Tokens → New token** (type: *Read*) | `hf_...` | Rate-limited, free |
 
 Also needed for the **Roboflow workflow** (this is what the starter project uses):
@@ -523,6 +523,7 @@ dist/assets/ort-wasm-simd-threaded.jsep-*.wasm ~23.9 MB ← model runtime (lazy)
 The two last chunks are **only downloaded when the user first clicks Analyse** — that
 lazy loading is what keeps the initial page fast.
 
+For screenshots/demos without keys:
 
 ```bash
 VITE_DEMO_MODE=true npm run build
@@ -609,9 +610,10 @@ clear "Roboflow proxy not configured" message and Roboflow is skipped gracefully
    for demos keep the interval at **8 seconds** or more, or use a local model.
 2. **HF free tier is rate-limited and cold-starts.** The first call to DETR can take
    20–60 s while the model loads. Later calls are fast.
-3. **The on-device model is general, not civic.** It only confidently detects
-   traffic lights / stop signs / fire hydrants / people. It will happily hand off
-   potholes to Roboflow — that's by design (see Step 6).
+3. **The default on-device model is general, not civic.** It only confidently
+   detects traffic lights / stop signs / fire hydrants / people and hands off
+   potholes to Roboflow — by design (see Step 6). To detect civic issues
+   on-device, train a custom YOLO model and set `VITE_ONDEVICE_YOLO_URL` (Step 10).
 4. **WebGPU is optional.** The on-device engine runs on plain WASM everywhere; WebGPU
    just makes it faster. No special browser flag needed.
 5. **The HF token is a `VITE_` var → it's public in the bundle** (same caveat as all
@@ -628,11 +630,83 @@ clear "Roboflow proxy not configured" message and Roboflow is skipped gracefully
 
 ---
 
+## Step 10 — Make on-device AI detect EVERYTHING (custom YOLO model)
+
+### Why you saw "on-device AI not confident"
+
+The default on-device model (`Xenova/yolos-tiny`) is a **general-purpose COCO
+model** — it knows 80 everyday classes (person, car, truck, traffic light, stop
+sign, fire hydrant…) but **has never seen a pothole, garbage pile, manhole,
+sewage overflow, broken road…** Those aren't in its vocabulary, so when you test
+with a pothole photo it detects "car 0.92 / truck 0.61", maps that to
+`other`, and correctly **hands off to Roboflow** (which IS trained on civic
+issues). That's the guard working as designed — no model can detect what it was
+never trained on.
+
+### The fix: point on-device at YOUR OWN civic model
+
+This repo now ships a **custom ONNX YOLO runtime** (`src/services/onDeviceYolo.ts`).
+If you set `VITE_ONDEVICE_YOLO_URL`, the app runs YOUR model in the browser first
+(free, private, offline) and only falls to Roboflow when your model is unsure.
+You can train it for free on Roboflow:
+
+1. **Create a dataset** → app.roboflow.com → Create Project → Object Detection →
+   upload 100–300 photos of potholes / garbage / manholes / broken roads (phone
+   photos are perfect). **Pro tip:** Roboflow has free public datasets — search
+   "pothole", "garbage", "manhole" under *Public Datasets* and just Add to Project.
+2. **Annotate** boxes on each photo (fast — a few per minute; 50+ images is
+   enough for a demo, 200+ is much better).
+3. **Generate a version** → *Generate* (auto-augments). 
+4. **Train** → *Train with Ultralytics* → pick **YOLOv8n** or **YOLO11n** (the
+   "nano" sizes run fast on phones) → Train (free GPU, a few minutes).
+5. **Export ONNX** → *Deploy → Export → ONNX*. Download `best.onnx` (or
+   `weights/best.onnx`).
+6. **Host it** — upload the `.onnx` anywhere with CORS enabled:
+   - GitHub: push to a repo, use the `raw.githubusercontent.com/...` URL, or
+   - Hugging Face: create a model repo, upload, use
+     `https://huggingface.co/{user}/{repo}/resolve/main/best.onnx`, or
+   - jsDelivr: `https://cdn.jsdelivr.net/gh/{user}/{repo}@main/best.onnx`.
+7. **Configure** in `.env` (and Vercel env):
+   ```
+   VITE_ONDEVICE_YOLO_URL=https://cdn.jsdelivr.net/gh/you/civiceye-models@main/best.onnx
+   VITE_ONDEVICE_YOLO_LABELS=pothole,broken-road,garbage,manhole,fallen-tree,street-light,sewage
+   VITE_ONDEVICE_YOLO_SIZE=640
+   VITE_ONDEVICE_YOLO_CONF=0.35
+   ```
+   **`VITE_ONDEVICE_YOLO_LABELS` order must match the class order in your
+   Roboflow export** (0 = first class). Any label that matches a CivicEye
+   category (or an alias like "trash"→garbage, "potholes"→pothole) maps
+   automatically; the rest are reported as-is but don't win the verdict.
+8. Rebuild (`npm run build`) — the app now runs your civic model **on-device**
+   before touching the cloud.
+
+**Output formats supported:** raw YOLOv8/YOLO11 export (`[1, 4+N, 8400]` or
+`[1, 8400, 4+N]`) and end-to-end NMS export (`[1, N, 6]`). Both decode + NMS in
+the browser, so it "just works" with a standard Roboflow/Ultralytics export.
+
+**Trade-offs to know:**
+- Nano models (~6–10 MB) run in ~0.5–2 s on phones; small models (`yolov8s`)
+  are more accurate but slower. Start nano.
+- The model file is a **first-load download** (cached after that, offline
+  afterwards) — just like the current 24 MB default model.
+- Accuracy depends on YOUR dataset. A 50-image demo set will occasionally
+  mislabel; 200+ images with clean boxes looks like a real product.
+
+> Also possible without training: point `VITE_ONDEVICE_MODEL` at a bigger
+> general model (e.g. `Xenova/detr-resnet-50`) — better COCO accuracy, but
+> still won't see potholes. Custom training is the only way to detect civic
+> issues on-device.
+
+---
+
 ## Quick file checklist (fresh checkout / teammate merge)
 
 ```
 ✅ npm install (or npm install @huggingface/transformers@3.4.0 --ignore-scripts)
+✅ npm install onnxruntime-web@^1.21.0 --ignore-scripts   (custom YOLO runtime)
 ✅ src/services/onDeviceService.ts        ← NEW (code above)
+✅ src/services/onDeviceYolo.ts           ← NEW (custom civic YOLO, Step 10)
+✅ src/services/onDeviceMap.ts            ← NEW (shared label mapping)
 ✅ src/services/huggingfaceService.ts     ← NEW (code above)
 ✅ src/services/aiAnalysisService.ts      ← UPDATE runImageAnalysis (code above)
 ✅ src/services/roboflowService.ts        ← from zip

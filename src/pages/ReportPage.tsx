@@ -10,6 +10,7 @@ import {
   Check,
   ChevronDown,
   Crosshair,
+  ExternalLink,
   Info,
   LocateFixed,
   MapPin,
@@ -30,6 +31,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { QRPopup } from '@/components/QRPopup';
 import { MapView } from '@/components/map/MapView';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
+import { authorityForCategory } from '@/data/authorities';
 import { Loader } from '@/components/Loader';
 import { useReports } from '@/hooks/useReports';
 import { useToast } from '@/hooks/useToast';
@@ -1181,6 +1183,34 @@ function SuccessScreen({
   onMap: () => void;
   onReport: () => void;
 }) {
+  // The responsible department for this report (e.g. BBMP for a pothole) —
+  // used to offer a redirect to their official complaint portal.
+  const authority = report ? authorityForCategory(report.category, report.scope) : undefined;
+  const portalUrl = authority?.portalUrl;
+
+  const [portalSecs, setPortalSecs] = useState(6);
+  const [portalCancelled, setPortalCancelled] = useState(false);
+  const portalTimer = useRef<number | null>(null);
+
+  // Auto-redirect the citizen to the department's official portal so the
+  // issue also enters their complaint system (cancelable, new-tab option).
+  useEffect(() => {
+    if (!portalUrl || portalCancelled) return;
+    portalTimer.current = window.setInterval(() => {
+      setPortalSecs((s) => {
+        if (s <= 1) {
+          if (portalTimer.current) window.clearInterval(portalTimer.current);
+          window.location.assign(portalUrl);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => {
+      if (portalTimer.current) window.clearInterval(portalTimer.current);
+    };
+  }, [portalUrl, portalCancelled]);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -1239,6 +1269,36 @@ function SuccessScreen({
           variant="secondary"
         />
       </div>
+      {portalUrl && !portalCancelled ? (
+        <div className="mx-auto mt-6 max-w-md rounded-2xl border border-primary-200 bg-primary-50/70 p-5 text-left backdrop-blur dark:border-primary-500/20 dark:bg-primary-500/5">
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
+            Also file it officially with {authority?.name} ↗
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            You can also register this issue on the department's official complaint
+            portal so it enters their system. Redirecting in{' '}
+            <strong className="text-slate-700 dark:text-slate-200">{portalSecs}s</strong>…
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <a
+              href={portalUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-primary"
+              onClick={() => setPortalCancelled(true)}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Continue to {authority?.department}
+            </a>
+            <button
+              onClick={() => setPortalCancelled(true)}
+              className="text-xs font-semibold text-slate-500 hover:underline dark:text-slate-400"
+            >
+              Stay in CivicEye
+            </button>
+          </div>
+        </div>
+      ) : null}
       <button
         onClick={onNew}
         className="mt-6 text-sm font-semibold text-primary-600 hover:underline dark:text-primary-400"

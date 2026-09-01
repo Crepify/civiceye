@@ -166,6 +166,34 @@ tell the person it's urgent.
 | "not a git repository" | Wrong folder | `cd` into the project |
 | "remote origin already exists" | Already linked | Skip `git remote add` |
 | "push declined / secret" | A key is in a commit | Remove the key, amend/filter history |
+| `tsc` error about `groqService.ts` | A **deleted** file survived the zip merge | `git rm src/services/groqService.ts` then commit + push |
+
+---
+
+## 10. ⚠️ Zip-merge rule (why deletions break the build)
+
+When you unzip a new `civiceye.zip` **over** an existing project folder, new and
+changed files overwrite fine — but files that were **deleted** in the zip are NOT
+deleted on disk. They stay behind, and the build can fail on stale files (this
+happened with `groqService.ts` after Groq was removed).
+
+**Always do one of these instead:**
+
+- **Recommended (fresh checkout):**
+  ```bash
+  rm -rf civiceye          # delete the whole folder first
+  unzip civiceye.zip -d .  # then unzip fresh
+  npm install --ignore-scripts
+  ```
+- **Or on an existing git repo (git will show deletions):**
+  ```bash
+  git add -A            # stages ALL changes, including deletions
+  git status            # confirm groqService.ts shows as "deleted"
+  git commit -m "chore: sync with zip (remove stale files)"
+  git push origin main
+  ```
+
+Never copy files "on top" of an old project — copy into a clean folder.
 
 ---
 

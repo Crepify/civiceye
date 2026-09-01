@@ -1,12 +1,16 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Report, VoteType } from '@/types';
 import { reportService } from '@/services/reportService';
+import { supabase } from '@/lib/supabase';
 
 /**
- * Reports store (async).
- * Reads from Supabase on mount and refreshes after every mutation so all
- * pages share one consistent, live view of the database.
+ * Reports store (async + LIVE).
+ * Reads from Supabase on mount, refreshes after every local mutation, and
+ * subscribes to Supabase Realtime so changes made by OTHER users (a confirm
+ * vote, a resolve, a new report, an admin scope move…) appear on everyone's
+ * screen without a manual refresh. Requires the `reports` table to be in the
+ * `supabase_realtime` publication — see supabase/realtime-fix.sql.
  */
 
 interface ReportsContextValue {
@@ -42,11 +46,18 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Last scope used for the latest fetch (realtime refetches reuse it).
+  const lastScopeRef = useRef<'city' | 'campus' | 'all'>('all');
+  // Debounce timer for coalescing a burst of realtime events into one refetch.
+  const liveTimerRef = useRef<number | null>(null);
+
   const refresh = useCallback(
     async (scope?: 'city' | 'campus' | 'all') => {
       try {
+        const s = scope ?? lastScopeRef.current;
+        lastScopeRef.current = s;
         setLoading(true);
-        const list = await reportService.getAll(scope ?? 'all');
+        const list = await reportService.getAll(s);
         setReports(list);
         setError(null);
       } catch (e) {
@@ -58,9 +69,47 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  /** Refetch WITHOUT toggling `loading` — used by realtime so live updates
+   *  don't flash loading skeletons on everyone's screen. */
+  const refreshQuiet = useCallback(async () => {
+    try {
+      const list = await reportService.getAll(lastScopeRef.current);
+      setReports(list);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load reports.');
+    }
+  }, []);
+
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  // ---- Live sync (Supabase Realtime) -------------------------------
+  // Fixes: "confirmations from another user don't increment the count."
+  // The store lives above the router, so a plain mount-once fetch went
+  // stale the moment another user voted/confirmed/resolved a report.
+  // Any INSERT/UPDATE/DELETE on `reports` is now broadcast to every open
+  // session and triggers a quiet refetch (~350 ms debounce).
+  useEffect(() => {
+    if (!supabase) return;
+    const client = supabase; // non-null local for the closure below
+    const channel = client
+      .channel('reports-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reports' },
+        () => {
+          if (liveTimerRef.current) window.clearTimeout(liveTimerRef.current);
+          liveTimerRef.current = window.setTimeout(() => void refreshQuiet(), 350);
+        },
+      )
+      .subscribe();
+    return () => {
+      if (liveTimerRef.current) window.clearTimeout(liveTimerRef.current);
+      void client.removeChannel(channel);
+    };
+  }, [refreshQuiet]);
 
   /** Run a mutation, then refresh. */
   const run = useCallback(
@@ -89,11 +138,21 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
           void refresh();
           return created;
         }),
-      vote: (id, voteType) => reportService.vote(id, voteType),
+      vote: (id, voteType) =>
+        reportService.vote(id, voteType).then((updated) => {
+          // Reflect the returned row instantly (realtime refetch follows).
+          if (updated) {
+            setReports((prev) => [updated, ...prev.filter((r) => r.id !== updated.id)]);
+          }
+          return updated;
+        }),
       voteUp: (id) => run(() => reportService.vote(id, 'up')),
       voteDown: (id) => run(() => reportService.vote(id, 'down')),
       confirmReport: (id) =>
         reportService.vote(id, 'confirm').then((updated) => {
+          if (updated) {
+            setReports((prev) => [updated, ...prev.filter((r) => r.id !== updated.id)]);
+          }
           void refresh();
           return updated;
         }),

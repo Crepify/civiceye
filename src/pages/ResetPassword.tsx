@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
+import { supabase } from '@/lib/supabase';
 import { Logo } from '@/components/Logo';
 
 /** Password reset screen — opened from the "recovery" email link. */
@@ -10,10 +11,54 @@ export function ResetPassword() {
   const { updatePassword } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const [ready, setReady] = useState(false);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // PKCE: the recovery link arrives as /reset?code=… — exchange it for a
+  // session BEFORE showing the form (updatePassword needs a signed-in user).
+  useEffect(() => {
+    if (!supabase) {
+      setError('Supabase is not configured.');
+      return;
+    }
+    const code = params.get('code');
+    (async () => {
+      if (code) await supabase.auth.exchangeCodeForSession(code);
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        setError('This reset link is invalid or expired. Please request a new one.');
+        return;
+      }
+      setReady(true);
+    })().catch(() =>
+      setError('This reset link is invalid or expired. Please request a new one.'),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        {error ? (
+          <div className="text-center">
+            <p className="text-sm font-semibold text-rose-600">{error}</p>
+            <button onClick={() => navigate('/login')} className="btn-secondary mt-4">
+              Back to login
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
+            <Loader2 className="h-5 w-5 animate-spin text-primary-600" />
+            Preparing your reset…
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

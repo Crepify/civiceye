@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { RequireAuth } from '@/components/RequireAuth';
 import { Landing } from '@/pages/Landing';
+import { AmritaEye } from '@/pages/AmritaEye';
 import { Features } from '@/pages/Features';
 import { MapPage } from '@/pages/MapPage';
 import { ReportPage } from '@/pages/ReportPage';
@@ -59,6 +60,7 @@ export default function App() {
   const gatedRoutes = (
     <Routes location={location}>
       <Route path="/" element={<Landing />} />
+      <Route path="/amrita" element={<AmritaEye />} />
       <Route path="/features" element={<Features />} />
       <Route path="/map" element={<MapPage />} />
       <Route path="/live" element={<LiveDetection />} />
