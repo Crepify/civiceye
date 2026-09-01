@@ -509,3 +509,14 @@ html.amrita .shadow-\[10px_10px_0_\#ef6b59\] { box-shadow: 10px 10px 0 rgb(var(-
 html.amrita .shadow-\[0_5px_0_\#ef6b59\] { box-shadow: 0 5px 0 rgb(var(--c-primary-600)); }
 /* Give the Amrita campus map a little breathing room under the floating pill nav. */
 html.amrita .comic-map-page { padding-top: 6.5rem !important; }
+
+/* ---- Amrita Eye: brand-consistent accents on shared components ----
+   Remap the few non-var violet/blue brand accents so Amrita Eye pages
+   read as one maroon palette (semantic sky/blue for water stays). */
+html.amrita .to-violet-600 { --tw-gradient-to: rgb(var(--c-primary-800)); }
+html.amrita .from-violet-600 { --tw-gradient-from: rgb(var(--c-primary-700)); }
+html.amrita .text-violet-500 { color: rgb(var(--c-primary-500)); }
+html.amrita .bg-violet-500 { background-color: rgb(var(--c-primary-500)); }
+html.amrita .bg-violet-500\/10 { background-color: rgb(var(--c-primary-500) / 0.1); }
+html.amrita .from-primary-500 { --tw-gradient-from: rgb(var(--c-primary-500)); }
+html.amrita .to-primary-600 { --tw-gradient-to: rgb(var(--c-primary-600)); }
