@@ -421,7 +421,12 @@ html.dark header nav { background:#0d2030!important; }
 html.dark header nav a,html.dark header nav button { color:#fff8e7!important; }
 html.dark header nav ul a:hover { background:#ef6b59!important; color:#172b44!important; }
 html.dark .comic-page { background:#081521!important; color:#fff8e7!important; }
-html.dark .comic-page .heading-xl,html.dark .comic-page .heading-lg,html.dark .comic-page h1,html.dark .comic-page h2,html.dark .comic-page h3 { color:#fff8e7!important; }
+/* Paper panels stay paper at night: light comic surfaces keep navy ink,
+   so cards, stickers, badges and buttons remain readable on midnight. */
+html.dark .comic-page [class*="bg-[#fff8e7]"],html.dark .comic-page [class*="bg-[#fffdf4]"],html.dark .comic-page [class*="bg-[#ffd630]"],html.dark .comic-page [class*="bg-[#91dcc4]"] { color:#172b44!important; }
+html.dark .comic-page [class*="bg-[#ffd630]"] a,html.dark .comic-page [class*="bg-[#ffd630]"] button,html.dark .comic-page [class*="bg-[#91dcc4]"] a,html.dark .comic-page [class*="bg-[#91dcc4]"] button { color:#172b44!important; }
+/* Modal sheets are cream paper — ink stays navy inside every dialog. */
+html.dark [role="dialog"] { color:#172b44!important; }
 html.dark .card,html.dark .glass,html.dark .glass-strong { background:#102b3d!important; border-color:#91dcc4!important; box-shadow:5px 5px 0 #ef6b59!important; }
 html.dark .btn-primary { background:#ffd630!important; color:#172b44!important; }
 html.dark .btn-secondary,html.dark .btn-ghost { background:#102b3d!important; border-color:#91dcc4!important; color:#fff8e7!important; }
@@ -457,15 +462,8 @@ html.dark [aria-label="Civic Hero certificate"] a.bg-\[\#ffd630\],html.dark [ari
 .about-us-cta:hover { transform: translate(-2px,-2px) rotate(-1deg); }
 
 /* Night Issue mode keeps the spotlight readable on midnight panels. */
-html.dark #about-us { background: #102b3d !important; border-color: #91dcc4 !important; }
+html.dark #about-us { background: #102b3d !important; border-color: #91dcc4 !important; color: #eaf5f0 !important; }
 html.dark #about-us h2 { color: #fff8e7 !important; text-shadow: 3px 3px 0 #ef6b59 !important; }
-html.dark #about-us > div > div > p { color: #eaf5f0 !important; }
-html.dark #about-us .bg-\[\#fffdf4\] { background: #173d50 !important; }
-html.dark #about-us .bg-\[\#fffdf4\] span { color: #eaf5f0 !important; }
-/* Creator badge keeps navy numerals even on midnight mode. */
-html.dark #about-us .bg-\[\#fffdf4\] > span:first-child { color: #172b44 !important; }
-/* SOS chip stays yellow-on-navy. */
-html.dark #about-us .bg-\[\#172b44\] { background: #172b44 !important; }
 html.dark #about-us .bg-\[\#172b44\], html.dark #about-us .bg-\[\#172b44\] * { color: #ffd630 !important; }
 html.dark #about-us .about-us-cta { color: #ffd630 !important; }
 html.dark #creators .comic-button { color: #172b44 !important; }
