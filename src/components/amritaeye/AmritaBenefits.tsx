@@ -45,15 +45,21 @@ export function AmritaBenefits() {
           {/* Main Bento Box */}
           <motion.div 
             variants={itemVariants} 
-            className="lg:col-span-2 flex flex-col justify-between rounded-3xl bg-[#F5F5F7] dark:bg-[#161618] p-8 sm:p-12 border border-neutral-200/50 dark:border-neutral-800/50 relative overflow-hidden group"
+            whileHover={{ y: -10, boxShadow: '0 30px 60px -15px rgba(165,22,54,0.25)' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="lg:col-span-2 flex flex-col justify-between rounded-3xl bg-[#F5F5F7] dark:bg-[#161618] p-8 sm:p-12 border border-neutral-200/50 dark:border-neutral-800/50 relative overflow-hidden group cursor-pointer"
           >
-            <div className="absolute top-0 right-0 p-8 opacity-10 transition-opacity group-hover:opacity-20">
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-[#A51636]/0 via-[#A51636]/0 to-[#E52B50]/0 transition-opacity duration-500 group-hover:from-[#A51636]/5 group-hover:via-[#E52B50]/5 group-hover:to-[#A51636]/10"
+              aria-hidden="true"
+            />
+            <div className="absolute top-0 right-0 p-8 opacity-10 transition-all duration-700 group-hover:opacity-25 group-hover:rotate-12 group-hover:scale-110">
               <Eye className="h-32 w-32 text-neutral-900 dark:text-white" />
             </div>
-            <div className="mb-24 flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-[#0D0105] shadow-sm z-10">
+            <div className="mb-24 flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-[#0D0105] shadow-sm z-10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
               <Eye className="h-7 w-7 text-[#A51636] dark:text-[#E52B50]" />
             </div>
-            <div className="z-10 max-w-lg">
+            <div className="z-10 max-w-lg transition-transform duration-500 group-hover:-translate-y-1">
               <h3 className="mb-4 text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white leading-[1.2]">
                 Instant visibility
               </h3>
@@ -66,12 +72,15 @@ export function AmritaBenefits() {
           {/* Side Bento 1 */}
           <motion.div 
             variants={itemVariants} 
-            className="flex flex-col justify-between rounded-3xl bg-[#F5F5F7] dark:bg-[#161618] p-8 sm:p-12 border border-neutral-200/50 dark:border-neutral-800/50"
+            whileHover={{ y: -10, boxShadow: '0 30px 60px -15px rgba(165,22,54,0.25)' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="flex flex-col justify-between rounded-3xl bg-[#F5F5F7] dark:bg-[#161618] p-8 sm:p-12 border border-neutral-200/50 dark:border-neutral-800/50 relative overflow-hidden group cursor-pointer"
           >
-            <div className="mb-16 flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-[#0D0105] shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#A51636]/0 to-[#E52B50]/0 transition-opacity duration-500 group-hover:from-[#A51636]/5 group-hover:to-[#E52B50]/5" aria-hidden="true" />
+            <div className="mb-16 flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-[#0D0105] shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-[-6deg] z-10">
               <Zap className="h-6 w-6 text-neutral-900 dark:text-white" />
             </div>
-            <div>
+            <div className="relative z-10 transition-transform duration-500 group-hover:-translate-y-1">
               <h3 className="mb-3 text-[24px] font-bold text-neutral-900 dark:text-white leading-[1.2]">
                 Targeted resolution
               </h3>
@@ -84,15 +93,18 @@ export function AmritaBenefits() {
           {/* Side Bento 2 */}
           <motion.div 
             variants={itemVariants} 
-            className="flex flex-col justify-between rounded-3xl bg-[#A51636] dark:bg-[#E52B50] p-8 sm:p-12 text-white relative overflow-hidden"
+            whileHover={{ y: -10, boxShadow: '0 30px 60px -15px rgba(165,22,54,0.5)' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="flex flex-col justify-between rounded-3xl bg-[#A51636] dark:bg-[#E52B50] p-8 sm:p-12 text-white relative overflow-hidden group cursor-pointer"
           >
-            <div className="absolute -bottom-6 -right-6 opacity-20">
+            <div className="absolute -bottom-6 -right-6 opacity-20 transition-transform duration-700 group-hover:scale-110 group-hover:translate-x-[-10px] group-hover:translate-y-[-10px]" aria-hidden="true">
               <Users className="h-40 w-40" />
             </div>
-            <div className="mb-16 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md z-10">
+            <div className="absolute inset-0 bg-[#E52B50]/0 transition-colors duration-500 group-hover:bg-[#E52B50]/10" aria-hidden="true" />
+            <div className="mb-16 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md z-10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
               <Users className="h-6 w-6 text-white" />
             </div>
-            <div className="z-10">
+            <div className="z-10 transition-transform duration-500 group-hover:-translate-y-1">
               <h3 className="mb-3 text-[24px] font-bold leading-[1.2]">
                 Community driven
               </h3>
@@ -105,11 +117,14 @@ export function AmritaBenefits() {
           {/* Bottom Full Span Bento */}
           <motion.div 
             variants={itemVariants} 
-            className="lg:col-span-2 flex flex-col justify-between rounded-3xl bg-[#F5F5F7] dark:bg-[#161618] p-8 sm:p-12 border border-neutral-200/50 dark:border-neutral-800/50"
+            whileHover={{ y: -10, boxShadow: '0 30px 60px -15px rgba(165,22,54,0.25)' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            className="lg:col-span-2 flex flex-col justify-between rounded-3xl bg-[#F5F5F7] dark:bg-[#161618] p-8 sm:p-12 border border-neutral-200/50 dark:border-neutral-800/50 relative overflow-hidden group cursor-pointer"
           >
-            <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#0D0105] shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#A51636]/0 to-[#E52B50]/0 transition-opacity duration-500 group-hover:from-[#A51636]/5 group-hover:to-[#E52B50]/5" aria-hidden="true" />
+            <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center justify-between relative z-10">
+              <div className="flex items-center gap-4 transition-transform duration-500 group-hover:-translate-y-1">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#0D0105] shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-[-6deg]">
                   <MapPin className="h-6 w-6 text-[#A51636] dark:text-[#E52B50]" />
                 </div>
                 <div>
@@ -121,8 +136,8 @@ export function AmritaBenefits() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#0D0105] shadow-sm">
+              <div className="flex items-center gap-4 transition-transform duration-500 group-hover:-translate-y-1">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#0D0105] shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
                   <ShieldCheck className="h-6 w-6 text-[#A51636] dark:text-[#E52B50]" />
                 </div>
                 <div>

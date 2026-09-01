@@ -17,9 +17,10 @@ interface BrandContextValue {
 const BrandContext = createContext<BrandContextValue | null>(null);
 
 function initialBrand(): BrandId {
-  // Always start on CivicEye — the brand is re-derived from the route/auth
-  // right after mount. (No localStorage memory, so the two sites can never
-  // flash each other's branding.)
+  try {
+    const stored = localStorage.getItem('civiceye:brand');
+    if (stored === 'amrita' || stored === 'civiceye') return stored;
+  } catch { /* SSR or private browsing */ }
   return 'civiceye';
 }
 
@@ -46,6 +47,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
       next = routeAmrita || (isAmrita && user) ? 'amrita' : 'civiceye';
     }
     setBrand(next);
+    try { localStorage.setItem('civiceye:brand', next); } catch { /* ignore */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAmrita, user?.id, loading, location.pathname, location.search]);
 

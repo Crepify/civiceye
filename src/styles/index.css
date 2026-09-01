@@ -594,8 +594,12 @@ html.amrita.dark .card {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 html.amrita .card:hover {
-  transform: none;
-  box-shadow: 0 10px 34px rgba(165, 22, 54, 0.1);
+  transform: translateY(-4px);
+  border-color: rgba(165, 22, 54, 0.35);
+  box-shadow: 0 18px 45px -12px rgba(165, 22, 54, 0.28);
+}
+html.amrita.dark .card:hover {
+  box-shadow: 0 18px 45px -12px rgba(0, 0, 0, 0.6);
 }
 
 /* Glass surfaces — soft white-pink glass in light, maroon-charcoal in dark. */
@@ -625,6 +629,8 @@ html.amrita .btn-primary {
 }
 html.amrita .btn-primary:hover {
   background-color: #84122b;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -8px rgba(165, 22, 54, 0.55);
 }
 html.amrita.dark .btn-primary {
   background-color: #e52b50;
@@ -633,6 +639,8 @@ html.amrita.dark .btn-primary {
 }
 html.amrita.dark .btn-primary:hover {
   background-color: #be2342;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -8px rgba(229, 43, 80, 0.55);
 }
 html.amrita .btn-secondary {
   background-color: #ffffff;

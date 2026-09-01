@@ -36,7 +36,7 @@ export function AmritaHowItWorks() {
           {steps.map((step, index) => (
             <motion.div 
               key={index} 
-              className="grid grid-cols-1 gap-8 md:grid-cols-12 py-16 border-b border-[#A51636]/10 dark:border-[#E52B50]/10"
+              className="group grid grid-cols-1 gap-8 md:grid-cols-12 py-16 border-b border-[#A51636]/10 dark:border-[#E52B50]/10 rounded-2xl px-4 transition-colors duration-300 hover:bg-[#A51636]/[0.035] dark:hover:bg-[#E52B50]/[0.06]"
               initial={{ opacity: 0, y: 100, scale: 0.9, filter: "blur(8px)", rotate: -2 }}
               whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)", rotate: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -44,7 +44,7 @@ export function AmritaHowItWorks() {
             >
               <div className="md:col-span-5 md:sticky md:top-32 self-start relative">
                 <motion.span 
-                  className="text-[72px] lg:text-[72px] font-serif italic leading-none tracking-tighter text-[#A51636]/10 dark:text-[#E52B50]/10 select-none inline-block origin-left"
+                  className="text-[72px] lg:text-[72px] font-serif italic leading-none tracking-tighter text-[#A51636]/10 dark:text-[#E52B50]/10 select-none inline-block origin-left transition-colors duration-300 group-hover:text-[#A51636]/25 dark:group-hover:text-[#E52B50]/30"
                   initial={{ scale: 2, opacity: 0, filter: "blur(8px)", x: -100 }}
                   whileInView={{ scale: 1, opacity: 1, filter: "blur(0px)", x: 0 }}
                   transition={{ type: "spring", bounce: 0.5, duration: 1.5, delay: 0.2 }}
@@ -53,7 +53,7 @@ export function AmritaHowItWorks() {
                 </motion.span>
                 <div className="absolute inset-0 flex items-center pt-8 pl-4 lg:pt-16 lg:pl-8 pointer-events-none">
                   <motion.h3 
-                    className="text-2xl sm:text-4xl font-bold tracking-tight text-neutral-900 dark:text-white leading-[1.1]"
+                    className="text-2xl sm:text-4xl font-bold tracking-tight text-neutral-900 dark:text-white leading-[1.1] transition-colors duration-300 group-hover:text-[#A51636] dark:group-hover:text-[#E52B50]"
                     initial={{ x: 50, opacity: 0 }}
                     whileInView={{ x: 0, opacity: 1 }}
                     transition={{ type: "spring", bounce: 0, duration: 1, delay: 0.4 }}
@@ -65,7 +65,7 @@ export function AmritaHowItWorks() {
               
               <div className="md:col-span-7 flex items-center">
                 <motion.p 
-                  className="text-xl sm:text-2xl leading-[1.6] text-neutral-600 dark:text-neutral-400 max-w-2xl"
+                  className="text-xl sm:text-2xl leading-[1.6] text-neutral-600 dark:text-neutral-400 max-w-2xl transition-colors duration-300 group-hover:text-neutral-800 dark:group-hover:text-neutral-200"
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", bounce: 0, duration: 1, delay: 0.5 }}
