@@ -10,6 +10,7 @@ import { RequireAuth } from '@/components/RequireAuth';
 import { Landing } from '@/pages/Landing';
 import { AmritaEye } from '@/pages/AmritaEye';
 import { useBrand } from '@/hooks/useBrand';
+import { cn } from '@/utils/cn';
 import { Features } from '@/pages/Features';
 import { MapPage } from '@/pages/MapPage';
 import { ReportPage } from '@/pages/ReportPage';
@@ -38,15 +39,6 @@ export default function App() {
   // @amrita.edu logins — matches the koushikkkkkkkkkk.github.io preview.
   const amritaChrome = isAmrita || location.pathname.startsWith('/amrita');
 
-  // About + Map are minimalist pages for BOTH brands — mark them so the comic
-  // CivicEye skin (scoped to html:not(.amrita):not(.clean-route)) never
-  // paints them bright cream/navy.
-  useEffect(() => {
-    const clean = location.pathname === '/about' || location.pathname === '/map';
-    document.documentElement.classList.toggle('clean-route', clean);
-    return () => document.documentElement.classList.remove('clean-route');
-  }, [location.pathname]);
-
   // Browsers gate audio behind a user gesture; arm it once per visit.
   useEffect(() => {
     primeComicAudio();
@@ -71,6 +63,16 @@ export default function App() {
   // DEMO MODE (VITE_DEMO_MODE=true): bypass the login gate so pages render
   // without a Supabase session — used for screenshots & live demos.
   const demoMode = import.meta.env.VITE_DEMO_MODE === 'true';
+
+  // Interior pages sit under a fixed top bar (comic street-sign header for
+  // CivicEye, floating pill for Amrita Eye). Pages that manage their own
+  // clearance (home, map, amrita landing, auth) are excluded.
+  const p = location.pathname;
+  const needsNavPad =
+    !isAuthPage &&
+    p !== '/' &&
+    !p.startsWith('/amrita') &&
+    p !== '/map';
 
   // Everything else requires a signed-in user (login-first app).
   const gatedRoutes = (
@@ -115,7 +117,7 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-1 flex-col"
+          className={cn('flex flex-1 flex-col', needsNavPad && 'has-top-nav')}
         >
           {isAuthPage ? authRoutes : demoMode ? gatedRoutes : <RequireAuth>{gatedRoutes}</RequireAuth>}
         </motion.main>
