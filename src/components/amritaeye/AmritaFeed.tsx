@@ -106,8 +106,8 @@ export function AmritaFeed({ campusReports }: AmritaFeedProps) {
                   aria-pressed={isActive}
                   className={`shrink-0 rounded-none border-b-2 pb-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'border-neutral-900 text-neutral-900 dark:text-white'
-                      : 'border-transparent text-neutral-500 dark:text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:text-white'
+                      ? 'border-neutral-900 text-neutral-900 dark:border-white dark:text-white'
+                      : 'border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-900 dark:text-neutral-400 dark:hover:border-neutral-500 dark:hover:text-white'
                   }`}
                 >
                   {filter.label}

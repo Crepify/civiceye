@@ -32,6 +32,7 @@ type Mode = 'signin' | 'signup' | 'magic';
 export function Login() {
   const { configured, loading, signInWithPassword, signUp, signInWithMagicLink, resendConfirmation, resetPassword } =
     useAuth();
+  const { isAmrita } = useBrand();
   const toast = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -139,14 +140,27 @@ export function Login() {
   if (!configured) {
     // Preview mode: lets reviewers navigate the visual prototype without exposing
     // credentials or requiring a real Supabase project.
+    // Brand + theme aware: clean indigo (CivicEye) / maroon (Amrita Eye), and
+    // fully readable in dark mode too.
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#fff8e7] px-4 py-16 text-[#172b44]">
-        <div className="w-full max-w-lg border-[5px] border-[#172b44] bg-[#fffdf4] p-8 text-center shadow-[10px_10px_0_#ef6b59]">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-16 text-slate-900 dark:bg-slate-950 dark:text-white">
+        <div className="w-full max-w-lg rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-soft dark:border-white/10 dark:bg-slate-900">
           <Logo to="/" className="justify-center" />
-          <p className="mt-7 inline-block bg-[#ffd630] px-3 py-2 text-xs font-black tracking-[.14em]">PREVIEW ACCESS</p>
-          <h1 className="mt-5 font-serif text-4xl font-black uppercase leading-none">Join the city squad.</h1>
-          <p className="mt-4 font-semibold">Supabase is not connected in this preview. Continue as a demo citizen to review every page.</p>
-          <button onClick={() => navigate(next)} className="mt-7 border-3 border-[#172b44] bg-[#91dcc4] px-5 py-3 font-black shadow-[4px_4px_0_#172b44]">CONTINUE AS DEMO CITIZEN ✦</button>
+          <p className="mt-7 inline-block rounded-full bg-primary-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[.14em] text-primary-600 dark:text-primary-400">
+            Preview access
+          </p>
+          <h1 className="mt-5 text-3xl font-extrabold tracking-tight">
+            {isAmrita ? 'Join the campus squad.' : 'Join the city squad.'}
+          </h1>
+          <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+            Supabase is not connected in this preview. Continue as a demo citizen to review every page.
+          </p>
+          <button
+            onClick={() => navigate(next)}
+            className="btn-primary mt-7 w-full"
+          >
+            Continue as demo citizen
+          </button>
         </div>
       </div>
     );

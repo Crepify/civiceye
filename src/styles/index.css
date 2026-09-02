@@ -89,8 +89,18 @@
     height: 100%;
   }
 
+  /* Root-level horizontal overflow guard — decorative glows/wide content must
+     never widen the layout viewport (which stretches the fixed header). */
+  html {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   body {
     @apply bg-slate-50 font-sans text-slate-800 antialiased transition-colors duration-300;
+    /* Never allow page content to push the viewport wider than the screen
+       (decorative glows, wide tables, etc.). */
+    overflow-x: hidden;
   }
 
   html.dark body {
@@ -445,6 +455,12 @@ html:not(.amrita):not(.clean-route).dark body { background:#081521!important; co
 html:not(.amrita):not(.clean-route).dark header { background:#0d2030!important; border-bottom-color:#ffd630!important; box-shadow:0 5px 0 #ef6b59!important; }
 html:not(.amrita):not(.clean-route).dark header nav { background:#0d2030!important; }
 html:not(.amrita):not(.clean-route).dark header nav a,html:not(.amrita):not(.clean-route).dark header nav button { color:#fff8e7!important; }
+/* Icon buttons (theme, home, bell, menu) keep the light cream bg otherwise —
+   they must flip to the midnight navy so their cream icons stay visible. */
+html:not(.amrita):not(.clean-route).dark header nav button { background:#0d2030!important; border-color:#91dcc4!important; color:#fff8e7!important; }
+html:not(.amrita):not(.clean-route).dark header nav button:hover { background:#173d50!important; }
+html:not(.amrita):not(.clean-route).dark header nav .btn-primary { background:#ffd630!important; color:#172b44!important; border-color:#172b44!important; }
+html:not(.amrita):not(.clean-route).dark header nav .btn-secondary { background:#173d50!important; border-color:#91dcc4!important; color:#fff8e7!important; }
 html:not(.amrita):not(.clean-route).dark header nav ul a:hover { background:#ef6b59!important; color:#172b44!important; }
 html:not(.amrita):not(.clean-route).dark .comic-page { background:#081521!important; color:#fff8e7!important; }
 html:not(.amrita):not(.clean-route).dark .comic-page .heading-xl,html:not(.amrita):not(.clean-route).dark .comic-page .heading-lg,html:not(.amrita):not(.clean-route).dark .comic-page h1,html:not(.amrita):not(.clean-route).dark .comic-page h2,html:not(.amrita):not(.clean-route).dark .comic-page h3 { color:#fff8e7!important; }
@@ -594,12 +610,8 @@ html.amrita.dark .card {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 html.amrita .card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(165, 22, 54, 0.35);
-  box-shadow: 0 18px 45px -12px rgba(165, 22, 54, 0.28);
-}
-html.amrita.dark .card:hover {
-  box-shadow: 0 18px 45px -12px rgba(0, 0, 0, 0.6);
+  transform: none;
+  box-shadow: 0 10px 34px rgba(165, 22, 54, 0.1);
 }
 
 /* Glass surfaces — soft white-pink glass in light, maroon-charcoal in dark. */
@@ -629,8 +641,6 @@ html.amrita .btn-primary {
 }
 html.amrita .btn-primary:hover {
   background-color: #84122b;
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px -8px rgba(165, 22, 54, 0.55);
 }
 html.amrita.dark .btn-primary {
   background-color: #e52b50;
@@ -639,8 +649,6 @@ html.amrita.dark .btn-primary {
 }
 html.amrita.dark .btn-primary:hover {
   background-color: #be2342;
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px -8px rgba(229, 43, 80, 0.55);
 }
 html.amrita .btn-secondary {
   background-color: #ffffff;
@@ -692,3 +700,36 @@ html.amrita :focus-visible {
 html.amrita.dark :focus-visible {
   box-shadow: 0 0 0 3px rgba(229, 43, 80, 0.4);
 }
+
+/* ---- Night mode: remap light comic SURFACES (inline hex utilities) ----
+   Cream/mint "paper" buttons/chips flip to midnight navy so light text stays
+   readable; the yellow comic accent keeps its navy-ink look (yellow bg + navy
+   text reads fine on dark too). Only in the CivicEye comic scope. */
+html:not(.amrita):not(.clean-route).dark .bg-\[\#fff8e7\],
+html:not(.amrita):not(.clean-route).dark .bg-\[\#fffdf4\] {
+  background-color: #0d2030 !important;
+}
+html:not(.amrita):not(.clean-route).dark .bg-\[\#91dcc4\] {
+  background-color: #173d50 !important;
+}
+/* Text that sat on cream/mint surfaces must become cream so it reads on the
+   navy surface. Applies to the .comic-button defaults and paired utilities. */
+html:not(.amrita):not(.clean-route).dark .comic-button.bg-\[\#fff8e7\],
+html:not(.amrita):not(.clean-route).dark .comic-button.bg-\[\#fffdf4\],
+html:not(.amrita):not(.clean-route).dark .comic-button.bg-\[\#91dcc4\],
+html:not(.amrita):not(.clean-route).dark .bg-\[\#fff8e7\] .text-\[\#172b44\],
+html:not(.amrita):not(.clean-route).dark .bg-\[\#fffdf4\] .text-\[\#172b44\],
+html:not(.amrita):not(.clean-route).dark .bg-\[\#91dcc4\] .text-\[\#172b44\] {
+  color: #fff8e7 !important;
+}
+/* Keep navy-on-yellow (the classic comic pop) intact in the dark theme. */
+html:not(.amrita):not(.clean-route).dark .comic-button.bg-\[\#ffd630\] {
+  color: #172b44 !important;
+}
+/* The floating "about us" pill on the comic home: mint chip → navy. */
+html:not(.amrita):not(.clean-route).dark [class*="about-us-pill"],
+html:not(.amrita):not(.clean-route).dark .fixed.right-5 .comic-button {
+  background-color: #173d50 !important;
+  color: #fff8e7 !important;
+}
+

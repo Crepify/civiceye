@@ -147,10 +147,10 @@ export function About() {
             </div>
           </Reveal>
 
-          <Reveal direction="left" className="flex justify-center">
-            <div className="relative">
-              <div className="absolute -inset-6 rounded-[2.5rem] brand-panel blur-2xl" />
-              <div className="card relative max-w-md p-8 text-center">
+          <Reveal direction="left" className="flex min-w-0 justify-center">
+            <div className="relative w-full max-w-md overflow-hidden rounded-[2rem]">
+              <div className="pointer-events-none absolute -inset-6 rounded-[2.5rem] brand-panel blur-2xl" />
+              <div className="card relative max-w-none w-full p-6 text-center sm:p-8">
                 <div className="flex justify-center">
                   <Logo iconOnly />
                 </div>
@@ -160,17 +160,17 @@ export function About() {
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   and for anyone new to their neighbourhood
                 </p>
-                <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+                <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3 text-center">
                   {[
                     ['1 Aug', '2026'],
                     ['4 yrs', 'of college life'],
                     ['100%', 'community-built'],
                   ].map(([v, l]) => (
-                    <div key={l} className="rounded-xl bg-slate-50 p-3 dark:bg-white/[0.04]">
-                      <p className="text-lg font-extrabold text-primary-600 dark:text-primary-400">
+                    <div key={l} className="rounded-xl bg-slate-50 px-1 py-3 dark:bg-white/[0.04]">
+                      <p className="text-base font-extrabold text-primary-600 dark:text-primary-400 sm:text-lg">
                         {v}
                       </p>
-                      <p className="text-[11px] font-medium text-slate-400">{l}</p>
+                      <p className="text-[10px] font-medium leading-tight text-slate-400 sm:text-[11px]">{l}</p>
                     </div>
                   ))}
                 </div>
