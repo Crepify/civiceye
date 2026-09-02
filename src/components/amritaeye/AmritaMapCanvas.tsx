@@ -12,7 +12,7 @@ interface AmritaMapCanvasProps {
 
 export function AmritaMapCanvas({ campusReports, selectedId, onSelect }: AmritaMapCanvasProps) {
   return (
-    <section className="bg-transparent border-t border-[#A51636]/10 dark:border-[#E52B50]/10">
+    <section className="bg-[#FFF5F7] dark:bg-[#1A030A] border-t border-[#A51636]/10 dark:border-[#E52B50]/10">
       <div className="mx-auto max-w-[1920px] px-5 py-24 sm:px-8 sm:py-36 lg:px-12 xl:px-16">
         <div className="flex flex-col gap-6 border border-neutral-200 dark:border-neutral-800 border-b-0 bg-[#f5f5f5] dark:bg-[#111] p-8 sm:p-10 lg:flex-row lg:items-end lg:justify-between rounded-t-md">
           <div className="space-y-3">

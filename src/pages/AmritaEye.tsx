@@ -34,10 +34,10 @@ export function AmritaEye() {
   }, [campusReports]);
 
   return (
-    <div className="relative min-h-screen text-neutral-900 dark:text-white font-sans antialiased selection:bg-primary-500 selection:text-white">
+    <div className="relative min-h-screen bg-[#FFF5F7] dark:bg-[#1A030A] text-neutral-900 dark:text-white font-sans antialiased selection:bg-primary-500 selection:text-white overflow-x-hidden">
       <AsciiAnimation />
-      <div className="relative z-10 w-full min-h-screen pointer-events-none">
-        <div className="pointer-events-auto w-full h-full">
+      <div className="relative z-10 w-full">
+        <div className="w-full h-full">
           <AmritaHero />
           <AmritaMapCanvas
             campusReports={campusReports}

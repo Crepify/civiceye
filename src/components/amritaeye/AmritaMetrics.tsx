@@ -12,7 +12,7 @@ interface AmritaMetricsProps {
 
 export function AmritaMetrics({ stats }: AmritaMetricsProps) {
   return (
-    <section className="bg-transparent">
+    <section className="bg-[#F5F5F7] dark:bg-[#0D0D0D] border-t border-neutral-200 dark:border-neutral-800">
       <div className="mx-auto max-w-[1920px] px-6 py-28 sm:py-36 flex flex-col items-center">
         <div className="mb-16 flex items-center justify-center gap-3 text-sm font-semibold uppercase tracking-widest text-[#A51636] dark:text-[#E52B50]">
           <span>Real-time impact</span>

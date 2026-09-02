@@ -31,7 +31,7 @@ export function AmritaFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="bg-transparent border-t border-[#A51636]/10 dark:border-[#E52B50]/10">
+    <section className="bg-[#FFF5F7] dark:bg-[#1A030A] border-t border-[#A51636]/10 dark:border-[#E52B50]/10">
       <div className="mx-auto max-w-[800px] px-6 py-28 sm:py-36">
         <h2 className="mb-16 text-3xl sm:text-4xl font-bold leading-[1.2] tracking-tight text-neutral-900 dark:text-white">
           Frequently asked questions
@@ -46,28 +46,26 @@ export function AmritaFAQ() {
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   aria-expanded={isOpen}
                   aria-controls={`faq-answer-${index}`}
-                  className="group flex w-full items-center justify-between py-8 text-left transition-all duration-300 hover:bg-neutral-50 hover:pl-4 dark:hover:bg-[#111113] focus-visible:outline-none"
+                  className="flex w-full items-center justify-between py-8 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-[#111113] focus-visible:outline-none"
                 >
-                  <span className={`text-xl font-semibold leading-[1.3] transition-colors duration-300 group-hover:text-[#A51636] dark:group-hover:text-[#E52B50] ${isOpen ? 'text-[#A51636] dark:text-[#E52B50]' : 'text-neutral-900 dark:text-white'}`}>
+                  <span className={`text-xl font-semibold leading-[1.3] transition-colors ${isOpen ? 'text-[#A51636] dark:text-[#E52B50]' : 'text-neutral-900 dark:text-white'}`}>
                     {faq.question}
                   </span>
-                  <span className="ml-6 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-700 transition-all duration-300 group-hover:border-[#A51636] group-hover:bg-[#A51636] group-hover:text-white dark:group-hover:border-[#E52B50] dark:group-hover:bg-[#E52B50]">
-                    <svg
-                      className={`h-4 w-4 transition-all duration-300 ${
-                        isOpen ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M12 5v14m-7-7h14"
-                      />
-                    </svg>
-                  </span>
+                  <svg
+                    className={`ml-6 h-6 w-6 shrink-0 transition-transform duration-300 ${
+                      isOpen ? 'rotate-180 text-[#A51636] dark:text-[#E52B50]' : 'text-neutral-400'
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
                 </button>
                 <div
                   id={`faq-answer-${index}`}

@@ -71,7 +71,7 @@ export function AmritaFeed({ campusReports }: AmritaFeedProps) {
   return (
     <section
       aria-labelledby="campus-reports-title"
-      className="bg-transparent"
+      className="bg-[#FFF5F7] dark:bg-[#1A030A] border-t border-[#A51636]/10 dark:border-[#E52B50]/10"
     >
       <div className="mx-auto max-w-[1920px] px-6 py-28 sm:py-36">
         <div className="grid gap-12 border-b border-neutral-200 dark:border-neutral-800 pb-12 lg:grid-cols-12 lg:items-end">

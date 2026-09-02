@@ -22,41 +22,51 @@ const itemVariants = {
 
 export function AmritaHero() {
   return (
-    <section id="hero" aria-labelledby="amrita-hero-title" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-transparent">
+    <section
+      id="hero"
+      aria-labelledby="amrita-hero-title"
+      className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden bg-transparent"
+    >
+      {/* Readability fade over the ASCII backdrop — keeps hero text crisp on
+          any screen size, light or dark. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/70 dark:from-black/60 dark:via-black/30 dark:to-[#1A030A]/80" aria-hidden="true" />
+      {/* Soft glow to lift the headline off the characters */}
+      <div className="pointer-events-none absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-[#E52B50]/20 blur-[120px] dark:bg-[#E52B50]/25" aria-hidden="true" />
+
       <motion.div 
-        className="mx-auto max-w-[1920px] px-6 lg:px-12 flex flex-col items-center text-center z-10 relative"
+        className="relative z-10 mx-auto max-w-[1920px] px-6 lg:px-12 flex flex-col items-center text-center"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         
         {/* Eyebrow */}
-        <motion.div variants={itemVariants} className="mb-8 flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-[#A51636] dark:text-[#E52B50]">
-          <span className="h-2 w-2 rounded-full bg-[#A51636] dark:bg-[#E52B50]" aria-hidden="true" />
+        <motion.div variants={itemVariants} className="mb-8 flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-[#E52B50]">
+          <span className="h-2 w-2 rounded-full bg-[#E52B50]" aria-hidden="true" />
           <span>Amrita Eye · Campus Reporting</span>
         </motion.div>
 
         {/* Headline */}
         <h1
           id="amrita-hero-title"
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-[72px] xl:text-[72px] font-bold leading-[1.08] tracking-[-0.03em] text-neutral-900 dark:text-white max-w-6xl mx-auto"
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-[72px] xl:text-[72px] font-bold leading-[1.08] tracking-[-0.03em] text-white max-w-6xl mx-auto"
         >
           <span className="block">
             <AnimatedText text="Every" />{' '}
-            <span className="font-serif italic font-normal text-[#A51636] dark:text-[#E52B50]">
+            <span className="font-serif italic font-normal text-[#E52B50]">
               <AnimatedText text="broken" />
             </span>{' '}
             <AnimatedText text="light" />
           </span>
           <span className="block mt-2 sm:mt-4">
             <AnimatedText text="on campus" />{' '}
-            <span className="font-serif italic font-normal text-[#A51636] dark:text-[#E52B50]">
+            <span className="font-serif italic font-normal text-[#E52B50]">
               <AnimatedText text="has a witness." />
             </span>
           </span>
         </h1>
 
-        <motion.p variants={itemVariants} className="mt-6 max-w-2xl text-base font-normal leading-[1.5] text-neutral-600 dark:text-neutral-400">
+        <motion.p variants={itemVariants} className="mt-6 max-w-2xl text-base font-normal leading-[1.5] text-white/75">
           Photograph the issue, confirm its location, and send a traceable report directly to the campus team responsible for fixing it.
         </motion.p>
 
