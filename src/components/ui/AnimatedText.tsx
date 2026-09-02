@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 interface AnimatedTextProps {
   text: string;
   className?: string;
-  el?: keyof JSX.IntrinsicElements;
+  el?: React.ElementType;
   once?: boolean;
 }
 

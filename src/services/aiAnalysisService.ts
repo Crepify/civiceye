@@ -156,7 +156,7 @@ export function analysisTotalMs(): number {
 }
 
 /**
- * Orchestrator: try the REAL engines in order (on-device → Roboflow →
+ * Orchestrator: try the REAL engines in order (Roboflow → on-device →
  * Hugging Face), falling back to the built-in mock estimate only if all fail
  * (no keys, offline, or rate limited). Result is tagged with the engine used.
  * Photos are compressed before hitting the APIs to stay under quotas.
@@ -173,20 +173,8 @@ export async function runImageAnalysis(
     aiPhoto = photo; // fall back to original if compression fails
   }
 
-  // 1) ON-DEVICE — free, private, offline-capable. Only trusted when it maps
-  //    to a real civic category with enough confidence; otherwise the cloud
-  //    engines take over (a general model can't see "pothole").
-  if (onDeviceEnabled) {
-    try {
-      const { confident, result } = await analyzeOnDevice(aiPhoto, coordinates);
-      if (confident) return { ...result, photo };
-      console.warn('[CivicEye] on-device AI not confident — using cloud engines.');
-    } catch (err) {
-      console.warn('[CivicEye] on-device AI unavailable:', err);
-    }
-  }
-
-  // 2) Roboflow (CivicLENS) — primary cloud engine, trained on civic issues.
+  // 1) ROBOFLOW (CivicLENS) — PRIMARY cloud engine, trained on civic issues.
+  //    Most accurate for civic detection, so it runs first when configured.
   if (hasRoboflowKey) {
     try {
       const real = await analyzePhotoWithRoboflow(aiPhoto, coordinates);
@@ -197,7 +185,20 @@ export async function runImageAnalysis(
   } else {
     console.warn('[CivicEye] Roboflow is NOT configured correctly —', roboflowStatus().reason);
   }
-  // 3) Hugging Face Inference API — cloud backup (after on-device + Roboflow).
+
+  // 2) ON-DEVICE — free, private, offline-capable FALLBACK. Only trusted when
+  //    it maps to a real civic category with enough confidence.
+  if (onDeviceEnabled) {
+    try {
+      const { confident, result } = await analyzeOnDevice(aiPhoto, coordinates);
+      if (confident) return { ...result, photo };
+      console.warn('[CivicEye] on-device AI not confident — using cloud engines.');
+    } catch (err) {
+      console.warn('[CivicEye] on-device AI unavailable:', err);
+    }
+  }
+
+  // 3) Hugging Face Inference API — cloud backup (after Roboflow + on-device).
   if (hasHuggingFaceKey) {
     try {
       const real = await analyzeWithHuggingFace(aiPhoto, coordinates);

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useReports } from '@/hooks/useReports';
+import { AsciiAnimation } from '@/components/AsciiAnimation';
 import { AmritaHero } from '@/components/amritaeye/AmritaHero';
 import { AmritaMetrics } from '@/components/amritaeye/AmritaMetrics';
 import { AmritaMapCanvas } from '@/components/amritaeye/AmritaMapCanvas';
@@ -33,20 +34,25 @@ export function AmritaEye() {
   }, [campusReports]);
 
   return (
-    <div className="min-h-screen bg-[#FFF5F7] dark:bg-[#1A030A] text-neutral-900 dark:text-white font-sans antialiased selection:bg-primary-500 selection:text-white">
-      <AmritaHero />
-      <AmritaMapCanvas
-        campusReports={campusReports}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-      />
-      <AmritaMetrics stats={stats} />
-      <AmritaTaglineReveal />
-      <AmritaBenefits />
-      <AmritaHowItWorks />
-      <AmritaFeed campusReports={campusReports} />
-      <AmritaFAQ />
-      <AmritaCTA />
+    <div className="relative min-h-screen text-neutral-900 dark:text-white font-sans antialiased selection:bg-primary-500 selection:text-white">
+      <AsciiAnimation />
+      <div className="relative z-10 w-full min-h-screen pointer-events-none">
+        <div className="pointer-events-auto w-full h-full">
+          <AmritaHero />
+          <AmritaMapCanvas
+            campusReports={campusReports}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+          <AmritaMetrics stats={stats} />
+          <AmritaTaglineReveal />
+          <AmritaBenefits />
+          <AmritaHowItWorks />
+          <AmritaFeed campusReports={campusReports} />
+          <AmritaFAQ />
+          <AmritaCTA />
+        </div>
+      </div>
     </div>
   );
 }

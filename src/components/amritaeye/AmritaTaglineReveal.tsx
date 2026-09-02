@@ -2,7 +2,7 @@ import { AnimatedText } from '@/components/ui/AnimatedText';
 
 export function AmritaTaglineReveal() {
   return (
-    <section className="relative bg-[#FFF5F7] dark:bg-[#1A030A] border-t border-[#A51636]/10 dark:border-[#E52B50]/10 overflow-hidden">
+    <section className="relative bg-transparent overflow-hidden">
       {/* Central glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#A51636]/5 dark:bg-[#E52B50]/5 blur-[120px] rounded-full pointer-events-none" />
 

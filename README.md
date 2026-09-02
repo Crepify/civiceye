@@ -94,9 +94,9 @@ All keys are stored on **Vercel** (or `.env` locally). Every `VITE_` var is read
 
 ## 🧠 AI engines (order)
 
-1. **On-device (Transformers.js)** — runs a real model in your browser (WASM/WebGPU). Free, private (photo never leaves the device), offline-capable after first download. Only trusted when it confidently maps to a civic category — otherwise the cloud takes over.
-2. **Custom on-device YOLO** *(optional)* — if `VITE_ONDEVICE_YOLO_URL` is set, runs your own Roboflow-trained YOLOv8/YOLO11 ONNX model in the browser (this is what detects potholes/garbage/manholes on-device — see `AI_INTEGRATION_GUIDE.md` Step 10).
-3. **CivicLENS AI (Roboflow)** — primary cloud engine, trained on civic issues. Runs via a proxy (Cloudflare Worker preferred, or `/api/roboflow`).
+1. **CivicLENS AI (Roboflow)** — **PRIMARY** cloud engine, trained on civic issues. Runs via a proxy (Cloudflare Worker preferred, or `/api/roboflow`).
+2. **Custom on-device YOLO** *(fallback)* — if `VITE_ONDEVICE_YOLO_URL` is set, runs your YOLO ONNX model in the browser (Crepify/CivicEyeModel). Used when Roboflow is unavailable/unconfigured — free, private, offline.
+3. **On-device (Transformers.js)** — general COCO model, only trusted when it confidently maps to a civic category.
 4. **Hugging Face Inference API** — cloud backup (needs `VITE_HF_API_TOKEN`).
 5. **Built-in estimate** — last resort, clearly labeled.
 
