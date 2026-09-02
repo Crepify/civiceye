@@ -61,18 +61,18 @@ export function NavbarAmrita() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-6 z-50 pointer-events-none">
-        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 pointer-events-none">
+      <header className="fixed inset-x-0 top-3 z-50 pointer-events-none sm:top-6">
+        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-2 px-2 pointer-events-none sm:gap-3 sm:px-6">
           
           {/* LEFT: Floating Logo */}
-          <div className="pointer-events-auto flex items-center justify-center rounded-full bg-white/90 px-6 py-3 shadow-md backdrop-blur-xl border border-neutral-200/50 dark:border-white/10 dark:bg-[#111113]/80">
-            <Logo to="/" />
+          <div className="navbar-logo-pill pointer-events-auto flex min-w-0 items-center justify-center rounded-full bg-white/90 py-2 pl-2 pr-3 shadow-md backdrop-blur-xl border border-neutral-200/50 dark:border-white/10 dark:bg-[#111113]/80 sm:py-3 sm:px-6">
+            <Logo to="/" className="min-w-0" />
           </div>
 
           {/* RIGHT: Floating Pill Navbar */}
           <nav
             aria-label="Main navigation"
-            className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-white/90 p-1.5 shadow-md backdrop-blur-xl border border-neutral-200/50 dark:border-white/10 dark:bg-[#111113]/80"
+            className="navbar-nav-pill pointer-events-auto flex shrink-0 items-center gap-0.5 rounded-full bg-white/90 p-1 shadow-md backdrop-blur-xl border border-neutral-200/50 dark:border-white/10 dark:bg-[#111113]/80 sm:gap-1.5 sm:p-1.5"
           >
             <ul className="hidden items-center px-2 lg:flex">
               {NAV_LINKS.map((link) => (
@@ -110,7 +110,7 @@ export function NavbarAmrita() {
                   title="Admin panel"
                   className={({ isActive }) =>
                     cn(
-                      'flex h-8 w-8 items-center justify-center rounded-full transition-colors',
+                      'hidden h-8 w-8 items-center justify-center rounded-full transition-colors sm:flex',
                       isActive
                         ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white'
                         : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white',
@@ -121,7 +121,7 @@ export function NavbarAmrita() {
                 </NavLink>
               )}
               
-              <div className="px-1"><NotificationBell /></div>
+              <div className="hidden px-1 min-[440px]:block"><NotificationBell /></div>
 
               {user ? (
                 <div className="relative ml-1" ref={profileRef}>

@@ -757,3 +757,37 @@ html.amrita main.has-top-nav {
     padding-top: calc(var(--nav-height) + 1.25rem) !important;
   }
 }
+
+/* ---- Amrita Eye floating nav — compact + never overflows on phones ----
+   Small screens: shrink the logo mark/wordmark so the branding pill is modest,
+   stop the wordmark wrapping, and keep the nav pill inside the viewport. */
+@media (max-width: 639px) {
+  html.amrita header .navbar-logo-pill .logo-mark {
+    height: 1.85rem !important;
+    width: 1.85rem !important;
+    border-radius: 0.55rem !important;
+  }
+  html.amrita header .navbar-logo-pill .logo-mark svg {
+    height: 1rem !important;
+    width: 1rem !important;
+  }
+  html.amrita header .navbar-logo-pill a {
+    gap: 0.5rem !important;
+  }
+  html.amrita header .navbar-logo-pill a .flex-col {
+    line-height: 1 !important;
+  }
+  html.amrita header .navbar-logo-pill a .flex-col span {
+    white-space: nowrap !important;
+  }
+  html.amrita header .navbar-logo-pill a .flex-col > span:first-child {
+    font-size: 0.95rem !important;
+    line-height: 1.1 !important;
+  }
+  html.amrita header .navbar-logo-pill a .flex-col > span:last-child {
+    display: none !important; /* tagline off on tiny screens */
+  }
+  html.amrita header .navbar-nav-pill > div {
+    gap: 0 !important;
+  }
+}
