@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, GraduationCap, House, LogOut, Menu, Plus, ShieldCheck, User } from 'lucide-react';
+import { BadgeCheck, ChevronRight, House, LogOut, Menu, Plus, ShieldCheck, User } from 'lucide-react';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { Drawer } from './Drawer';
@@ -28,7 +28,7 @@ export function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, profile, isAmrita, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { brand } = useBrand();
   const profileRef = useRef<HTMLDivElement>(null);
   const isAdmin = isAdminEmail(user?.email, brand);
@@ -178,12 +178,10 @@ export function Navbar() {
                         {profile?.full_name || 'Account'}
                       </p>
                       <p className="truncate text-xs text-slate-400">{user.email}</p>
-                      {isAmrita ? (
-                        <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary-500/10 px-2 py-0.5 text-[10px] font-bold text-primary-700 dark:text-primary-300">
-                          <GraduationCap className="h-3 w-3" />
-                          Amrita Eye member
-                        </span>
-                      ) : null}
+                      <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary-500/10 px-2 py-0.5 text-[10px] font-bold text-primary-700 dark:text-primary-300">
+                        <BadgeCheck className="h-3 w-3" />
+                        CivicEye member
+                      </span>
                     </div>
                     <button
                       onClick={() => void handleSignOut()}

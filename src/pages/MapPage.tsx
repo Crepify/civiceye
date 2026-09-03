@@ -59,6 +59,9 @@ export function MapPage() {
   const visibleReports = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
     return reports.filter((r) => {
+      // Complete separation: CivicEye only ever shows city reports; Amrita Eye
+      // only ever shows campus reports — never mixed, even on "All".
+      if (isAmrita ? r.scope !== 'campus' : r.scope !== 'city') return false;
       if (filters.scope !== 'all' && r.scope !== filters.scope) return false;
       if (!ALL(filters.categories) && !filters.categories.includes(r.category)) return false;
       if (!ALL(filters.severities) && !filters.severities.includes(r.severity)) return false;
@@ -71,7 +74,7 @@ export function MapPage() {
       }
       return true;
     });
-  }, [reports, filters, debouncedSearch]);
+  }, [reports, filters, debouncedSearch, isAmrita]);
 
   // Keep the selection valid as filters change.
   useEffect(() => {

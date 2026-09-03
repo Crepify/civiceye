@@ -32,16 +32,21 @@ export function FilterBar({ filters, onChange, className }: FilterBarProps) {
         Filters
       </div>
 
-      {/* Scope — campus vs city */}
+      {/* Scope — location. Amrita Eye toggles campus/city; CivicEye is city-only. */}
       <div>
         <p className="mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Location</p>
         <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/10">
           {(
-            [
-              ['all', 'All', MapPin],
-              ['campus', 'Campus', School],
-              ['city', 'City', MapPin],
-            ] as const
+            isAmrita
+              ? ([
+                  ['all', 'All', MapPin],
+                  ['campus', 'Campus', School],
+                  ['city', 'City', MapPin],
+                ] as const)
+              : ([
+                  ['all', 'All', MapPin],
+                  ['city', 'City', MapPin],
+                ] as const)
           ).map(([key, label, Icon]) => (
             <button
               key={key}
@@ -59,9 +64,11 @@ export function FilterBar({ filters, onChange, className }: FilterBarProps) {
             </button>
           ))}
         </div>
-        <p className="mt-1.5 text-[11px] text-slate-400 dark:text-slate-500">
-          Campus = inside the campus boundary · City = anywhere else
-        </p>
+        {isAmrita ? (
+          <p className="mt-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+            Campus = inside the campus boundary · City = anywhere else
+          </p>
+        ) : null}
       </div>
 
       {/* Categories */}

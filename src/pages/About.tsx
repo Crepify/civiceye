@@ -96,11 +96,15 @@ const MISSION =
 
 /** About page. */
 export function About() {
-  const { meta } = useBrand();
+  const { meta, isAmrita } = useBrand();
   const appName = meta.appName;
   // Render-time brand substitution: any "CivicEye" mention in the static
   // story text becomes the active brand's name (e.g. "Amrita Eye").
   const b = (s: string) => s.replace(/CivicEye/g, appName);
+
+  // Complete separation: CivicEye's About never mentions campus / Amrita Eye.
+  const timeline = TIMELINE.filter((t) => isAmrita || t.title !== 'Campus & city rollout');
+  const placeWord = isAmrita ? 'campus' : 'city';
   useEffect(() => {
     if (window.location.hash !== '#creators') return;
     const timer = window.setTimeout(() => {
@@ -114,7 +118,7 @@ export function About() {
       <PageHeader
         eyebrow={`About ${appName}`}
         title="Know your place before it bites"
-        description={`${appName} is a shared, living map of what\u2019s broken, dark, flooded or unsafe in your city and campus — reported and verified by the people who live it, so newcomers and locals alike know where they\u2019re going.`}
+        description={`${appName} is a shared, living map of what\u2019s broken, dark, flooded or unsafe in your ${placeWord} — reported and verified by the people around you, so newcomers and locals alike know where they\u2019re going.`}
       />
 
       <section className="section-pad py-16 sm:py-20">
@@ -256,10 +260,10 @@ export function About() {
       <section className="section-pad py-16 sm:py-20">
         <SectionHeading eyebrow="Timeline" title="How this started" />
         <div className="mx-auto max-w-3xl">
-          {TIMELINE.map((t, i) => (
+          {timeline.map((t, i) => (
             <Reveal key={t.date} delay={i * 0.1}>
               <div className="relative flex gap-6 pb-10 last:pb-0">
-                {i < TIMELINE.length - 1 ? (
+                {i < timeline.length - 1 ? (
                   <span className="absolute left-[15px] top-9 h-full w-0.5 bg-gradient-to-b from-primary-400 to-accent-400/40" />
                 ) : null}
                 <span className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full brand-grad-1 text-[10px] font-bold text-white shadow-glow">

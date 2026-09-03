@@ -106,11 +106,10 @@ function ReportWizard() {
   const [retrying, setRetrying] = useState(false);
   const timerRef = useRef<number | null>(null);
 
-  // Auto-detect: if the report's coordinates are inside the campus, it's
-  // recommended to campus students/staff (scope = campus). The user can
-  // override via `chosenScope`.
-  const insideCampus = draft.coordinates ? isInsideCampus(draft.coordinates) : false;
-  const detectedScope: 'city' | 'campus' = insideCampus ? 'campus' : 'city';
+  // Auto-detect scope. Amrita Eye: coordinates inside the campus → campus
+  // report (user can override). CivicEye is city-only — never campus.
+  const insideCampus = isAmrita && draft.coordinates ? isInsideCampus(draft.coordinates) : false;
+  const detectedScope: 'city' | 'campus' = isAmrita ? (insideCampus ? 'campus' : 'city') : 'city';
   const finalScope = chosenScope ?? detectedScope;
 
   const update = useCallback(
@@ -465,6 +464,7 @@ function ReportWizard() {
                   <LocationStep
                     coordinates={draft.coordinates}
                     locationName={draft.locationName}
+                    isAmrita={isAmrita}
                     insideCampus={insideCampus}
                     finalScope={finalScope}
                     chosenScope={chosenScope}
@@ -843,6 +843,7 @@ function AnalysisResultCard({
 function LocationStep({
   coordinates,
   locationName,
+  isAmrita,
   insideCampus,
   finalScope,
   chosenScope,
@@ -852,6 +853,8 @@ function LocationStep({
 }: {
   coordinates: Coordinates | null;
   locationName: string;
+  /** False in CivicEye → scope is always city, no campus UI is shown. */
+  isAmrita: boolean;
   insideCampus: boolean;
   finalScope: 'city' | 'campus';
   chosenScope: 'city' | 'campus' | null;
@@ -935,8 +938,22 @@ function LocationStep({
           </div>
         </div>
 
-        {/* Campus detection / recommendation */}
-        {coordinates ? (
+        {/* Campus detection / recommendation — Amrita Eye only. CivicEye is
+            city-only, so it shows a plain city-report note instead. */}
+        {coordinates && !isAmrita ? (
+          <div className="mt-4 flex items-start gap-3 rounded-2xl border border-slate-200 bg-white/60 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-400/10 text-slate-500">
+              <MapPin className="h-4 w-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">City report</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                This report will be shared with the city community so neighbours can verify it.
+              </p>
+            </div>
+          </div>
+        ) : null}
+        {coordinates && isAmrita ? (
           <div
             className={cn(
               'mt-4 flex items-start gap-3 rounded-2xl border p-4',

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Building2, CheckCircle2, Clock, ExternalLink, Mail, MapPin, Phone, Send, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { useToast } from '@/hooks/useToast';
+import { useBrand } from '@/hooks/useBrand';
 import { authoritiesForScope } from '@/data/authorities';
 
 /** Official CivicEye contact inbox — used across the contact + escalation flows. */
@@ -24,13 +25,14 @@ type ContactForm = z.infer<typeof contactSchema>;
 const INFO: Array<{ icon: typeof Mail; label: string; value: string; href?: string }> = [
   { icon: Mail, label: 'Email', value: 'civiceyeoffcial@gmail.com', href: `mailto:${CIVICEYE_CONTACT_EMAIL}` },
   { icon: Phone, label: 'Helpline', value: '1533 · 1912 · 19145 (govt helplines)' },
-  { icon: MapPin, label: 'Built in', value: 'Amrita Vishwa Vidyapeetham · Bengaluru' },
+  { icon: MapPin, label: 'Serving', value: 'Bengaluru, Karnataka, India' },
   { icon: Clock, label: 'Response time', value: 'Within 1–2 working days' },
 ];
 
 /** Contact page with a validated form (prototype — no real submission). */
 export function Contact() {
   const toast = useToast();
+  const { isAmrita } = useBrand();
   const [sent, setSent] = useState(false);
 
   const {
@@ -273,7 +275,7 @@ export function Contact() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {authoritiesForScope('city').map((a) => (
+            {authoritiesForScope(isAmrita ? 'campus' : 'city').map((a) => (
               <div key={a.id} className="card flex h-full flex-col p-5">
                 <div className="flex items-center gap-3">
                   <span
@@ -323,8 +325,8 @@ export function Contact() {
           </div>
 
           <p className="mt-6 text-center text-xs text-slate-400">
-            For emergencies call 112 · For campus issues (Amrita Eye) the report goes to campus staff
-            instead of the city bodies above.
+            For emergencies call 112 · Reports are verified by the community before they reach the
+            department.
           </p>
         </div>
       </section>

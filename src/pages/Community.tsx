@@ -77,6 +77,9 @@ export function Community() {
   const filtered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
     return reports.filter((r) => {
+      // Complete separation: CivicEye only ever shows city reports; Amrita Eye
+      // only ever shows campus reports — never mixed, even on "All".
+      if (isAmrita ? r.scope !== 'campus' : r.scope !== 'city') return false;
       if (filters.scope !== 'all' && r.scope !== filters.scope) return false;
       if (filters.categories.length && !filters.categories.includes(r.category)) return false;
       if (filters.severities.length && !filters.severities.includes(r.severity)) return false;
@@ -88,7 +91,7 @@ export function Community() {
       }
       return true;
     });
-  }, [reports, filters, debouncedSearch]);
+  }, [reports, filters, debouncedSearch, isAmrita]);
 
   const sorted = useMemo(() => sortReports(filtered, sort), [filtered, sort]);
   const page = sorted.slice(0, visibleCount);

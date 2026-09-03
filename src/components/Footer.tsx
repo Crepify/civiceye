@@ -18,8 +18,6 @@ const COMPANY_LINKS = [
   { to: '/features', label: 'How it works' },
 ];
 
-const AMRITA_PLACE = 'Amrita Vishwa Vidyapeetham · Bengaluru Campus';
-
 const SOCIALS = [
   { href: 'https://twitter.com', label: 'Twitter / X', icon: Twitter },
   { href: 'https://facebook.com', label: 'Facebook', icon: Facebook },
@@ -30,7 +28,7 @@ const SOCIALS = [
 
 /** Site-wide footer. */
 export function Footer() {
-  const { meta, isAmrita } = useBrand();
+  const { meta } = useBrand();
   return (
     <footer className="relative mt-auto border-t border-slate-200/70 bg-white/70 backdrop-blur dark:border-white/5 dark:bg-slate-950/80">
       <div className="section-pad py-12 sm:py-16">
@@ -40,13 +38,11 @@ export function Footer() {
             <Logo />
             <p className="mt-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
               {meta.tagline}{' '}
-              {isAmrita
-                ? 'Reports go straight to campus staff so they can act fast.'
-                : 'Citizens report, the community verifies, authorities fix.'}
+              Citizens report, the community verifies, authorities fix.
             </p>
             <div className="mt-5 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <MapPin className="h-4 w-4 text-primary-500" />
-              {isAmrita ? AMRITA_PLACE : 'Bengaluru, Karnataka, India'}
+              Bengaluru, Karnataka, India
             </div>
           </div>
 
@@ -123,7 +119,7 @@ export function Footer() {
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200/70 pt-6 sm:flex-row dark:border-white/5">
           <p className="text-xs text-slate-400 dark:text-slate-500">
             © {new Date().getFullYear()} {meta.appName}. All rights reserved. Built with ❤️ in
-            {isAmrita ? ' Amritapuri & Bengaluru' : ' Bengaluru'}.
+            Bengaluru.
           </p>
           <div className="flex items-center gap-5 text-xs text-slate-400 dark:text-slate-500">
             <Link

@@ -65,6 +65,12 @@ export function AdminPanel() {
     return map;
   }, [profiles]);
 
+  // Complete separation: each admin panel only manages its own brand's reports.
+  const scopedReports = useMemo(
+    () => reports.filter((r) => r.scope === (brand === 'amrita' ? 'campus' : 'city')),
+    [reports, brand],
+  );
+
   if (!isAdmin) {
     return (
       <div className="section-pad py-24 text-center">
@@ -146,7 +152,7 @@ export function AdminPanel() {
             </p>
           </div>
           <div className="card p-5">
-            <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{reports.length}</p>
+            <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{scopedReports.length}</p>
             <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
               Total posts ({brand === 'amrita' ? 'campus' : 'city'})
             </p>
@@ -253,15 +259,16 @@ export function AdminPanel() {
           )}
         </div>
 
-        {/* Scope manager: mark reports as campus */}
+        {/* Scope manager (Amrita Eye only — CivicEye's feed is entirely city,
+            so there's nothing to move across feeds here). */}
+        {brand === 'amrita' ? (
         <div className="mt-10">
           <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             <School className="h-4.5 w-4.5 text-primary-500" />
-            Mark reports as campus
+            Manage campus reports
           </h2>
           <p className="mb-3 text-xs text-slate-400">
-            Move reports between the city feed (public) and the campus feed (Amrita Eye). Campus
-            reports are only visible to Amrita accounts.
+            Review posts in the campus feed and fix any that belong in the city feed.
           </p>
           <div className="card overflow-hidden">
             <div className="overflow-x-auto">
@@ -280,14 +287,14 @@ export function AdminPanel() {
                         <div className="skeleton h-8 w-full" />
                       </td>
                     </tr>
-                  ) : reports.length === 0 ? (
+                  ) : scopedReports.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="py-8 text-center text-xs text-slate-400">
                         No reports yet.
                       </td>
                     </tr>
                   ) : (
-                    [...reports]
+                    [...scopedReports]
                       .sort((a, b) => (a.date < b.date ? 1 : -1))
                       .slice(0, 15)
                       .map((r) => (
@@ -339,7 +346,10 @@ export function AdminPanel() {
           </div>
         </div>
 
+) : null}
+
         {/* Users (student details) */}
+        
         <div className="mt-10">
           <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
             <Users className="h-4.5 w-4.5 text-primary-500" />
