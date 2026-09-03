@@ -87,11 +87,11 @@ export function FooterAmrita() {
               ))}
             </ul>
             <a
-              href="mailto:hello@civiceye.app"
+              href="mailto:civiceyeoffcial@gmail.com"
               className="mt-6 flex items-center gap-3 text-sm font-medium text-neutral-600 dark:text-neutral-300 transition-colors hover:text-neutral-900 dark:text-white"
             >
               <Mail className="h-4 w-4" />
-              hello@civiceye.app
+              civiceyeoffcial@gmail.com
             </a>
           </nav>
 

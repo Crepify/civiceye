@@ -87,11 +87,11 @@ export function Footer() {
               ))}
             </ul>
             <a
-              href="mailto:hello@civiceye.app"
+              href="mailto:civiceyeoffcial@gmail.com"
               className="mt-4 flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400"
             >
               <Mail className="h-4 w-4" />
-              hello@civiceye.app
+              civiceyeoffcial@gmail.com
             </a>
           </nav>
 

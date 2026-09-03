@@ -21,7 +21,7 @@
  *   SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS   — any SMTP provider
  *   SMTP_FROM                                       — e.g. "CivicEye <alerts@yourdomain.com>"
  *   AUTHORITY_EMAIL_<ID>                            — e.g. AUTHORITY_EMAIL_BBMP_42
- *                                                     (overrides the placeholder inbox)
+ *                                                     (overrides the default official inbox)
  *
  * If SMTP is not configured the function responds 503 with
  * { reason: "EMAIL_NOT_CONFIGURED" } and the UI falls back to a mailto: link,
@@ -33,15 +33,15 @@ import nodemailer from 'nodemailer';
 /* Built-in authority directory (id → { name, department, email }).
  * Keep in sync with src/data/authorities.ts. Env vars always win. */
 const DIRECTORY = {
-  'bbmp-42': { name: 'BBMP Ward 42 Control Room', department: 'Roads & Infrastructure', email: 'xetawaw@gmail.com' },
-  'bbmp-swm': { name: 'BBMP Solid Waste Management', department: 'Sanitation', email: 'xetawaw@gmail.com' },
-  bwssb: { name: 'BWSSB Helpline', department: 'Water Supply & Sewerage', email: 'xetawaw@gmail.com' },
-  bescom: { name: 'BESCOM 1912', department: 'Street Lighting & Power', email: 'xetawaw@gmail.com' },
-  'traffic-police': { name: 'Bengaluru Traffic Police', department: 'Traffic & Signals', email: 'xetawaw@gmail.com' },
-  'forest-dept': { name: 'BBMP Forest Cell', department: 'Trees & Parks', email: 'xetawaw@gmail.com' },
-  'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: 'xetawaw@gmail.com' },
-  'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: 'xetawaw@gmail.com' },
-  'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: 'xetawaw@gmail.com' },
+  'bbmp-42': { name: 'BBMP Ward 42 Control Room', department: 'Roads & Infrastructure', email: 'civiceyeoffcial@gmail.com' },
+  'bbmp-swm': { name: 'BBMP Solid Waste Management', department: 'Sanitation', email: 'civiceyeoffcial@gmail.com' },
+  bwssb: { name: 'BWSSB Helpline', department: 'Water Supply & Sewerage', email: 'civiceyeoffcial@gmail.com' },
+  bescom: { name: 'BESCOM 1912', department: 'Street Lighting & Power', email: 'civiceyeoffcial@gmail.com' },
+  'traffic-police': { name: 'Bengaluru Traffic Police', department: 'Traffic & Signals', email: 'civiceyeoffcial@gmail.com' },
+  'forest-dept': { name: 'BBMP Forest Cell', department: 'Trees & Parks', email: 'civiceyeoffcial@gmail.com' },
+  'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: 'civiceyeoffcial@gmail.com' },
+  'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: 'civiceyeoffcial@gmail.com' },
+  'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: 'civiceyeoffcial@gmail.com' },
 };
 
 const MAX_BODY_CHARS = 20_000;

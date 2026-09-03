@@ -1,19 +1,16 @@
 import type { Authority, CategoryId } from '@/types';
 
 /* ====================================================================
- *  ⚠️  TODO — REPLACE THE PLACEHOLDER CONTACTS BELOW
+ *  Authority contacts
  *
- *  Every `email`, `phone` and `whatsapp` below is a real-format
- *  PLACEHOLDER. When you have the actual department contacts:
+ *  `email` defaults to the official CivicEye inbox
+ *  (civiceyeoffcial@gmail.com) so every escalated report is captured by
+ *  the team. `phone` / `whatsapp` are the public civic helplines; the
+ *  official complaint portal for each body is in `portalUrl`.
  *
- *    1. Edit this file and swap the values, AND
- *    2. On Vercel, set `AUTHORITY_EMAIL_<ID>` env vars (see
- *       ENVIRONMENT.md) — the server-side email function reads the
- *       delivery address from env first, so nothing is emailed to a
- *       placeholder inbox by accident.
- *
- *  Until SMTP is configured on Vercel, the "Email authority" button
- *  gracefully falls back to opening the citizen's own mail app.
+ *  When you have a dedicated department inbox, set `AUTHORITY_EMAIL_<ID>`
+ *  on Vercel (see ENVIRONMENT.md) — the server-side email function reads
+ *  the delivery address from env first and overrides this default.
  * ==================================================================== */
 
 /**
@@ -32,7 +29,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#f59e0b',
     scope: 'city',
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'other'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BBMP Ward 42 Office, 4th Main Road, Bengaluru — 5600XX', // TODO
@@ -47,7 +44,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#22c55e',
     scope: 'city',
     categories: ['garbage', 'illegal-dumping'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'SWM Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
@@ -61,7 +58,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#38bdf8',
     scope: 'city',
     categories: ['water-leakage', 'sewage'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BWSSB, Cauvery Bhavan, KG Road, Bengaluru — 560009', // TODO
@@ -75,7 +72,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#facc15',
     scope: 'city',
     categories: ['street-light'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'BESCOM Corporate Office, KR Circle, Bengaluru — 560001', // TODO
@@ -89,7 +86,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#fb7185',
     scope: 'city',
     categories: ['traffic-signal', 'accident'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Traffic Management Centre, Infantry Road, Bengaluru — 560001', // TODO
@@ -103,7 +100,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#34d399',
     scope: 'city',
     categories: ['fallen-tree'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Forest Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
@@ -119,7 +116,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#f59e0b',
     scope: 'campus',
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'fallen-tree', 'other'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Estate Office, Admin Block, Amrita Campus', // TODO
@@ -132,7 +129,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#38bdf8',
     scope: 'campus',
     categories: ['garbage', 'sewage', 'water-leakage', 'street-light'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Facilities Office, Ground Floor, Admin Block', // TODO
@@ -145,7 +142,7 @@ export const AUTHORITIES: Authority[] = [
     color: '#fb7185',
     scope: 'campus',
     categories: ['security', 'accident'],
-    email: 'xetawaw@gmail.com', // TEST: personal inbox — replace with the real dept email
+    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
     phone: '+919480079837', // TEST: personal number — replace with real dept number
     whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
     address: 'Security Control Room, Main Gate', // TODO

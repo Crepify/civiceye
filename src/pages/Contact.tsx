@@ -3,9 +3,13 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Clock, Mail, MapPin, Phone, Send } from 'lucide-react';
+import { Building2, CheckCircle2, Clock, ExternalLink, Mail, MapPin, Phone, Send, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { useToast } from '@/hooks/useToast';
+import { authoritiesForScope } from '@/data/authorities';
+
+/** Official CivicEye contact inbox — used across the contact + escalation flows. */
+export const CIVICEYE_CONTACT_EMAIL = 'civiceyeoffcial@gmail.com';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Please enter your name.'),
@@ -17,10 +21,10 @@ const contactSchema = z.object({
 
 type ContactForm = z.infer<typeof contactSchema>;
 
-const INFO = [
-  { icon: Mail, label: 'Email', value: 'hello@civiceye.app' },
-  { icon: Phone, label: 'Phone', value: '+91 80 1234 5678' },
-  { icon: MapPin, label: 'Office', value: 'Indiranagar, Bengaluru 560038' },
+const INFO: Array<{ icon: typeof Mail; label: string; value: string; href?: string }> = [
+  { icon: Mail, label: 'Email', value: 'civiceyeoffcial@gmail.com', href: `mailto:${CIVICEYE_CONTACT_EMAIL}` },
+  { icon: Phone, label: 'Helpline', value: '1533 · 1912 · 19145 (govt helplines)' },
+  { icon: MapPin, label: 'Built in', value: 'Amrita Vishwa Vidyapeetham · Bengaluru' },
   { icon: Clock, label: 'Response time', value: 'Within 1–2 working days' },
 ];
 
@@ -36,11 +40,16 @@ export function Contact() {
   } = useForm<ContactForm>({ resolver: zodResolver(contactSchema) });
 
   const onSubmit = async (data: ContactForm) => {
-    // Prototype: simulate a network request.
-    await new Promise((r) => setTimeout(r, 1200));
-    console.info('[CivicEye] contact form (prototype)', data);
+    // Open the user's mail app with everything pre-filled to the official inbox.
+    const subject = encodeURIComponent(data.subject);
+    const body = encodeURIComponent(
+      `Hi CivicEye team,\n\n${data.message}\n\n— ${data.name}${data.email ? ` (${data.email})` : ''}${data.ward ? `\nArea/Ward: ${data.ward}` : ''}`,
+    );
+    window.location.href = `mailto:${CIVICEYE_CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+    await new Promise((r) => setTimeout(r, 600));
+    console.info('[CivicEye] contact form opened mail client for', data);
     setSent(true);
-    toast.success('Message sent!', 'We\u2019ll get back to you within 1–2 working days.');
+    toast.success('Opening your mail app…', `Your message is addressed to ${CIVICEYE_CONTACT_EMAIL}.`);
   };
 
   return (
@@ -70,13 +79,22 @@ export function Contact() {
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-500/10 text-primary-600 dark:text-primary-400">
                       <item.icon className="h-4 w-4" />
                     </span>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         {item.label}
                       </p>
-                      <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                        {item.value}
-                      </p>
+                      {'href' in item && item.href ? (
+                        <a
+                          href={item.href}
+                          className="text-sm font-medium text-primary-600 underline-offset-2 hover:underline dark:text-primary-400"
+                        >
+                          {item.value}
+                        </a>
+                      ) : (
+                        <p className="break-words text-sm font-medium text-slate-700 dark:text-slate-200">
+                          {item.value}
+                        </p>
+                      )}
                     </div>
                   </li>
                 ))}
@@ -84,11 +102,17 @@ export function Contact() {
             </div>
 
             <div className="card relative overflow-hidden brand-cta p-6 text-white">
-              <h3 className="text-base font-bold">For authorities</h3>
+              <h3 className="text-base font-bold">Official reporting inbox</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-white/85">
-                Ward officers and agencies: request a demo dashboard for your jurisdiction.
+                Escalated citizen reports and official correspondence land here. Prefer the
+                department portals below — they go straight to the responsible civic body.
               </p>
-              <p className="mt-4 text-sm font-semibold">gov@civiceye.app</p>
+              <a
+                href={`mailto:${CIVICEYE_CONTACT_EMAIL}`}
+                className="mt-4 inline-block text-sm font-semibold underline underline-offset-2"
+              >
+                {CIVICEYE_CONTACT_EMAIL}
+              </a>
             </div>
           </motion.aside>
 
@@ -228,6 +252,80 @@ export function Contact() {
               )}
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Real authority reporting — every civic body a report can be escalated to */}
+      <section className="border-t border-slate-200/70 bg-white/50 py-14 dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
+        <div className="section-pad">
+          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">
+                <ShieldCheck className="h-4 w-4" /> Report to the right authority
+              </p>
+              <h2 className="heading-lg mt-1">Where your civic reports go</h2>
+            </div>
+            <p className="max-w-xl text-sm text-slate-500 dark:text-slate-400">
+              When you report an issue, it is auto-routed to the department below that owns that
+              category — and the app emails a consolidated report to our official inbox. Use the
+              portal buttons to also file it directly with the department.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {authoritiesForScope('city').map((a) => (
+              <div key={a.id} className="card flex h-full flex-col p-5">
+                <div className="flex items-center gap-3">
+                  <span
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ backgroundColor: `${a.color}22`, color: a.color }}
+                  >
+                    <Building2 className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                      {a.name}
+                    </h3>
+                    <p className="text-xs font-medium text-slate-400">{a.department}</p>
+                  </div>
+                </div>
+
+                <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                  Handles: {a.categories.map((c) => c.replace(/-/g, ' ')).join(' · ')}
+                </p>
+                {a.hours ? (
+                  <p className="mt-1 text-xs text-slate-400">{a.hours}</p>
+                ) : null}
+
+                <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
+                  {a.portalUrl ? (
+                    <a
+                      href={a.portalUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-secondary !px-3 !py-1.5 text-xs"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Official portal
+                    </a>
+                  ) : null}
+                  <a
+                    href={`mailto:${CIVICEYE_CONTACT_EMAIL}?subject=${encodeURIComponent(
+                      `Report for ${a.name} (${a.department})`,
+                    )}`}
+                    className="text-xs font-semibold text-primary-600 underline-offset-2 hover:underline dark:text-primary-400"
+                  >
+                    Email us instead
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-6 text-center text-xs text-slate-400">
+            For emergencies call 112 · For campus issues (Amrita Eye) the report goes to campus staff
+            instead of the city bodies above.
+          </p>
         </div>
       </section>
     </>
