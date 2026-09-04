@@ -264,8 +264,8 @@ export function Landing() {
         </div>
       </section>
 
-      <button onClick={() => { const next = !soundOn; setSoundOn(next); setComicSoundOn(next); if (next) sound([523, 659, 784]); }} className={`fixed right-5 top-[calc(var(--nav-height)+1rem)] z-[60] border-3 border-[#172b44] px-3 py-2 text-xs font-black shadow-[4px_4px_0_#172b44] ${soundOn ? 'bg-[#91dcc4]' : 'bg-[#ffd630]'}`} aria-pressed={soundOn}>♬ SOUND: {soundOn ? 'ON' : 'OFF'}</button>
-      <button onClick={() => { setPromoOpen(true); sound([196, 392, 784]); }} className="fixed bottom-5 right-5 z-40 border-[3px] border-[#172b44] bg-[#ef6b59] px-4 py-3 text-xs font-black shadow-[5px_5px_0_#172b44]">▶ WATCH THE CIVICEYE STORY</button>
+      <button onClick={() => { const next = !soundOn; setSoundOn(next); setComicSoundOn(next); if (next) sound([523, 659, 784]); }} className={`fixed right-5 top-[calc(var(--nav-height)+1.6rem)] z-[60] border-3 border-[#172b44] px-3 py-2 text-xs font-black shadow-[4px_4px_0_#172b44] ${soundOn ? 'bg-[#91dcc4]' : 'bg-[#ffd630]'}`} aria-pressed={soundOn}>♬ SOUND: {soundOn ? 'ON' : 'OFF'}</button>
+      <button onClick={() => { setPromoOpen(true); sound([196, 392, 784]); }} className="fixed bottom-5 left-5 z-40 border-[3px] border-[#172b44] bg-[#ef6b59] px-4 py-3 text-xs font-black shadow-[5px_5px_0_#172b44]">▶ WATCH THE CIVICEYE STORY</button>
       {certificateOpen ? <div role="dialog" aria-label="Civic Hero certificate" className="fixed inset-0 z-[70] grid place-items-center bg-[#172b44]/90 p-5" onClick={() => setCertificateOpen(false)}>
         <div className="w-full max-w-2xl border-[6px] border-[#172b44] bg-[#fff8e7] p-6 shadow-[10px_10px_0_#ffd630] sm:p-10" onClick={(e) => e.stopPropagation()}>
           {!certificateIssued ? <>
