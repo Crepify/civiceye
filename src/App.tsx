@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { NavbarAmrita } from '@/components/NavbarAmrita';
 import { FooterAmrita } from '@/components/FooterAmrita';
+import { SOSButton } from '@/components/SOSButton';
 import { RequireAuth } from '@/components/RequireAuth';
 import { Landing } from '@/pages/Landing';
 import { AmritaEye } from '@/pages/AmritaEye';
@@ -110,6 +111,8 @@ export default function App() {
       {/* Brand-aware chrome: Amrita Eye users get the Amrita Eye top bar +
           footer (the koushikkkkkkkkkk.github.io/civiceye design). */}
       {!isAuthPage ? (amritaChrome ? <NavbarAmrita /> : <Navbar />) : null}
+      {/* Global one-tap SOS (only shows for signed-in users). */}
+      {!isAuthPage ? <SOSButton /> : null}
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}

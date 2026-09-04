@@ -1,16 +1,15 @@
 import type { Authority, CategoryId } from '@/types';
 
 /* ====================================================================
- *  Authority contacts
+ *  Authority directory
  *
- *  `email` defaults to the official CivicEye inbox
- *  (civiceyeoffcial@gmail.com) so every escalated report is captured by
- *  the team. `phone` / `whatsapp` are the public civic helplines; the
- *  official complaint portal for each body is in `portalUrl`.
- *
- *  When you have a dedicated department inbox, set `AUTHORITY_EMAIL_<ID>`
- *  on Vercel (see ENVIRONMENT.md) — the server-side email function reads
- *  the delivery address from env first and overrides this default.
+ *  - `email`  defaults to the official CivicEye inbox so every escalated
+ *    report is captured by the team (per-department AUTHORITY_EMAIL_<ID>
+ *    env overrides win server-side — see ENVIRONMENT.md).
+ *  - `phone`  is the department's PUBLIC helpline (tel: works on mobile).
+ *  - `portalUrl` is the department's official complaint portal — the
+ *    recommended channel for a fast, traceable filing.
+ *  - `whatsapp` is omitted unless the body publishes a WhatsApp line.
  * ==================================================================== */
 
 /**
@@ -24,17 +23,15 @@ export const AUTHORITIES: Authority[] = [
   /* ------------------------- CivicEye (city) ------------------------- */
   {
     id: 'bbmp-42',
-    name: 'BBMP Ward 42 Control Room',
+    name: 'BBMP Ward Roads',
     department: 'Roads & Infrastructure',
     color: '#f59e0b',
     scope: 'city',
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'other'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'BBMP Ward 42 Office, 4th Main Road, Bengaluru — 5600XX', // TODO
-    hours: 'Mon–Sat 9:30–17:30',
-    // Official grievance portal — verify it's current before demoing.
+    email: 'civiceyeoffcial@gmail.com', // official CivicEye capture inbox
+    phone: '1533', // BBMP public helpline
+    address: 'BBMP — your ward office routes to the responsible engineer',
+    hours: 'Helpline 1533 · 24×7',
     portalUrl: 'https://bbmp.samparka.online', // BBMP Samparka (roads/potholes)
   },
   {
@@ -44,11 +41,10 @@ export const AUTHORITIES: Authority[] = [
     color: '#22c55e',
     scope: 'city',
     categories: ['garbage', 'illegal-dumping'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'SWM Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
-    hours: 'Mon–Sat 9:00–18:00',
+    email: 'civiceyeoffcial@gmail.com',
+    phone: '1533',
+    address: 'SWM Cell, BBMP Head Office, NR Square, Bengaluru — 560002',
+    hours: 'Helpline 1533 · 24×7',
     portalUrl: 'https://bbmp.samparka.online', // BBMP Samparka (garbage/SWM)
   },
   {
@@ -58,11 +54,10 @@ export const AUTHORITIES: Authority[] = [
     color: '#38bdf8',
     scope: 'city',
     categories: ['water-leakage', 'sewage'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'BWSSB, Cauvery Bhavan, KG Road, Bengaluru — 560009', // TODO
-    hours: '24×7 helpline',
+    email: 'civiceyeoffcial@gmail.com',
+    phone: '19145',
+    address: 'BWSSB, Cauvery Bhavan, KG Road, Bengaluru — 560009',
+    hours: '24×7 helpline (19145)',
     portalUrl: 'https://bwssb.karnataka.gov.in', // official BWSSB site
   },
   {
@@ -72,10 +67,9 @@ export const AUTHORITIES: Authority[] = [
     color: '#facc15',
     scope: 'city',
     categories: ['street-light'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'BESCOM Corporate Office, KR Circle, Bengaluru — 560001', // TODO
+    email: 'civiceyeoffcial@gmail.com',
+    phone: '1912',
+    address: 'BESCOM Corporate Office, KR Circle, Bengaluru — 560001',
     hours: '24×7 helpline (1912)',
     portalUrl: 'https://bescom.karnataka.gov.in', // official BESCOM site
   },
@@ -86,11 +80,10 @@ export const AUTHORITIES: Authority[] = [
     color: '#fb7185',
     scope: 'city',
     categories: ['traffic-signal', 'accident'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'Traffic Management Centre, Infantry Road, Bengaluru — 560001', // TODO
-    hours: '24×7 control room',
+    email: 'civiceyeoffcial@gmail.com',
+    phone: '112',
+    address: 'Traffic Management Centre, Infantry Road, Bengaluru — 560001',
+    hours: '24×7 control room (112 / 103)',
     portalUrl: 'https://www.bengalurucitypolice.gov.in', // Bangalore City Police
   },
   {
@@ -100,11 +93,10 @@ export const AUTHORITIES: Authority[] = [
     color: '#34d399',
     scope: 'city',
     categories: ['fallen-tree'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'Forest Cell, BBMP Head Office, NR Square, Bengaluru — 560002', // TODO
-    hours: 'Mon–Sat 10:00–17:00',
+    email: 'civiceyeoffcial@gmail.com',
+    phone: '1533',
+    address: 'Forest Cell, BBMP Head Office, NR Square, Bengaluru — 560002',
+    hours: 'Helpline 1533 · 24×7',
     portalUrl: 'https://bbmp.gov.in', // BBMP main site (tree cell)
   },
 
@@ -116,10 +108,8 @@ export const AUTHORITIES: Authority[] = [
     color: '#f59e0b',
     scope: 'campus',
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'fallen-tree', 'other'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'Estate Office, Admin Block, Amrita Campus', // TODO
+    email: 'civiceyeoffcial@gmail.com',
+    address: 'Estate Office, Admin Block, Amrita Campus',
     hours: 'Mon–Sat 9:00–17:00',
   },
   {
@@ -129,10 +119,8 @@ export const AUTHORITIES: Authority[] = [
     color: '#38bdf8',
     scope: 'campus',
     categories: ['garbage', 'sewage', 'water-leakage', 'street-light'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'Facilities Office, Ground Floor, Admin Block', // TODO
+    email: 'civiceyeoffcial@gmail.com',
+    address: 'Facilities Office, Ground Floor, Admin Block',
     hours: 'Mon–Sat 8:30–17:30',
   },
   {
@@ -142,10 +130,8 @@ export const AUTHORITIES: Authority[] = [
     color: '#fb7185',
     scope: 'campus',
     categories: ['security', 'accident'],
-    email: 'civiceyeoffcial@gmail.com', // TEST: personal inbox — replace with the real dept email
-    phone: '+919480079837', // TEST: personal number — replace with real dept number
-    whatsapp: ['919480079837', '919741042014'], // TEST: personal numbers — replace with real dept numbers
-    address: 'Security Control Room, Main Gate', // TODO
+    email: 'civiceyeoffcial@gmail.com',
+    address: 'Security Control Room, Main Gate',
     hours: '24×7 emergency line',
   },
 ];
@@ -178,30 +164,23 @@ export function authorityForCategory(
 export const telLink = (a: Authority): string | undefined =>
   a.phone ? `tel:${a.phone.replace(/[^\d+]/g, '')}` : undefined;
 
-/** wa.me deep links, one per authority WhatsApp number, with an optional pre-filled message. */
 export function whatsAppLinks(
   a: Authority,
   message?: string,
 ): { number: string; url: string }[] {
-  return (a.whatsapp ?? []).map((raw) => {
-    const digits = raw.replace(/\D/g, '');
-    const base = `https://wa.me/${digits}`;
-    return { number: digits, url: message ? `${base}?text=${encodeURIComponent(message)}` : base };
-  });
+  const text = encodeURIComponent(message ?? `CivicEye enquiry for ${a.name}`);
+  return (a.whatsapp ?? []).map((number) => ({
+    number,
+    url: `https://wa.me/${number.replace(/[^\d]/g, '')}?text=${text}`,
+  }));
 }
 
-/**
- * sms: deep link with a pre-filled body — opens the citizen's messaging app.
- * The "?&body" form works on both Android (?body) and iOS (&body).
- */
 export function smsLink(a: Authority, message?: string): string | undefined {
   if (!a.phone) return undefined;
-  const number = a.phone.replace(/[^\d+]/g, '');
-  const base = `sms:${number}`;
-  return message ? `${base}?&body=${encodeURIComponent(message)}` : base;
+  const text = encodeURIComponent(message ?? `CivicEye enquiry for ${a.name}`);
+  return `sms:${a.phone.replace(/[^\d+]/g, '')}?body=${text}`;
 }
 
-/** mailto: link with pre-filled subject + body. */
 export function mailToLink(a: Authority, subject: string, body: string): string {
   return `mailto:${a.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

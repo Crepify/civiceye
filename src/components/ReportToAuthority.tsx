@@ -12,6 +12,7 @@ import {
   Phone,
   Send,
   ShieldAlert,
+  Wrench,
 } from 'lucide-react';
 import { Modal } from './Modal';
 import { AuthorityContactCard } from './AuthorityContactCard';
@@ -32,6 +33,7 @@ import { useToast } from '@/hooks/useToast';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useBrand } from '@/hooks/useBrand';
 import { useAuth } from '@/hooks/useAuth';
+import { findRoadContract, isUnderWarranty } from '@/services/roadContracts';
 import { cn } from '@/utils/cn';
 
 interface ReportToAuthorityProps {
@@ -90,6 +92,11 @@ export function ReportToAuthority({
   );
   const reporterEmail = user?.email ?? profile?.email ?? null;
   const reporterId = user?.id ?? null;
+
+  // Road-contractor warranty check (city roads only): if the reported road is
+  // under a contractor's defect-liability window, the builder must fix it.
+  const roadContract = report && scope === 'city' ? findRoadContract(report.locationName) : null;
+  const contractWarrantyActive = roadContract ? isUnderWarranty(roadContract) : false;
 
   const resolvedLabel = isAmrita && !report ? 'Report to staff' : label;
   const phoneHref = telLink(authority);
@@ -246,6 +253,65 @@ export function ReportToAuthority({
                 exit={{ opacity: 0 }}
               >
                 <AuthorityContactCard authority={authority} />
+
+                {/* Official complaint portal — the most reliable channel */}
+                {authority.portalUrl && !isAmrita ? (
+                  <a
+                    href={authority.portalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-500"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    File on {authority.name.split(' ').slice(0, 2).join(' ')} official portal
+                  </a>
+                ) : null}
+
+                {/* Contractor / warranty callout (city roads under DLP) */}
+                {roadContract ? (
+                  <div
+                    className={`mt-3 flex items-start gap-3 rounded-2xl border p-4 text-left ${
+                      contractWarrantyActive
+                        ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10'
+                        : 'border-amber-300 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10'
+                    }`}
+                  >
+                    <Wrench className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
+                    <div className="min-w-0 flex-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                      {contractWarrantyActive ? (
+                        <>
+                          <p className="font-bold text-emerald-700 dark:text-emerald-300">
+                            This road is under a contractor warranty.
+                          </p>
+                          <p className="mt-1">
+                            {roadContract.corridor} · {roadContract.contractor} · covered until{' '}
+                            {roadContract.warrantyUntil}. Mention the contract{' '}
+                            {roadContract.contractRef} when you report — the builder (not the
+                            taxpayer) should fix it. ({roadContract.source})
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-bold text-amber-700 dark:text-amber-300">
+                            Possible contractor liability
+                          </p>
+                          <p className="mt-1">
+                            {roadContract.corridor} ({roadContract.contractor}, warranty ended{' '}
+                            {roadContract.warrantyUntil}). Ask the ward to confirm — if it failed
+                            within the defect-liability window, the contractor must still fix it.
+                            ({roadContract.source})
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ) : report && scope === 'city' ? (
+                  <p className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500 dark:bg-white/[0.04] dark:text-slate-400">
+                    💡 Many new roads carry a contractor warranty — mention{' '}
+                    <strong>“please check if this road is under a defect-liability contract”</strong>{' '}
+                    in your note and the office can route the fix to the builder for free.
+                  </p>
+                ) : null}
 
                 {report ? (
                   <div className="mt-4">
