@@ -8,6 +8,7 @@ import { NavbarAmrita } from '@/components/NavbarAmrita';
 import { FooterAmrita } from '@/components/FooterAmrita';
 import { SOSButton } from '@/components/SOSButton';
 import { RequireAuth } from '@/components/RequireAuth';
+import { GuestGate } from '@/components/GuestGate';
 import { Landing } from '@/pages/Landing';
 import { AmritaEye } from '@/pages/AmritaEye';
 import { useBrand } from '@/hooks/useBrand';
@@ -86,7 +87,7 @@ export default function App() {
       <Route path="/features" element={<Features />} />
       <Route path="/map" element={<MapPage />} />
       <Route path="/live" element={<LiveDetection />} />
-      <Route path="/report" element={<ReportPage />} />
+      <Route path="/report" element={<GuestGate><ReportPage /></GuestGate>} />
       <Route path="/report/:id" element={<ReportDetails />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/community" element={<Community />} />

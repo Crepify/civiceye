@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/useToast';
 import { displayName } from '@/services/reportService';
 import { timeAgo } from '@/utils/format';
 import { cn } from '@/utils/cn';
+import { isGuest, guestId } from '@/utils/guest';
 
 const MAX_REVIEW_LENGTH = 600;
 
@@ -26,22 +27,29 @@ export function ReviewSection({ reportId }: { reportId: string }) {
 
   const requireAuth = (): boolean => {
     if (user) return true;
-    toast.info('Sign in required', 'Create a free account to review reports.');
+    toast.info('Sign in required', 'Create a free account for that.');
     navigate('/login?next=' + encodeURIComponent(window.location.pathname));
     return false;
   };
 
   const submit = async () => {
-    if (!requireAuth()) return;
+    // Guests may review too — they just post as "Guest citizen".
+    if (!user && !isGuest()) {
+      requireAuth();
+      return;
+    }
     const text = content.trim();
     if (text.length < 2) {
       toast.warning('Review too short', 'Please write at least a couple of words.');
       return;
     }
-    if (!user) return;
     setSubmitting(true);
     try {
-      await addReview(text, displayName(profile), user.id);
+      await addReview(
+        text,
+        user ? displayName(profile) : 'Guest citizen',
+        user ? user.id : guestId(),
+      );
       setContent('');
       toast.success('Review posted!', 'Thanks for sharing your experience.');
     } catch (err) {
@@ -52,7 +60,14 @@ export function ReviewSection({ reportId }: { reportId: string }) {
   };
 
   const handleVote = (reviewId: string, voteType: 'agree' | 'disagree') => {
-    if (!requireAuth()) return;
+    if (!user) {
+      if (isGuest()) {
+        toast.info('Guests can review, but voting needs a free account.');
+      } else {
+        requireAuth();
+      }
+      return;
+    }
     void vote(reviewId, voteType)
       .then(() => toast.success('Vote recorded'))
       .catch(() => toast.error('Could not record vote'));
