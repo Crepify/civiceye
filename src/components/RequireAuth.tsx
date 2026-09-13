@@ -15,9 +15,18 @@ export function RequireAuth({ children }: RequireAuthProps) {
   const { configured, loading, user } = useAuth();
   const location = useLocation();
 
+  // Guest view (set from the login page) browses everything; only creating
+  // reports still needs a real account downstream.
+  let guest = false;
+  try {
+    guest = window.localStorage.getItem('civiceye-guest') === '1';
+  } catch {
+    guest = false;
+  }
+
   // Demo/local-preview mode remains navigable without credentials. When
   // Supabase is configured, normal sign-in protection still applies.
-  if (!configured) {
+  if (!configured || guest) {
     return <>{children}</>;
   }
 

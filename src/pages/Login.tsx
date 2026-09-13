@@ -378,6 +378,20 @@ export function Login() {
           )}
         </div>
 
+        <button
+          onClick={() => {
+            try {
+              window.localStorage.setItem('civiceye-guest', '1');
+            } catch {
+              /* private mode */
+            }
+            navigate(next);
+          }}
+          className="mt-5 w-full border-[3px] border-[#172b44] bg-[#91dcc4] px-4 py-3 text-sm font-black tracking-wide text-[#172b44] shadow-[4px_4px_0_#172b44] transition hover:-translate-y-0.5 hover:bg-[#ffd630]"
+        >
+          👀 GUEST VIEW — EXPLORE WITHOUT AN ACCOUNT
+        </button>
+
         <p className="mt-5 text-center text-xs text-slate-400">
           {mode === 'signin' ? 'New here? ' : 'Already have an account? '}
           <button
