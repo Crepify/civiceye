@@ -5,6 +5,8 @@ import { z } from 'zod';
 import {
   KeyRound,
   Loader2,
+  Eye,
+  EyeOff,
   LogIn,
   Mail,
   MailCheck,
@@ -41,6 +43,7 @@ export function Login() {
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
   const [fullName, setFullName] = useState('');
   const [busy, setBusy] = useState(false);
   const [sentMagic, setSentMagic] = useState(false);
@@ -323,15 +326,26 @@ export function Login() {
                       <label htmlFor="password" className="label-base">
                         Password
                       </label>
-                      <input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
-                        className="input-base"
-                        autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                      />
+                      <div className="relative">
+                        <input
+                          id="password"
+                          type={showPwd ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
+                          className="input-base pr-10"
+                          autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPwd((v) => !v)}
+                          aria-label={showPwd ? 'Hide password' : 'Show password'}
+                          title={showPwd ? 'Hide password' : 'Show password'}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-primary-600 dark:text-slate-300 dark:hover:text-white"
+                        >
+                          {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </div>
                   ) : null}
 
