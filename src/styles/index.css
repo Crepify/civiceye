@@ -800,3 +800,13 @@ html:not(.amrita):not(.clean-route).dark [class*="bg-[#ffd630]"] h1,html:not(.am
 /* Night Issue: paper panels, yellow bars and dialog sheets keep NAVY headlines
    so the vibrant mint only lands on midnight backgrounds. */
 html:not(.amrita).dark [class*="bg-[#ffd630]"] h1,html:not(.amrita).dark [class*="bg-[#ffd630]"] h2,html:not(.amrita).dark [class*="bg-[#ffd630]"] h3,html:not(.amrita).dark [class*="bg-[#ffd630]"] p,html:not(.amrita).dark [class*="bg-[#fff8e7]"] h1,html:not(.amrita).dark [class*="bg-[#fff8e7]"] h2,html:not(.amrita).dark [class*="bg-[#fff8e7]"] h3,html:not(.amrita).dark [class*="bg-[#fffdf4]"] h1,html:not(.amrita).dark [class*="bg-[#fffdf4]"] h2,html:not(.amrita).dark [class*="bg-[#fffdf4]"] h3,html:not(.amrita).dark [class*="bg-[#91dcc4]"] h1,html:not(.amrita).dark [class*="bg-[#91dcc4]"] h2,html:not(.amrita).dark [class*="bg-[#91dcc4]"] h3,html:not(.amrita).dark [role="dialog"] h1,html:not(.amrita).dark [role="dialog"] h2,html:not(.amrita).dark [role="dialog"] h3 { color:#172b44!important; text-shadow:none!important; }
+
+/* Night Issue body ink — permanent remap (attribute selectors so Tailwind
+   @apply never sees a circular override): slate goes light on midnight,
+   indigo accents go mint; paper/white surfaces keep navy ink. */
+html:not(.amrita).dark [class*="text-slate-900"],html:not(.amrita).dark [class*="text-slate-800"],html:not(.amrita).dark [class*="text-slate-700"] { color:#fff8e7!important; }
+html:not(.amrita).dark [class*="text-slate-600"],html:not(.amrita).dark [class*="text-slate-500"] { color:#cfe0da!important; }
+html:not(.amrita).dark [class*="text-slate-400"],html:not(.amrita).dark [class*="text-slate-300"] { color:#a9bfb9!important; }
+html:not(.amrita).dark [class*="text-primary-500"],html:not(.amrita).dark [class*="text-primary-600"],html:not(.amrita).dark [class*="text-primary-700"] { color:#91dcc4!important; }
+html:not(.amrita).dark [class*="bg-[#fff8e7]"] [class*="text-slate-"],html:not(.amrita).dark [class*="bg-[#fffdf4]"] [class*="text-slate-"],html:not(.amrita).dark [class*="bg-[#ffd630]"] [class*="text-slate-"],html:not(.amrita).dark [class*="bg-[#91dcc4]"] [class*="text-slate-"],html:not(.amrita).dark [class*="bg-white"] [class*="text-slate-"],html:not(.amrita).dark [role="dialog"] [class*="text-slate-"] { color:#172b44!important; }
+html:not(.amrita).dark [class*="bg-[#fff8e7]"] [class*="text-primary-"],html:not(.amrita).dark [class*="bg-[#fffdf4]"] [class*="text-primary-"],html:not(.amrita).dark [class*="bg-[#ffd630]"] [class*="text-primary-"],html:not(.amrita).dark [class*="bg-[#91dcc4]"] [class*="text-primary-"],html:not(.amrita).dark [class*="bg-white"] [class*="text-primary-"] { color:#172b44!important; }
