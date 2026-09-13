@@ -794,7 +794,8 @@ html.amrita main.has-top-nav {
 
 /* Night Issue ink, site-wide on comic routes: headlines go yellow so they
    never sit dark-on-dark; paper panels, dialogs and yellow bars keep navy. */
-html:not(.amrita):not(.clean-route).dark h1,html:not(.amrita):not(.clean-route).dark h2,html:not(.amrita):not(.clean-route).dark h3,html:not(.amrita):not(.clean-route).dark .heading-xl,html:not(.amrita):not(.clean-route).dark .heading-lg { color:#91dcc4!important; text-shadow:3px 3px 0 #ef6b59!important; }
+html:not(.amrita):not(.clean-route).dark h1,html:not(.amrita):not(.clean-route).dark h2,html:not(.amrita):not(.clean-route).dark h3,html:not(.amrita):not(.clean-route).dark h4,html:not(.amrita):not(.clean-route).dark .heading-xl,html:not(.amrita):not(.clean-route).dark .heading-lg { color:#91dcc4!important; text-shadow:none!important; }
+html:not(.amrita):not(.clean-route).dark .heading-xl,html:not(.amrita):not(.clean-route).dark .heading-lg { text-shadow:3px 3px 0 #ef6b59!important; }
 html:not(.amrita):not(.clean-route).dark [class*="bg-[#ffd630]"] h1,html:not(.amrita):not(.clean-route).dark [class*="bg-[#ffd630]"] h2,html:not(.amrita):not(.clean-route).dark [class*="bg-[#ffd630]"] h3,html:not(.amrita):not(.clean-route).dark [class*="bg-[#ffd630]"] p,html:not(.amrita):not(.clean-route).dark [class*="bg-[#fff8e7]"] h1,html:not(.amrita):not(.clean-route).dark [class*="bg-[#fff8e7]"] h2,html:not(.amrita):not(.clean-route).dark [class*="bg-[#fff8e7]"] h3,html:not(.amrita):not(.clean-route).dark [class*="bg-[#fffdf4]"] h1,html:not(.amrita):not(.clean-route).dark [class*="bg-[#fffdf4]"] h2,html:not(.amrita):not(.clean-route).dark [class*="bg-[#fffdf4]"] h3,html:not(.amrita):not(.clean-route).dark [class*="bg-[#91dcc4]"] h1,html:not(.amrita):not(.clean-route).dark [class*="bg-[#91dcc4]"] h2,html:not(.amrita):not(.clean-route).dark [class*="bg-[#91dcc4]"] h3,html:not(.amrita):not(.clean-route).dark [role="dialog"] h1,html:not(.amrita):not(.clean-route).dark [role="dialog"] h2,html:not(.amrita):not(.clean-route).dark [role="dialog"] h3 { color:#172b44!important; text-shadow:none!important; }
 
 /* Night Issue: paper panels, yellow bars and dialog sheets keep NAVY headlines
@@ -819,3 +820,12 @@ html:not(.amrita).dark [class*="bg-[#fff8e7]"] { background-color:#fff8e7!import
 html:not(.amrita).dark [class*="bg-[#fffdf4]"] { background-color:#fffdf4!important; color:#172b44!important; }
 /* ...except surfaces that are intentionally navy/night keep their own ink. */
 html:not(.amrita).dark [class*="bg-[#172b44]"] { background-color:#172b44!important; }
+
+/* Night Issue polish sweep: every leftover component reads on midnight. */
+html:not(.amrita).dark ::placeholder { color:#8fa8a1!important; }
+html:not(.amrita).dark th,html:not(.amrita).dark dt { color:#cfe0da!important; }
+html:not(.amrita).dark [class*="text-white"] { color:#fff8e7!important; }
+html:not(.amrita).dark [class*="bg-[#91dcc4]"] [class*="text-white"],html:not(.amrita).dark [class*="bg-[#ffd630]"] [class*="text-white"],html:not(.amrita).dark [class*="bg-[#fff8e7]"] [class*="text-white"] { color:#172b44!important; }
+html:not(.amrita).dark footer a,html:not(.amrita).dark footer p,html:not(.amrita).dark footer span { color:#b9cfca!important; }
+html:not(.amrita).dark footer h1,html:not(.amrita).dark footer h2,html:not(.amrita).dark footer h3,html:not(.amrita).dark footer h4 { color:#91dcc4!important; text-shadow:none!important; }
+html:not(.amrita).dark footer [class*="bg-[#ffd630]"],html:not(.amrita).dark footer [class*="bg-[#91dcc4]"] { color:#172b44!important; }
