@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react';
-import { SunDim, Sun, SunMedium } from 'lucide-react';
+import { Sun, SunDim } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 const STORAGE_KEY = 'civiceye-brightness';
-/** Light-mode-only brightness steps (percent). */
-const LEVELS = [100, 110, 90, 80] as const;
+const MIN = 10;
+const MAX = 100;
 
 function readLevel(): number {
   try {
     const v = Number(window.localStorage.getItem(STORAGE_KEY));
-    return (LEVELS as readonly number[]).includes(v) ? v : 100;
+    return Number.isFinite(v) ? 100 : Math.min(MAX, Math.max(MIN, v));
   } catch {
     return 100;
   }
 }
 
 /**
- * Brightness adjuster that sits next to the light/dark switch.
- * Light mode only: cycles 100% → 110% → 90% → 80% using a fixed veil,
- * so no layout/fixed-position side effects. Hidden entirely in night mode.
+ * Light-mode-only brightness slider (10-100%). Sits next to the theme toggle.
+ * Implemented as a fixed veil (no filters on the page, so nothing breaks),
+ * and hides completely in night mode.
  */
 export function BrightnessControl() {
   const { theme } = useTheme();
   const [level, setLevel] = useState<number>(100);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setLevel(readLevel());
@@ -40,17 +41,12 @@ export function BrightnessControl() {
       document.body.appendChild(veil);
     }
     const dark = theme === 'dark';
-    if (dark || level === 100) {
+    if (dark || level >= 100) {
       veil.style.display = 'none';
     } else {
       veil.style.display = 'block';
-      if (level < 100) {
-        veil.style.background = '#081521';
-        veil.style.opacity = String((100 - level) / 100);
-      } else {
-        veil.style.background = '#ffffff';
-        veil.style.opacity = String((level - 100) / 100);
-      }
+      veil.style.background = '#081521';
+      veil.style.opacity = String((100 - level) / 100);
     }
     return () => {
       if (veil) veil.style.display = 'none';
@@ -59,28 +55,45 @@ export function BrightnessControl() {
 
   if (theme === 'dark') return null;
 
-  const cycle = () => {
-    const idx = (LEVELS as readonly number[]).indexOf(level);
-    const next = LEVELS[(idx + 1) % LEVELS.length];
-    setLevel(next);
+  const set = (v: number) => {
+    setLevel(v);
     try {
-      window.localStorage.setItem(STORAGE_KEY, String(next));
+      window.localStorage.setItem(STORAGE_KEY, String(v));
     } catch {
       /* private mode */
     }
   };
 
-  const Icon = level > 100 ? Sun : level === 100 ? SunMedium : SunDim;
-
   return (
-    <button
-      onClick={cycle}
-      className="relative flex h-9 items-center gap-1 rounded-xl border border-slate-200 bg-white/70 px-2 text-[10px] font-black text-slate-600 transition-all duration-200 hover:border-amber-300 hover:text-amber-600"
-      aria-label={`Brightness ${level} percent — click to change`}
-      title={`Brightness ${level}% (light mode only)`}
-    >
-      <Icon className="h-4 w-4" />
-      {level}%
-    </button>
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="relative flex h-9 items-center gap-1 rounded-xl border border-slate-200 bg-white/70 px-2 text-[10px] font-black text-slate-600 transition-all duration-200 hover:border-amber-300 hover:text-amber-600"
+        aria-label={`Brightness ${level} percent — open slider`}
+        title={`Brightness ${level}% (light mode only)`}
+      >
+        {level >= 100 ? <Sun className="h-4 w-4" /> : <SunDim className="h-4 w-4" />}
+        {level}%
+      </button>
+      {open ? (
+        <div className="absolute right-0 top-11 z-50 w-44 border-[3px] border-[#172b44] bg-[#fff8e7] p-3 shadow-[4px_4px_0_#172b44]">
+          <p className="mb-1 text-[10px] font-black tracking-wide text-[#172b44]">BRIGHTNESS · {level}%</p>
+          <input
+            type="range"
+            min={MIN}
+            max={MAX}
+            step={5}
+            value={level}
+            onChange={(e) => set(Number(e.target.value))}
+            className="w-full accent-[#ef6b59]"
+            aria-label="Brightness slider"
+          />
+          <div className="flex justify-between text-[9px] font-bold text-[#52606a]">
+            <span>10</span>
+            <span>100</span>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
