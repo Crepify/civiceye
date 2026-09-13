@@ -810,3 +810,12 @@ html:not(.amrita).dark [class*="text-slate-400"],html:not(.amrita).dark [class*=
 html:not(.amrita).dark [class*="text-primary-500"],html:not(.amrita).dark [class*="text-primary-600"],html:not(.amrita).dark [class*="text-primary-700"] { color:#91dcc4!important; }
 html:not(.amrita).dark [class*="bg-[#fff8e7]"] [class*="text-slate-"],html:not(.amrita).dark [class*="bg-[#fffdf4]"] [class*="text-slate-"],html:not(.amrita).dark [class*="bg-[#ffd630]"] [class*="text-slate-"],html:not(.amrita).dark [class*="bg-[#91dcc4]"] [class*="text-slate-"],html:not(.amrita).dark [class*="bg-white"] [class*="text-slate-"],html:not(.amrita).dark [role="dialog"] [class*="text-slate-"] { color:#172b44!important; }
 html:not(.amrita).dark [class*="bg-[#fff8e7]"] [class*="text-primary-"],html:not(.amrita).dark [class*="bg-[#fffdf4]"] [class*="text-primary-"],html:not(.amrita).dark [class*="bg-[#ffd630]"] [class*="text-primary-"],html:not(.amrita).dark [class*="bg-[#91dcc4]"] [class*="text-primary-"],html:not(.amrita).dark [class*="bg-white"] [class*="text-primary-"] { color:#172b44!important; }
+
+/* Night Issue: paper surfaces are PINNED — whatever else cascades, mint stays
+   mint, yellow stays yellow, cream stays cream, and their ink stays navy. */
+html:not(.amrita).dark [class*="bg-[#91dcc4]"] { background-color:#91dcc4!important; color:#172b44!important; }
+html:not(.amrita).dark [class*="bg-[#ffd630]"] { background-color:#ffd630!important; color:#172b44!important; }
+html:not(.amrita).dark [class*="bg-[#fff8e7]"] { background-color:#fff8e7!important; color:#172b44!important; }
+html:not(.amrita).dark [class*="bg-[#fffdf4]"] { background-color:#fffdf4!important; color:#172b44!important; }
+/* ...except surfaces that are intentionally navy/night keep their own ink. */
+html:not(.amrita).dark [class*="bg-[#172b44]"] { background-color:#172b44!important; }
