@@ -31,12 +31,12 @@ export const CAMPUS_STATS = {
 export const BLOCKS_INFO = [
   {
     id: 'E',
-    name: 'Block E (Main / New Block) — SQUARE 50.8x50.8m per your correction',
-    role: 'Main block — SQUARE per your correction — nearest the gate (entrance, admin, all halls in 1st 2nd 3rd floor per your correction)',
+    name: 'Block E (Main / New Block)',
+    role: 'Main block — nearest the gate (entrance, admin, library)',
     floors: 5,
     area: 2587,
-    position: 'Nearest the gate — square shape from your correction + Google Maps',
-    highlights: ['Main Entrance & Reception (white ornate arch from your photo)', 'Administrative Office', "Director's Office central tower with Amma photo", 'Ground: Admin only (no halls per your correction)', '1st Floor: Amriteshwari 265, Sudhamani 300, Krishna 112 (all in E Block per your correction)', '2nd Floor: Vyasa 90, Rama 85, Valmiki 80, Conference 27 (E Block per your correction)', '3rd Floor: Indo-US 62, E-Learning 120, Akshaya 100 (E Block per your correction, Akshaya was in A Block photo)', '4th Floor: Central Library 1213 sq m 200 seating + Reading Hall 325 sq m 150 seating', 'Medical Room, Bank/ATM'],
+    position: 'Nearest the gate',
+    highlights: ['Main Entrance & Reception', 'Administrative Office', "Director's Office", 'Amriteshwari Hall 265', 'Conference Hall 27', 'Medical Room', 'Central Library 4th floor'],
     color: '#A51636',
   },
   {

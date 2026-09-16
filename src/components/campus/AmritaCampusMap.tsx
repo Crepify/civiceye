@@ -395,10 +395,11 @@ export function AmritaCampusMap({
     const stage = stageRef.current;
     const bw = stage.clientWidth;
     const bh = stage.clientHeight;
-    const k = Math.min(bw / W, bh / H) * 0.9;
+    const pad = view.mode === 'campus' ? 60 : 40;
+    const k = Math.min((bw - pad*2) / W, (bh - pad*2) / H) * 0.92;
     const x = (bw - W * k) / 2;
     const y = (bh - H * k) / 2;
-    setCam({ x, y, k });
+    setCam({ x, y, k: Math.max(0.25, Math.min(5, k)) });
   }, [view, currentFloor]);
 
   useEffect(() => {
@@ -946,9 +947,9 @@ export function AmritaCampusMap({
   const droppedSvg = droppedPin ? latLngToSvg(droppedPin) : null;
 
   return (
-    <div className={cn('relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#0f0a0d]', className)}>
+    <div className={cn('relative flex h-full w-full flex-col overflow-hidden rounded-[20px] border border-[#A51636]/10 bg-[#FFF5F7] shadow-[0_8px_32px_rgba(165,22,54,0.08)] dark:border-white/10 dark:bg-[#0f0a0d] dark:shadow-none', className)}>
       {/* Top bar */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white/80 p-3 backdrop-blur dark:border-white/10 dark:bg-black/20">
+      <div className="flex flex-wrap items-center gap-2 border-b border-[#A51636]/10 bg-white/90 p-3 backdrop-blur-xl dark:border-white/10 dark:bg-black/30">
         <button
           onClick={() => setSidebarOpen((o) => !o)}
           className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-white lg:hidden"
@@ -1339,7 +1340,7 @@ export function AmritaCampusMap({
         {sidebarOpen ? <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} /> : null}
 
         {/* Stage */}
-        <div ref={stageRef} className="relative flex-1 overflow-hidden bg-[#f8f5f6] dark:bg-[#0a0607]" onClick={handleCanvasClick}>
+        <div ref={stageRef} className="relative flex-1 overflow-hidden bg-[#FFF5F7] dark:bg-[#0a0607]" onClick={handleCanvasClick}>
           <svg ref={svgRef} className="h-full w-full touch-none select-none" style={{ cursor: drag ? 'grabbing' : 'grab' }}>
             <g ref={gRef}>
               {/* Satellite */}
@@ -1438,23 +1439,19 @@ export function AmritaCampusMap({
                 </>
               ) : (
                 <>
-                  {/* Floor view - FIXED from your A Block 1st floor photos + E Block square correction + Google Maps + Google Images */}
+                  {/* Floor view - enhanced from your photos + Google Maps ref */}
                   {currentFloor ? (
                     <>
-                      {/* Show enhanced floor plan images as reference behind SVG - from your photos + Google Images + Google Maps */}
-                      {(view as any).buildingId === 'a' && (view as any).floorId === 'a-1' ? (
-                        <>
-                          <image href="/amrita-a-block-1st-floor-real.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.18} />
-                          <image href="/amrita-block-a-floorplan.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.12} />
-                        </>
-                      ) : (view as any).buildingId === 'e' ? (
-                        <>
-                          <image href="/amrita-e-block-square-halls.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.18} />
-                          <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.12} />
-                        </>
-                      ) : (
-                        <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.15} />
-                      )}
+                      {/* Show enhanced floor plan image as reference behind SVG - from your photos + Google Images */}
+                      <image
+                        href={`/amrita-block-${(view as any).buildingId}-floorplan.png`}
+                        x={0}
+                        y={0}
+                        width={currentFloor.width}
+                        height={currentFloor.height}
+                        preserveAspectRatio="none"
+                        opacity={0.28}
+                      />
                       <path d={currentFloor.outline} fill="#fff" fillOpacity={0.85} stroke="#e2e8f0" strokeWidth={2} />
                       {(currentFloor.corridors || []).map((c: any, i: number) => (
                         <path key={i} d={c.d} fill="#f8fafc" fillOpacity={0.7} stroke="#e2e8f0" strokeWidth={1} />
@@ -1496,32 +1493,10 @@ export function AmritaCampusMap({
             </g>
           </svg>
 
-          {/* A Block 1st floor real photos gallery - from your Drive */}
-          {(view as any).buildingId === 'a' && (view as any).floorId === 'a-1' ? (
-            <div className="absolute bottom-12 left-3 right-3 z-10 flex gap-1.5 overflow-x-auto rounded-xl border border-slate-200 bg-white/90 p-2 shadow backdrop-blur dark:border-white/10 dark:bg-black/70 lg:bottom-3 lg:left-3 lg:right-auto lg:max-w-[420px]">
-              {[
-                '/ablock/12NIyq5aonvzJdY5pu4VcsMSYIknyTsPJ.jpg',
-                '/ablock/1jf0Y4DaImnZZBpcYTDz8RTKUmlF2M34v.jpg',
-                '/ablock/1T6okRUiIL_LBD3V6E3OMVtXIv0d3-SXP.jpg',
-                '/ablock/1v3uEtzYkhfAxiTJkbY_z1VVYY__8R0Nh.jpg',
-                '/ablock/1VVv1IbeCOWnoHe6FyYFAP-uQjaPUk3Pb.jpg',
-                '/ablock/1jIWlVREBypG-jg7Cpdfpp2Aq610X73mG.jpg',
-                '/ablock/1KnIAh5DnqAnjgHEQ3g2U9xTB_tGVj7Mg.jpg',
-                '/ablock/1fockOhcUyZ_b2KU1WPDkyXFRhFORq19g.jpg',
-                '/ablock/1ZqYDL0Vc5HDirh4eauPaqKnuEmUIe7-b.jpg',
-                '/ablock/1bFZFS2qHwsA6nR-CfBj3IfXFr6uzbY6K.jpg',
-                '/ablock/1UFii8ResibMMjZtgHLmCQBtoJRmzAKLv.jpg',
-              ].map((src) => (
-                <img key={src} src={src} alt="A Block 1st floor real" className="h-16 w-24 shrink-0 rounded-lg object-cover" loading="lazy" />
-              ))}
-              <div className="shrink-0 rounded-lg bg-[#A51636]/10 px-2.5 py-1 text-[10px] font-bold text-[#A51636]">A Block 1st floor — real photos from your Drive — corridor south open with railings facing fountain, rooms north, Akshaya Hall, Indo-US blue curved wall, staircase Amma photo</div>
-            </div>
-          ) : null}
-
           {/* Scale */}
           <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 px-2.5 py-1.5 text-[10px] font-medium text-slate-600 shadow backdrop-blur dark:bg-black/60 dark:text-slate-300">
             <div className="mb-1 h-1 w-[50px] rounded bg-slate-600 dark:bg-slate-300" style={{ width: `${50 * cam.k}px` }} />
-            50 m · 1 unit = 1 m · E Block square per your correction
+            50 m · 1 unit = 1 m
           </div>
 
           {/* Attribution */}
@@ -1568,10 +1543,11 @@ export function AmritaCampusMap({
         <AnimatePresence>
           {infoOpen && info ? (
             <motion.div
-              initial={{ opacity: 0, y: 20, x: 20 }}
-              animate={{ opacity: 1, y: 0, x: 0 }}
-              exit={{ opacity: 0, y: 20, x: 20 }}
-              className="absolute bottom-3 left-3 right-3 z-20 max-h-[56vh] overflow-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-[#1a0f12] lg:bottom-auto lg:left-auto lg:right-3 lg:top-20 lg:w-[340px] lg:max-h-[70vh]"
+              initial={{ opacity: 0, y: 24, x: 16, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, x: 16, scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+              className="absolute bottom-3 left-3 right-3 z-20 max-h-[60vh] overflow-auto rounded-[20px] border border-[#A51636]/10 bg-white p-5 shadow-[0_16px_48px_rgba(165,22,54,0.12)] dark:border-white/10 dark:bg-[#1a0f12] lg:bottom-auto lg:left-auto lg:right-3 lg:top-20 lg:w-[360px] lg:max-h-[72vh]"
             >
               <button onClick={() => setInfoOpen(false)} className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/10">
                 <X className="h-4 w-4" />

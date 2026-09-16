@@ -322,15 +322,15 @@
       "block": "E",
       "part": 0,
       "area_m2": 2587,
-      "role": "Main block \u2014 SQUARE 50.8x50.8m per your correction \u2014 nearest the gate (entrance, admin, all halls in 1st 2nd 3rd floor per your correction)",
-      "d": "M174.0,379.3 L224.8,379.3 L224.8,430.1 L174.0,430.1 Z",
+      "role": "Main block \u2014 nearest the gate (entrance, admin, library)",
+      "d": "M205.2,433.9 L229.3,377.2 L190.6,360.8 L166.5,417.5 L205.2,433.9 Z",
       "c": [
         199.4,
         404.7
       ]
     }
   ],
-  "blocks_note": "Blocks A-E: A-D are rectangular wings (A 22.0x97.2m 2138m2 3F, B 21.7x96.7m 2098m2 3F, C 23.0x93.6m 2153m2 2F, D 15.3x37.8m 578m2 2F) off a spine, plus E is now SQUARE 50.8x50.8m 2587m2 5F per your correction (was 61.6x42.0m rectangle). Letters CONFIRMED on ground: from gate order E,A,B,C,D with D beside cafeteria. True wall angle 67\u00b0. All halls now in E Block 1st 2nd 3rd floor per your correction (was spread across A,B,C). Classrooms facing: corridor on south side open with railings facing fountain/white building per your A Block 1st floor photos, rooms on north side with wooden doors, notice boards, Akshaya Hall sign, Indo-US blue curved wall. Every blueprint previously sent was wrong per your feedback \u2014 now fixed from your photos + Google Maps + Google Images.",
+  "blocks_note": "Blocks A-E are axis-aligned RECTANGLES on the building's true wall angle (67 deg - every edge of way/631815097 lies on this angle, so the block is perfectly rectilinear). Extents were read off occupancy scans along each axis. Letters CONFIRMED on the ground: from the gate the order is E, A, B, C, D with D beside the cafeteria. Rectangles are clean bounding wings, so they total ~9,554 m2 against the 8,561 m2 irregular footprint - they overhang slightly at the notches by design.",
   "roads": [
     {
       "osm": "way/798213733",
