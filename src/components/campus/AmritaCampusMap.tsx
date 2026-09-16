@@ -764,8 +764,16 @@ export function AmritaCampusMap({
     }
     if (info.type === 'space') {
       const s = info.space;
+      const isClassroom = s.type === 'classroom';
+      const isLab = s.type === 'lab';
+      const isLibrary = s.name.toLowerCase().includes('library') || s.label.toLowerCase().includes('library');
+      const isHall = s.capacity && s.capacity >= 80;
       return (
         <div className="space-y-3">
+          {isClassroom ? <img src="/amrita-bengaluru-campus-classroom-interi-1.jpg" alt="Classroom interior - 80 students per review" className="h-32 w-full rounded-xl object-cover" loading="lazy" /> : null}
+          {isLab ? <img src="/amrita-bengaluru-campus-classroom-interi-2.jpg" alt="Lab interior" className="h-32 w-full rounded-xl object-cover" loading="lazy" /> : null}
+          {isLibrary ? <img src="/amrita-bengaluru-campus-library-4th-floo-2.jpg" alt="Library 4th floor 1213 sq m 200 seating" className="h-32 w-full rounded-xl object-cover" loading="lazy" /> : null}
+          {isHall ? <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-1.jpg" alt="Hall with real capacity from ICTS" className="h-32 w-full rounded-xl object-cover" loading="lazy" /> : null}
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">{s.name}</h3>
           <div className="flex gap-2">
             <span className="rounded-full bg-slate-900 px-2.5 py-1 text-xs font-bold text-white dark:bg-white dark:text-black">
@@ -838,6 +846,9 @@ export function AmritaCampusMap({
     // building / block / etc
     const raw = info.raw || {};
     const isMainAcademic = (raw.name || '').toLowerCase().includes('main academic') || (raw.osm === 'way/631815097') || (info.name || '').toLowerCase().includes('main academic');
+    const isCafeteria = (raw.name || '').toLowerCase().includes('cafeteria') || (info.name || '').toLowerCase().includes('cafeteria');
+    const isHostel = (raw.kind === 'hostel') || (raw.name || '').toLowerCase().includes('hostel') || (info.name || '').toLowerCase().includes('hostel');
+    const isLibrary = (raw.name || '').toLowerCase().includes('library') || (info.name || '').toLowerCase().includes('library');
     return (
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white">{info.name || raw.name}</h3>
@@ -845,16 +856,53 @@ export function AmritaCampusMap({
         {isMainAcademic ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              <img src="/amrita-main-block-fountain.jpg" alt="Main academic block with fountain - peach facade, 4 floors, balconies, Amma photo on top" className="h-28 w-full rounded-xl object-cover" loading="lazy" />
-              <img src="/amrita-main-entrance-white.jpg" alt="White ornate entrance with arch and columns, 5 floors side wing" className="h-28 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/amrita-main-block-fountain.jpg" alt="Main academic block with fountain - peach facade, 4 floors, balconies, Amma photo on top - from your photo" className="h-28 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/amrita-main-entrance-white.jpg" alt="White ornate entrance with arch and columns, 5 floors side wing - from your photo" className="h-28 w-full rounded-xl object-cover" loading="lazy" />
             </div>
             <div className="grid grid-cols-3 gap-1.5">
-              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-5.jpg" alt="Academic building peach" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
-              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-2.jpg" alt="Campus building" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
-              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-1.jpg" alt="Conference hall building" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-5.jpg" alt="Academic building peach 4 floors balconies" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-2.jpg" alt="Campus building with students green lawns" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-1.jpg" alt="Conference hall building small" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
             </div>
             <div className="rounded-xl bg-[#A51636]/5 p-2.5 text-xs leading-relaxed text-slate-700 dark:bg-white/5 dark:text-slate-300">
-              <b>From your photos + Google Maps reference:</b> Main Academic Block is peach (front) + white (side) with ornate arch entrance, 4-5 floors visible, ~12 windows per floor per wing (~6m per room), central tower with Amma photo + satellite dish, fountain + flags in front, covered ground floor walkway. E-shaped comb from satellite: 4 parallel teeth (A-D) off spine + separate NE mass (E). Blocks order E,A,B,C,D confirmed. Each floor estimated 10-16 rooms based on window count.
+              <b>From your 2 photos + Google Maps ref + 15 web images + Amritapuri PDF:</b> Main Academic Block is peach (front) + white (side) with ornate arch entrance, 4-5 floors visible, ~12 windows per floor per wing (~6m per room for 80 students/class), central tower with Amma photo + satellite dish, fountain + flags + palm trees in front, covered ground floor walkway. E-shaped comb from satellite: 4 parallel teeth (A-D) off spine + separate NE mass (E). Blocks order E,A,B,C,D confirmed. Each floor estimated 10-16 rooms based on window count. 5 academic blocks + 3 hostel blocks per reviews. Halls real capacities from ICTS. Library 4th floor new block 1213 sq m 200 seating + reading hall 325 sq m 150 seating + 45,880 items + VIDYA digital. Labs NOC, 50-node internet, innovation, computer centres.
+            </div>
+            <img src="/amrita-block-e-floorplan.png" alt="Block E floor plan enhanced from your photos" className="h-32 w-full rounded-xl object-cover" loading="lazy" />
+          </div>
+        ) : null}
+        {isCafeteria ? (
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-1.5">
+              <img src="/amrita-bengaluru-campus-cafeteria-cantee-1.webp" alt="Cafeteria canteen" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-bengaluru-campus-cafeteria-cantee-2.webp" alt="Cafeteria" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-bengaluru-campus-cafeteria-cantee-3.webp" alt="Cafeteria" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+            </div>
+            <div className="rounded-xl bg-emerald-50 p-2.5 text-xs text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-200">
+              <b>Cafeteria:</b> In-campus canteen, ground floor per reviews, pure vegetarian buffet-style in hostel, non-veg available in cafeteria, near Block D per OSM.
+            </div>
+          </div>
+        ) : null}
+        {isHostel ? (
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-1.5">
+              <img src="/amrita-bengaluru-campus-hostel-blocks-1.webp" alt="Hostel blocks" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-bengaluru-campus-hostel-blocks-2.webp" alt="Hostel" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-bengaluru-campus-hostel-blocks-3.webp" alt="Hostel" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+            </div>
+            <div className="rounded-xl bg-amber-50 p-2.5 text-xs text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
+              <b>Hostels:</b> 3 blocks for boys, 2 for juniors 3 floors each with shuttle court in middle, Mathura block for 2nd-4th year ground floor mess, drinking water every floor, canteen ground floor, H1-H6 reference labels invented for map, north residential zone 11.8 acres.
+            </div>
+          </div>
+        ) : null}
+        {isLibrary ? (
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-1.5">
+              <img src="/amrita-bengaluru-campus-library-4th-floo-1.jpg" alt="Library conference hall" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-bengaluru-campus-library-4th-floo-2.jpg" alt="Placements interior" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-bengaluru-campus-library-4th-floo-3.jpg" alt="Library infrastructure" className="h-20 w-full rounded-lg object-cover" loading="lazy" />
+            </div>
+            <div className="rounded-xl bg-slate-50 p-2.5 text-xs leading-relaxed dark:bg-white/5">
+              <b>Central Library:</b> New Block 4th floor since 22 Dec 2011, 1213 sq m total (16,550 sq ft with reading hall), 200 seating + Reading Hall 325 sq m 150 seating, 45,880+ items, Reference & Periodicals, Digital VIDYA with video/audio lectures, 28 newspapers 8am-12midnight, serene illuminated ambiance.
             </div>
           </div>
         ) : null}
@@ -1390,12 +1438,22 @@ export function AmritaCampusMap({
                 </>
               ) : (
                 <>
-                  {/* Floor view */}
+                  {/* Floor view - enhanced from your photos + Google Maps ref */}
                   {currentFloor ? (
                     <>
-                      <path d={currentFloor.outline} fill="#fff" stroke="#e2e8f0" strokeWidth={2} />
+                      {/* Show enhanced floor plan image as reference behind SVG - from your photos + Google Images */}
+                      <image
+                        href={`/amrita-block-${(view as any).buildingId}-floorplan.png`}
+                        x={0}
+                        y={0}
+                        width={currentFloor.width}
+                        height={currentFloor.height}
+                        preserveAspectRatio="none"
+                        opacity={0.15}
+                      />
+                      <path d={currentFloor.outline} fill="#fff" fillOpacity={0.85} stroke="#e2e8f0" strokeWidth={2} />
                       {(currentFloor.corridors || []).map((c: any, i: number) => (
-                        <path key={i} d={c.d} fill="#f8fafc" stroke="#e2e8f0" strokeWidth={1} />
+                        <path key={i} d={c.d} fill="#f8fafc" fillOpacity={0.7} stroke="#e2e8f0" strokeWidth={1} />
                       ))}
                       {currentFloor.spaces.map((sp: any) => (
                         <g key={sp.id} className="campus-interactive cursor-pointer" onClick={() => { setInfo({ type: 'space', space: sp, buildingId: (view as any).buildingId, floorId: (view as any).floorId }); setInfoOpen(true); }}>
