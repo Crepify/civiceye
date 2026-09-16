@@ -17,7 +17,7 @@ import {
 import { Modal } from './Modal';
 import { AuthorityContactCard } from './AuthorityContactCard';
 import type { Authority, Report } from '@/types';
-import { authorityForCategory, telLink } from '@/data/authorities';
+import { authorityForCategory, bbmpGrievanceEmailFor, hasEscalationEmail, telLink } from '@/data/authorities';
 import {
   buildEscalationPayload,
   escalationMailToUrl,
@@ -102,9 +102,20 @@ export function ReportToAuthority({
   const phoneHref = telLink(authority);
   const waTargets = report ? escalationWhatsAppTargets(report, authority) : [];
   const smsHref = report ? escalationSmsUrl(report, authority) : undefined;
-  const mailToHref = report
-    ? escalationMailToUrl(report, authority, reporterEmail, note.trim() || undefined)
-    : `mailto:${authority.email}`;
+
+  // Zone-aware grievance email: BBMP roads are handled zone-wise, so for a
+  // city road report we prefer the matching zone's email (East/West/South/
+  // Mahadevapura) over the central cell. Others use authority.email.
+  const zoneEmail = !isAmrita && report ? bbmpGrievanceEmailFor(report.locationName) : '';
+  const emailAvailable = hasEscalationEmail(authority) || Boolean(zoneEmail);
+  const mailAuthority = zoneEmail ? { ...authority, email: zoneEmail } : authority;
+  const mailToHref = emailAvailable
+    ? report
+      ? escalationMailToUrl(report, mailAuthority, reporterEmail, note.trim() || undefined)
+      : mailAuthority.email
+      ? `mailto:${mailAuthority.email}`
+      : undefined
+    : undefined;
 
   useEffect(
     () => () => {
@@ -333,17 +344,26 @@ export function ReportToAuthority({
                   </div>
                 ) : null}
 
-                {report ? (
+                {report && emailAvailable ? (
                   <>
                     <button onClick={() => void send()} className="btn-primary mt-4 w-full">
                       <Mail className="h-4 w-4" />
-                      Email report package to {authority.name.split(' ').slice(0, 3).join(' ')}
+                      Email report package to{' '}
+                      {authority.name.split(' ').slice(0, 3).join(' ')}
+                      {zoneEmail ? ' (your BBMP zone)' : ''}
                     </button>
                     <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-400">
-                      The {isAmrita ? 'campus office' : 'authority'} receives the report details,
-                      evidence photo link and GPS coordinates by email.
+                      {zoneEmail
+                        ? `Goes to ${zoneEmail} — the grievance cell for your zone.`
+                        : `The ${isAmrita ? 'campus office' : 'authority'} receives the report details, evidence photo link and GPS coordinates by email.`}
                     </p>
                   </>
+                ) : report && !emailAvailable ? (
+                  <p className="mt-4 rounded-2xl border border-sky-200/70 bg-sky-50 px-4 py-3 text-xs leading-relaxed text-sky-800 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-200">
+                    This department has no public grievance inbox — the fastest channels are the
+                    official portal, the helpline above, or WhatsApp below. Your CivicEye report is
+                    still logged so the team can follow up.
+                  </p>
                 ) : (
                   <p className="mt-4 text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                     Pick how you'd like to reach the {isAmrita ? 'campus office' : 'office'} about{' '}
@@ -379,14 +399,16 @@ export function ReportToAuthority({
                       SMS
                     </a>
                   ) : null}
-                  <a
-                    href={mailToHref}
-                    onClick={() => log('mailto')}
-                    className="btn-secondary !px-2 text-xs"
-                  >
-                    <Mail className="h-4 w-4" />
-                    Mail app
-                  </a>
+                  {mailToHref ? (
+                    <a
+                      href={mailToHref}
+                      onClick={() => log('mailto')}
+                      className="btn-secondary !px-2 text-xs"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Mail app
+                    </a>
+                  ) : null}
                 </div>
               </motion.div>
             ) : null}

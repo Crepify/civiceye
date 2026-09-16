@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Flame, Layers, ListFilter, ShieldCheck, Thermometer } from 'lucide-react';
+import { Flame, Layers, ListFilter, ShieldCheck, Thermometer, Building2, MapPin } from 'lucide-react';
 import type { CategoryId, Coordinates, ReportStatus, Severity, ScopeFilter } from '@/types';
 import { useReports } from '@/hooks/useReports';
 import { useBrand } from '@/hooks/useBrand';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { MapView } from '@/components/map/MapView';
+import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
 import { SearchBar } from '@/components/SearchBar';
 import { FilterBar } from '@/components/FilterBar';
 import { Drawer } from '@/components/Drawer';
@@ -14,6 +15,7 @@ import { Badge } from '@/components/Badge';
 import { SEVERITY_META, STATUS_META } from '@/data/categories';
 import { EmptyState } from '@/components/EmptyState';
 import { cn } from '@/utils/cn';
+import { CAMPUS_ACREAGE } from '@/data/campus';
 
 interface MapFilters {
   categories: CategoryId[];
@@ -35,11 +37,10 @@ const DEFAULT_FILTERS: MapFilters = {
 
 const ALL = (list: unknown[]) => list.length === 0;
 
-/** Interactive map page: search, filters, heatmap, legend and report list. */
+/** Interactive map page: CivicEye uses Google/Fallback, Amrita Eye uses custom campus map only */
 export function MapPage() {
   const { reports } = useReports();
   const { isAmrita } = useBrand();
-  // CivicEye keeps the comic street-sign map skin; Amrita Eye uses the clean map.
   const [filters, setFilters] = useLocalStorage<MapFilters>('civiceye:map-filters', {
     ...DEFAULT_FILTERS,
     scope: isAmrita ? 'campus' : 'city',
@@ -54,13 +55,9 @@ export function MapPage() {
 
   const debouncedSearch = useDebounce(filters.search, 250);
 
-  // Clean, brand-consistent map for both CivicEye and Amrita Eye — no comic skin.
-
   const visibleReports = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
     return reports.filter((r) => {
-      // Complete separation: CivicEye only ever shows city reports; Amrita Eye
-      // only ever shows campus reports — never mixed, even on "All".
       if (isAmrita ? r.scope !== 'campus' : r.scope !== 'city') return false;
       if (filters.scope !== 'all' && r.scope !== filters.scope) return false;
       if (!ALL(filters.categories) && !filters.categories.includes(r.category)) return false;
@@ -68,29 +65,24 @@ export function MapPage() {
       if (!ALL(filters.status) && !filters.status.includes(r.status)) return false;
       if (filters.verifiedOnly && !r.verified) return false;
       if (q) {
-        const haystack =
-          `${r.title} ${r.description} ${r.locationName} ${r.author} ${r.id}`.toLowerCase();
+        const haystack = `${r.title} ${r.description} ${r.locationName} ${r.author} ${r.id}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
   }, [reports, filters, debouncedSearch, isAmrita]);
 
-  // Keep the selection valid as filters change.
   useEffect(() => {
     if (selectedId && !visibleReports.some((r) => r.id === selectedId)) setSelectedId(null);
   }, [visibleReports, selectedId]);
 
-  // Clicking a report — either a map marker or the side list — centers the
-  // map on it and zooms in so the pin is clearly visible.
   useEffect(() => {
     if (!selectedId) return;
     const report = reports.find((r) => r.id === selectedId || r.code === selectedId);
-    if (report) {
+    if (report && !isAmrita) {
       setView({ center: report.coordinates, zoom: 16 });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
+  }, [selectedId, reports, isAmrita]);
 
   const hasActiveFilters =
     filters.categories.length > 0 ||
@@ -99,22 +91,78 @@ export function MapPage() {
     filters.verifiedOnly ||
     filters.search.trim().length > 0 ||
     filters.scope !== (isAmrita ? 'campus' : 'city');
-  filters.categories.length > 0 ||
-    filters.severities.length > 0 ||
-    filters.status.length > 0 ||
-    filters.verifiedOnly ||
-    filters.search.trim().length > 0;
 
-  const clearFilters = () =>
-    setFilters({ ...DEFAULT_FILTERS, scope: isAmrita ? 'campus' : 'city' });
+  const clearFilters = () => setFilters({ ...DEFAULT_FILTERS, scope: isAmrita ? 'campus' : 'city' });
 
+  // Amrita Eye: full custom campus map, no Google Maps at all
+  if (isAmrita) {
+    return (
+      <div className="flex h-[calc(100vh-var(--nav-height))] flex-col bg-[#FFF5F7] pt-[calc(var(--nav-height)+2.5rem)] dark:bg-[#1A030A]">
+        {/* Header bar - Amrita style */}
+        <div className="z-20 border-b border-[#A51636]/10 bg-white/80 backdrop-blur dark:border-white/5 dark:bg-white/[0.02]">
+          <div className="flex flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
+                <Building2 className="h-5 w-5 text-[#A51636]" />
+                Amrita Campus Map
+                <span className="ml-2 rounded-full bg-[#A51636]/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-[#A51636]">No GMaps · Custom · 1m pinnable</span>
+              </h1>
+              <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <span>{visibleReports.length} campus issues · 12 buildings · 5 blocks A–E · 15 floors · 163 rooms · 155 faculty</span>
+                <span className="hidden h-3 w-px bg-slate-300 dark:bg-white/10 sm:block" />
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> {CAMPUS_ACREAGE.totalMeasured} acres measured · every location pinnable
+                </span>
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <SearchBar value={filters.search} onChange={(search) => setFilters({ ...filters, search })} placeholder="Search building, room, teacher, issue…" className="flex-1 lg:w-80" />
+              <button
+                onClick={() => setFiltersOpen(true)}
+                className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white/70 px-3.5 text-sm font-semibold text-slate-600 transition-all hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300 lg:hidden"
+              >
+                <ListFilter className="h-4 w-4" />
+                Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Body - campus map only */}
+        <div className="min-h-0 flex-1 p-3 sm:p-4">
+          <AmritaCampusMap
+            reports={visibleReports}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            className="h-full min-h-[500px] shadow-soft"
+          />
+        </div>
+
+        {/* Mobile filters drawer */}
+        <Drawer open={filtersOpen} onClose={() => setFiltersOpen(false)} title="Filters">
+          <div className="p-5">
+            <FilterBar filters={filters} onChange={setFilters} />
+            {hasActiveFilters ? (
+              <button onClick={clearFilters} className="btn-secondary mt-6 w-full">
+                Clear all filters
+              </button>
+            ) : null}
+            <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900 dark:border-amber-900/30 dark:bg-amber-950/20 dark:text-amber-200">
+              <b>Amrita Eye uses custom campus map only.</b> No Google Maps. Real OSM footprints, Esri satellite, 155 faculty public, every location pinnable to 1m with QR deep links.
+            </div>
+          </div>
+        </Drawer>
+      </div>
+    );
+  }
+
+  // CivicEye: original Google/Fallback map
   return (
-    <div className={isAmrita ? "flex h-[calc(100vh-var(--nav-height))] flex-col bg-slate-50 pt-[calc(var(--nav-height)+2.5rem)] dark:bg-slate-950" : "comic-map-page flex h-[calc(100vh-var(--nav-height))] flex-col bg-[#fff8e7] pt-[var(--nav-height)] text-[#172b44]"}>
-      {/* Header bar */}
-      <div className={isAmrita ? "z-20 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-white/5 dark:bg-white/[0.02]" : "z-20 border-b-4 border-[#172b44] bg-[#ffd630] shadow-[0_5px_0_#ef6b59]"}>
+    <div className="comic-map-page flex h-[calc(100vh-var(--nav-height))] flex-col bg-[#fff8e7] pt-[var(--nav-height)] text-[#172b44]">
+      <div className="z-20 border-b-4 border-[#172b44] bg-[#ffd630] shadow-[0_5px_0_#ef6b59]">
         <div className="flex flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className={isAmrita ? "flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white" : "flex items-center gap-2 font-serif text-xl font-black uppercase text-[#172b44]"}>
+            <h1 className="flex items-center gap-2 font-serif text-xl font-black uppercase text-[#172b44]">
               <Layers className="h-5 w-5 text-primary-500" />
               Live issue map
             </h1>
@@ -123,29 +171,19 @@ export function MapPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <SearchBar
-              value={filters.search}
-              onChange={(search) => setFilters({ ...filters, search })}
-              placeholder="Search area, title, id…"
-              className="flex-1 lg:w-72"
-            />
+            <SearchBar value={filters.search} onChange={(search) => setFilters({ ...filters, search })} placeholder="Search area, title, id…" className="flex-1 lg:w-72" />
             <button
               onClick={() => setHeatmap(!heatmap)}
               aria-pressed={heatmap}
               className={cn(
                 'flex h-11 items-center gap-2 rounded-xl border px-3.5 text-sm font-semibold transition-all',
-                heatmap
-                  ? 'border-primary-400 bg-primary-500/10 text-primary-600 dark:text-primary-400'
-                  : 'border-slate-200 bg-white/70 text-slate-600 hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300',
+                heatmap ? 'border-primary-400 bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'border-slate-200 bg-white/70 text-slate-600 hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300',
               )}
             >
               <Thermometer className="h-4 w-4" />
               <span className="hidden sm:inline">Heatmap</span>
             </button>
-            <button
-              onClick={() => setFiltersOpen(true)}
-              className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white/70 px-3.5 text-sm font-semibold text-slate-600 transition-all hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300 lg:hidden"
-            >
+            <button onClick={() => setFiltersOpen(true)} className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white/70 px-3.5 text-sm font-semibold text-slate-600 transition-all hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300 lg:hidden">
               <ListFilter className="h-4 w-4" />
               Filters
             </button>
@@ -153,10 +191,8 @@ export function MapPage() {
         </div>
       </div>
 
-      {/* Body */}
       <div className="grid min-h-0 flex-1 grid-rows-[1fr_auto] lg:grid-cols-[1fr_340px] lg:grid-rows-1">
-        {/* Map */}
-        <div className={isAmrita ? "relative min-h-[320px] bg-slate-50 p-4 dark:bg-slate-950 sm:p-5" : "relative min-h-[320px] bg-[#fff8e7] p-4 sm:p-5"}>
+        <div className="relative min-h-[320px] bg-[#fff8e7] p-4 sm:p-5">
           <MapView
             reports={visibleReports}
             selectedId={selectedId}
@@ -165,20 +201,13 @@ export function MapPage() {
             zoom={view.zoom}
             onViewChange={(center, zoom) => setView({ center, zoom })}
             heatmap={heatmap}
-            className={isAmrita ? "h-full min-h-[320px] overflow-hidden rounded-2xl border border-slate-200/80 shadow-soft dark:border-white/10" : "h-full min-h-[320px] border-[5px] border-[#172b44] shadow-[8px_8px_0_#ef6b59]"}
+            className="h-full min-h-[320px] border-[5px] border-[#172b44] shadow-[8px_8px_0_#ef6b59]"
           />
-
-          {/* Legend */}
-          <div className={isAmrita ? "pointer-events-none absolute bottom-8 left-8 z-20 hidden rounded-2xl border border-slate-200/70 bg-white/90 px-4 py-3 shadow-soft backdrop-blur dark:border-white/10 dark:bg-slate-900/90 sm:block" : "pointer-events-none absolute bottom-8 left-8 z-20 hidden border-[3px] border-[#172b44] bg-[#fff8e7] px-4 py-3 shadow-[4px_4px_0_#172b44] sm:block"}>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              Severity
-            </p>
+          <div className="pointer-events-none absolute bottom-8 left-8 z-20 hidden border-[3px] border-[#172b44] bg-[#fff8e7] px-4 py-3 shadow-[4px_4px_0_#172b44] sm:block">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Severity</p>
             <div className="space-y-1.5">
               {Object.entries(SEVERITY_META).map(([key, meta]) => (
-                <div
-                  key={key}
-                  className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300"
-                >
+                <div key={key} className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
                   <span className={cn('h-2.5 w-2.5 rounded-full', meta.dot)} />
                   {meta.label}
                   <span className="text-[10px] text-slate-400">· weight {meta.weight}</span>
@@ -190,35 +219,19 @@ export function MapPage() {
               Green tick = community verified
             </div>
           </div>
-
-          {/* Empty state overlay */}
           <AnimatePresence>
             {visibleReports.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 p-4 backdrop-blur-sm dark:bg-slate-950/60"
-              >
-                <EmptyState
-                  icon={<Flame className="h-8 w-8" />}
-                  title="No reports match your filters"
-                  description="Try widening the filters, or be the first to report this area."
-                />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 p-4 backdrop-blur-sm dark:bg-slate-950/60">
+                <EmptyState icon={<Flame className="h-8 w-8" />} title="No reports match your filters" description="Try widening the filters, or be the first to report this area." />
               </motion.div>
             ) : null}
           </AnimatePresence>
         </div>
-
-        {/* Side list (desktop) */}
-        <aside className={isAmrita ? "hidden min-h-0 flex-col overflow-hidden border-l border-slate-200/70 bg-white/70 dark:border-white/5 dark:bg-white/[0.02] lg:flex" : "hidden min-h-0 flex-col overflow-hidden border-l-[5px] border-[#172b44] bg-[#91dcc4] lg:flex"}>
+        <aside className="hidden min-h-0 flex-col overflow-hidden border-l-[5px] border-[#172b44] bg-[#91dcc4] lg:flex">
           <div className="flex items-center justify-between border-b border-slate-200/70 px-4 py-3 dark:border-white/5">
             <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Visible reports</p>
             {hasActiveFilters ? (
-              <button
-                onClick={clearFilters}
-                className="text-xs font-semibold text-primary-600 hover:underline dark:text-primary-400"
-              >
+              <button onClick={clearFilters} className="text-xs font-semibold text-primary-600 hover:underline dark:text-primary-400">
                 Clear filters
               </button>
             ) : null}
@@ -233,21 +246,12 @@ export function MapPage() {
                   onClick={() => setSelectedId(r.id)}
                   className={cn(
                     'flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-all',
-                    selectedId === r.id
-                      ? 'border-primary-400 bg-primary-500/10 shadow-softer'
-                      : 'border-slate-200/80 bg-white/80 hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.04]',
+                    selectedId === r.id ? 'border-primary-400 bg-primary-500/10 shadow-softer' : 'border-slate-200/80 bg-white/80 hover:border-primary-300 dark:border-white/10 dark:bg-white/[0.04]',
                   )}
                 >
-                  <img
-                    src={r.image}
-                    alt=""
-                    className="h-14 w-14 shrink-0 rounded-xl object-cover"
-                    loading="lazy"
-                  />
+                  <img src={r.image} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" loading="lazy" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
-                      {r.title}
-                    </p>
+                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{r.title}</p>
                     <p className="mt-0.5 truncate text-xs text-slate-400">{r.locationName}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       <Badge className={cn(severity.bg, severity.color)}>{severity.label}</Badge>
@@ -266,7 +270,6 @@ export function MapPage() {
         </aside>
       </div>
 
-      {/* Mobile filters drawer */}
       <Drawer open={filtersOpen} onClose={() => setFiltersOpen(false)} title="Filters">
         <div className="p-5">
           <FilterBar filters={filters} onChange={setFilters} />

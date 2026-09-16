@@ -5,6 +5,7 @@ import { SectionHeading } from '@/components/SectionHeading';
 import { FeatureCard } from '@/components/FeatureCard';
 import { Reveal } from '@/components/Reveal';
 import { MapView } from '@/components/map/MapView';
+import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
 import { useReports } from '@/hooks/useReports';
 import { useBrand } from '@/hooks/useBrand';
 import { useMemo } from 'react';
@@ -15,7 +16,7 @@ const DETAILS = [
     icon: MapIcon,
     title: 'Interactive map, two engines',
     points: [
-      'Full Google Maps integration when a key is configured',
+      'CivicEye: Google Maps + fallback vector map · Amrita Eye: custom campus map (no Google Maps) — 1m pinnable, 155 faculty, 163 rooms',
       'Zero-config fallback vector map for instant demos',
       'Marker clustering, severity heatmap, live filters & search',
       'One-tap directions to any verified report',
@@ -119,22 +120,25 @@ export function Features() {
                   <div className="relative">
                     <div className="absolute -inset-4 rounded-[2rem] brand-panel blur-xl" />
                     {i === 0 ? (
-                      // The "interactive map" feature shows a live map preview
-                      // (Google Maps when a key is set, fallback map otherwise).
+                      // Brand-aware: CivicEye uses Google/Fallback, Amrita Eye uses custom campus map only
                       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/60 shadow-soft dark:border-white/10">
-                        <MapView
-                          reports={scoped}
-                          center={{ lat: 12.9716, lng: 77.5946 }}
-                          zoom={12}
-                          onViewChange={() => undefined}
-                          selectedId={null}
-                          onSelect={() => undefined}
-                          heatmap
-                          className="h-full w-full"
-                        />
+                        {isAmrita ? (
+                          <AmritaCampusMap reports={scoped} selectedId={null} onSelect={() => undefined} className="h-full w-full rounded-none border-0" />
+                        ) : (
+                          <MapView
+                            reports={scoped}
+                            center={{ lat: 12.9716, lng: 77.5946 }}
+                            zoom={12}
+                            onViewChange={() => undefined}
+                            selectedId={null}
+                            onSelect={() => undefined}
+                            heatmap
+                            className="h-full w-full"
+                          />
+                        )}
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-500 via-emerald-500 to-primary-500 opacity-60" />
                         <div className="absolute bottom-3 right-3 rounded-xl bg-white/85 px-3 py-1.5 text-[10px] font-bold text-slate-600 backdrop-blur dark:bg-slate-900/85 dark:text-slate-300">
-                          LIVE · {scoped.length} reports
+                          LIVE · {scoped.length} {isAmrita ? 'campus issues · custom map' : 'reports'}
                         </div>
                       </div>
                     ) : (

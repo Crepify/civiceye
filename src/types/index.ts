@@ -162,22 +162,34 @@ export interface Authority {
   scope: 'city' | 'campus';
   /** Report categories this authority is responsible for. */
   categories: CategoryId[];
-  /** Official inbox that receives escalated report packages. */
+  /**
+   * Official inbox that receives escalated report packages.
+   * Leave EMPTY when a department publishes no grievance email — the UI then
+   * steers citizens to the phone / WhatsApp / portal channels instead.
+   */
   email: string;
-  /** Public phone line (dialable, e.g. "+918022661234"). */
+  /** Public phone line. Use a full dialable number (e.g. "+918022660000"). */
   phone?: string;
-  /** WhatsApp numbers in international format without '+', e.g. ["918022661234"]. */
+  /** Human label for the phone row, e.g. "Helpline 1533 · 24×7". */
+  phoneNote?: string;
+  /** WhatsApp numbers in international format without '+', e.g. ["919448197197"]. */
   whatsapp?: string[];
+  /** Short label for the WhatsApp row (e.g. "BBMP waste WhatsApp"). */
+  whatsappNote?: string;
   /** Postal / office address. */
   address?: string;
   /** Office hours label, e.g. "Mon–Sat 9:30–17:30". */
   hours?: string;
   /**
-   * Official complaint/grievance portal URL for this department. When set,
-   * the post-submit screen offers to redirect the citizen there so they can
-   * also file/track the issue officially (e.g. BBMP Samparka).
+   * Official complaint/grievance portal URL. When set, the UI offers a
+   * prominent "file officially" action (verified working portal, e.g. BBMP
+   * official site / Namma Bengaluru).
    */
   portalUrl?: string;
+  /** Short label for the portal button, e.g. "BBMP official site". */
+  portalLabel?: string;
+  /** Provenance note for sample/derived contact data. */
+  source?: string;
 }
 
 /** A logged escalation of a report to an authority (the `authority_reports` table). */

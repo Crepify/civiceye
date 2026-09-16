@@ -8,13 +8,13 @@ import { NavbarAmrita } from '@/components/NavbarAmrita';
 import { FooterAmrita } from '@/components/FooterAmrita';
 import { SOSButton } from '@/components/SOSButton';
 import { RequireAuth } from '@/components/RequireAuth';
-import { GuestGate } from '@/components/GuestGate';
 import { Landing } from '@/pages/Landing';
 import { AmritaEye } from '@/pages/AmritaEye';
 import { useBrand } from '@/hooks/useBrand';
 import { cn } from '@/utils/cn';
 import { Features } from '@/pages/Features';
 import { MapPage } from '@/pages/MapPage';
+import { AmritaMapPage } from '@/pages/AmritaMapPage';
 import { ReportPage } from '@/pages/ReportPage';
 import { ReportDetails } from '@/pages/ReportDetails';
 import { Dashboard } from '@/pages/Dashboard';
@@ -84,10 +84,11 @@ export default function App() {
           the CivicEye comic landing. */}
       <Route path="/" element={isAmrita ? <AmritaEye /> : <Landing />} />
       <Route path="/amrita" element={<AmritaEye />} />
+      <Route path="/amrita/map" element={<AmritaMapPage />} />
       <Route path="/features" element={<Features />} />
       <Route path="/map" element={<MapPage />} />
       <Route path="/live" element={<LiveDetection />} />
-      <Route path="/report" element={<GuestGate><ReportPage /></GuestGate>} />
+      <Route path="/report" element={<ReportPage />} />
       <Route path="/report/:id" element={<ReportDetails />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/community" element={<Community />} />

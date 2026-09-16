@@ -23,6 +23,7 @@ import { DashboardCard } from '@/components/DashboardCard';
 import { ChartCard } from '@/components/ChartCard';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { MapView } from '@/components/map/MapView';
+import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
 import { Badge } from '@/components/Badge';
 import { CATEGORIES, SEVERITY_META, STATUS_META, categoryById } from '@/data/categories';
 import { authoritiesForScope, authorityById } from '@/data/authorities';
@@ -411,18 +412,16 @@ export function Dashboard() {
       {/* Map + top areas */}
       <div className="section-pad mt-5 grid gap-5 lg:grid-cols-3 [&>*]:min-w-0">
         <ChartCard
-          title="Live ward map"
-          subtitle="Click a pin to inspect a report"
+          title={isAmrita ? "Campus map · every location pinnable" : "Live ward map"}
+          subtitle={isAmrita ? "Custom campus map · no Google Maps · 155 faculty · 163 rooms" : "Click a pin to inspect a report"}
           className="lg:col-span-2"
         >
-          <div className="h-[420px] min-h-[420px] w-full overflow-hidden border-[4px] border-[#172b44] shadow-[5px_5px_0_#ef6b59]">
-            <MapView
-              reports={scopedReports}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              heatmap
-              className="h-full w-full"
-            />
+          <div className={isAmrita ? "h-[520px] min-h-[520px] w-full overflow-hidden rounded-xl border border-slate-200 dark:border-white/10" : "h-[420px] min-h-[420px] w-full overflow-hidden border-[4px] border-[#172b44] shadow-[5px_5px_0_#ef6b59]"}>
+            {isAmrita ? (
+              <AmritaCampusMap reports={scopedReports} selectedId={selectedId} onSelect={setSelectedId} className="h-full w-full rounded-none border-0" />
+            ) : (
+              <MapView reports={scopedReports} selectedId={selectedId} onSelect={setSelectedId} heatmap className="h-full w-full" />
+            )}
           </div>
         </ChartCard>
 

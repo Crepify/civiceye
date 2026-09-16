@@ -33,12 +33,12 @@ import nodemailer from 'nodemailer';
 /* Built-in authority directory (id → { name, department, email }).
  * Keep in sync with src/data/authorities.ts. Env vars always win. */
 const DIRECTORY = {
-  'bbmp-42': { name: 'BBMP Ward 42 Control Room', department: 'Roads & Infrastructure', email: 'civiceyeoffcial@gmail.com' },
-  'bbmp-swm': { name: 'BBMP Solid Waste Management', department: 'Sanitation', email: 'civiceyeoffcial@gmail.com' },
-  bwssb: { name: 'BWSSB Helpline', department: 'Water Supply & Sewerage', email: 'civiceyeoffcial@gmail.com' },
-  bescom: { name: 'BESCOM 1912', department: 'Street Lighting & Power', email: 'civiceyeoffcial@gmail.com' },
-  'traffic-police': { name: 'Bengaluru Traffic Police', department: 'Traffic & Signals', email: 'civiceyeoffcial@gmail.com' },
-  'forest-dept': { name: 'BBMP Forest Cell', department: 'Trees & Parks', email: 'civiceyeoffcial@gmail.com' },
+  'bbmp-42': { name: 'BBMP — Roads & Potholes', department: 'Roads & Infrastructure', email: 'comm@bbmp.gov.in' },
+  'bbmp-swm': { name: 'BBMP Solid Waste Management', department: 'Sanitation', email: 'comm@bbmp.gov.in' },
+  bwssb: { name: 'BWSSB Helpline', department: 'Water Supply & Sewerage', email: '' },
+  bescom: { name: 'BESCOM 1912', department: 'Street Lighting & Power', email: '' },
+  'traffic-police': { name: 'Bengaluru Traffic Police', department: 'Traffic & Signals', email: '' },
+  'forest-dept': { name: 'BBMP Forest Cell', department: 'Trees & Parks', email: 'comm@bbmp.gov.in' },
   'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: 'civiceyeoffcial@gmail.com' },
   'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: 'civiceyeoffcial@gmail.com' },
   'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: 'civiceyeoffcial@gmail.com' },

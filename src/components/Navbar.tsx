@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { BadgeCheck, ChevronRight, House, LogOut, Menu, Plus, ShieldCheck, User } from 'lucide-react';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
-import { BrightnessControl } from './BrightnessControl';
 import { Drawer } from './Drawer';
 import { NotificationBell } from './NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
@@ -156,7 +155,6 @@ export function Navbar() {
               </NavLink>
             ) : null}
             <NotificationBell />
-            <BrightnessControl />
             <ThemeToggle />
 
             {user ? (

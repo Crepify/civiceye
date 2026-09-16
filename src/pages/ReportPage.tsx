@@ -30,6 +30,7 @@ import { Stepper } from '@/components/Stepper';
 import { ImageUploader } from '@/components/ImageUploader';
 import { QRPopup } from '@/components/QRPopup';
 import { MapView } from '@/components/map/MapView';
+import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { authorityForCategory } from '@/data/authorities';
 import { Loader } from '@/components/Loader';
@@ -897,18 +898,39 @@ function LocationStep({
           </button>
         </div>
 
-        <MapView
-          reports={[]}
-          selectedId={null}
-          onSelect={() => undefined}
-          center={mapCenter}
-          zoom={13}
-          heatmap={false}
-          pinDropping
-          onPinDrop={onCoordinates}
-          droppedPin={coordinates}
-          className="h-[340px]"
-        />
+        {isAmrita ? (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-[#A51636]/20 bg-[#A51636]/5 p-3 text-xs leading-relaxed text-[#A51636] dark:bg-[#A51636]/10">
+              <b>Amrita Eye · Custom campus map · No Google Maps</b> — Every location pinnable to 1m. Tap any building, block, floor, room or open area to set your report location. Campus issues only show up on this map. Search 155 faculty, 163 rooms, 12 buildings.
+            </div>
+            <AmritaCampusMap
+              reports={[]}
+              selectedId={null}
+              onSelect={() => undefined}
+              pinDropping
+              onPinDrop={(coords, meta) => {
+                onCoordinates(coords);
+                const label = meta.building || meta.block ? `${meta.block ? `Block ${meta.block} ` : ''}${meta.building || ''} · ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`;
+                onLocationName(label);
+              }}
+              droppedPin={coordinates}
+              className="h-[480px]"
+            />
+          </div>
+        ) : (
+          <MapView
+            reports={[]}
+            selectedId={null}
+            onSelect={() => undefined}
+            center={mapCenter}
+            zoom={13}
+            heatmap={false}
+            pinDropping
+            onPinDrop={onCoordinates}
+            droppedPin={coordinates}
+            className="h-[340px]"
+          />
+        )}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>

@@ -93,6 +93,11 @@ isn't confident does it fall back to the general model.
 
 ---
 
+> **ZERO-TRAINING OPTION — YOLO-World:** export `yolov8s-worldv2.pt` with
+> `set_classes([...your labels...])` + `model.export(format="onnx", imgsz=640)` and
+> the labels are baked in — the ONNX is a standard YOLO detector that our engine
+> already runs. Full recipe: see `YOLO_WORLD_ONDEVICE.md`.
+
 ## 4. How to get the model URL (answer to "all I need to do is add URL")
 
 ### 4a. Already have a trained Roboflow model? Use it on-device (5 min)

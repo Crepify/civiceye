@@ -1,51 +1,58 @@
 import type { Authority, CategoryId } from '@/types';
 
 /* ====================================================================
- *  Authority directory
+ *  Authority directory (verified public channels)
  *
- *  - `email`  defaults to the official CivicEye inbox so every escalated
- *    report is captured by the team (per-department AUTHORITY_EMAIL_<ID>
- *    env overrides win server-side — see ENVIRONMENT.md).
- *  - `phone`  is the department's PUBLIC helpline (tel: works on mobile).
- *  - `portalUrl` is the department's official complaint portal — the
- *    recommended channel for a fast, traceable filing.
- *  - `whatsapp` is omitted unless the body publishes a WhatsApp line.
+ *  City bodies: helpline + official portal + WhatsApp + grievance email
+ *  where published. `email` left EMPTY when a department has no public
+ *  grievance inbox (the UI then uses phone / WhatsApp / portal instead).
+ *
+ *  Campus bodies: route through the CivicEye team inbox (the campus staff
+ *  addresses are internal) — staff are reachable via the campus dashboard.
+ *
+ *  BBMP note: BBMP's working citizen channels are the official site
+ *  (www.bbmp.gov.in / Namma Bengaluru Sahaaya 2.0), the 1533 helpline and
+ *  the central grievance cell comm@bbmp.gov.in. Per-zone grievance emails
+ *  are resolved by `bbmpGrievanceEmailFor()` from the report location.
  * ==================================================================== */
 
-/**
- * Civic / campus authorities used for dashboard assignment and the
- * "Report to Authority" escalation flow.
- *
- * scope 'city'   → CivicEye (government & municipal bodies, Bengaluru)
- * scope 'campus' → Amrita Eye (campus offices, escalation = "report to staff")
- */
 export const AUTHORITIES: Authority[] = [
   /* ------------------------- CivicEye (city) ------------------------- */
   {
     id: 'bbmp-42',
-    name: 'BBMP Ward Roads',
-    department: 'Roads & Infrastructure',
+    name: 'BBMP — Roads & Potholes',
+    department: 'Roads & Infrastructure · Grievance Cell',
     color: '#f59e0b',
     scope: 'city',
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'other'],
-    email: 'civiceyeoffcial@gmail.com', // official CivicEye capture inbox
-    phone: '1533', // BBMP public helpline
-    address: 'BBMP — your ward office routes to the responsible engineer',
+    email: 'comm@bbmp.gov.in', // BBMP central grievance cell (public)
+    phone: '+918022660000', // BBMP citizen helpline (full, dialable)
+    phoneNote: 'Toll-free 1533 · helpline 080-2266 0000',
+    whatsapp: ['919480685700'],
+    whatsappNote: 'BBMP WhatsApp grievance',
+    address: 'BBMP Head Office, N R Square, Bengaluru 560002',
     hours: 'Helpline 1533 · 24×7',
-    portalUrl: 'https://bbmp.samparka.online', // BBMP Samparka (roads/potholes)
+    portalUrl: 'https://www.bbmp.gov.in',
+    portalLabel: 'BBMP official site',
+    source: 'bbmp.gov.in + public helpline records',
   },
   {
     id: 'bbmp-swm',
     name: 'BBMP Solid Waste Management',
-    department: 'Sanitation',
+    department: 'Sanitation · Blackspots & Dumping',
     color: '#22c55e',
     scope: 'city',
     categories: ['garbage', 'illegal-dumping'],
-    email: 'civiceyeoffcial@gmail.com',
-    phone: '1533',
-    address: 'SWM Cell, BBMP Head Office, NR Square, Bengaluru — 560002',
+    email: 'comm@bbmp.gov.in',
+    phone: '+918022660000',
+    phoneNote: 'Toll-free 1533 · helpline 080-2266 0000',
+    whatsapp: ['919448197197'],
+    whatsappNote: 'BBMP waste WhatsApp (launched 2025)',
+    address: 'SWM Cell, BBMP Head Office, N R Square, Bengaluru 560002',
     hours: 'Helpline 1533 · 24×7',
-    portalUrl: 'https://bbmp.samparka.online', // BBMP Samparka (garbage/SWM)
+    portalUrl: 'https://www.bbmp.gov.in',
+    portalLabel: 'BBMP official site',
+    source: 'BBMP waste-helpline announcement (Jun 2025)',
   },
   {
     id: 'bwssb',
@@ -54,11 +61,14 @@ export const AUTHORITIES: Authority[] = [
     color: '#38bdf8',
     scope: 'city',
     categories: ['water-leakage', 'sewage'],
-    email: 'civiceyeoffcial@gmail.com',
+    email: '', // no published citizen grievance inbox
     phone: '19145',
-    address: 'BWSSB, Cauvery Bhavan, KG Road, Bengaluru — 560009',
-    hours: '24×7 helpline (19145)',
-    portalUrl: 'https://bwssb.karnataka.gov.in', // official BWSSB site
+    phoneNote: 'BWSSB helpline 19145 · Cauvery complaints',
+    address: 'BWSSB, Cauvery Bhavan, KG Road, Bengaluru 560009',
+    hours: '24×7 helpline',
+    portalUrl: 'https://bwssb.karnataka.gov.in',
+    portalLabel: 'BWSSB official site',
+    source: 'BWSSB helpline',
   },
   {
     id: 'bescom',
@@ -67,11 +77,14 @@ export const AUTHORITIES: Authority[] = [
     color: '#facc15',
     scope: 'city',
     categories: ['street-light'],
-    email: 'civiceyeoffcial@gmail.com',
+    email: '', // complaints via 1912 / portal
     phone: '1912',
-    address: 'BESCOM Corporate Office, KR Circle, Bengaluru — 560001',
+    phoneNote: 'BESCOM helpline 1912 · 24×7',
+    address: 'BESCOM Corporate Office, KR Circle, Bengaluru 560001',
     hours: '24×7 helpline (1912)',
-    portalUrl: 'https://bescom.karnataka.gov.in', // official BESCOM site
+    portalUrl: 'https://bescom.karnataka.gov.in',
+    portalLabel: 'BESCOM official site',
+    source: 'BESCOM helpline 1912',
   },
   {
     id: 'traffic-police',
@@ -80,11 +93,14 @@ export const AUTHORITIES: Authority[] = [
     color: '#fb7185',
     scope: 'city',
     categories: ['traffic-signal', 'accident'],
-    email: 'civiceyeoffcial@gmail.com',
+    email: '', // emergencies → 112/103
     phone: '112',
-    address: 'Traffic Management Centre, Infantry Road, Bengaluru — 560001',
-    hours: '24×7 control room (112 / 103)',
-    portalUrl: 'https://www.bengalurucitypolice.gov.in', // Bangalore City Police
+    phoneNote: 'Emergency 112 · Traffic helpline 103',
+    address: 'Traffic Management Centre, Infantry Road, Bengaluru 560001',
+    hours: '24×7 control room',
+    portalUrl: 'https://www.bengalurucitypolice.gov.in',
+    portalLabel: 'Bengaluru City Police',
+    source: '112 / 103 helplines',
   },
   {
     id: 'forest-dept',
@@ -93,11 +109,14 @@ export const AUTHORITIES: Authority[] = [
     color: '#34d399',
     scope: 'city',
     categories: ['fallen-tree'],
-    email: 'civiceyeoffcial@gmail.com',
-    phone: '1533',
-    address: 'Forest Cell, BBMP Head Office, NR Square, Bengaluru — 560002',
+    email: 'comm@bbmp.gov.in',
+    phone: '+918022660000',
+    phoneNote: 'Toll-free 1533 · helpline 080-2266 0000',
+    address: 'Forest Cell, BBMP Head Office, N R Square, Bengaluru 560002',
     hours: 'Helpline 1533 · 24×7',
-    portalUrl: 'https://bbmp.gov.in', // BBMP main site (tree cell)
+    portalUrl: 'https://www.bbmp.gov.in',
+    portalLabel: 'BBMP official site',
+    source: 'bbmp.gov.in',
   },
 
   /* ------------------------ Amrita Eye (campus) ---------------------- */
@@ -108,9 +127,11 @@ export const AUTHORITIES: Authority[] = [
     color: '#f59e0b',
     scope: 'campus',
     categories: ['pothole', 'broken-road', 'sidewalk', 'manhole', 'fallen-tree', 'other'],
-    email: 'civiceyeoffcial@gmail.com',
+    email: 'civiceyeoffcial@gmail.com', // routed to campus staff via team
+    phoneNote: 'Report to campus estate staff',
     address: 'Estate Office, Admin Block, Amrita Campus',
     hours: 'Mon–Sat 9:00–17:00',
+    source: 'Campus office directory',
   },
   {
     id: 'amrita-facilities',
@@ -120,8 +141,10 @@ export const AUTHORITIES: Authority[] = [
     scope: 'campus',
     categories: ['garbage', 'sewage', 'water-leakage', 'street-light'],
     email: 'civiceyeoffcial@gmail.com',
+    phoneNote: 'Report to campus facilities staff',
     address: 'Facilities Office, Ground Floor, Admin Block',
     hours: 'Mon–Sat 8:30–17:30',
+    source: 'Campus office directory',
   },
   {
     id: 'amrita-security',
@@ -131,8 +154,10 @@ export const AUTHORITIES: Authority[] = [
     scope: 'campus',
     categories: ['security', 'accident'],
     email: 'civiceyeoffcial@gmail.com',
+    phoneNote: '24×7 campus security line',
     address: 'Security Control Room, Main Gate',
     hours: '24×7 emergency line',
+    source: 'Campus office directory',
   },
 ];
 
@@ -184,3 +209,51 @@ export function smsLink(a: Authority, message?: string): string | undefined {
 export function mailToLink(a: Authority, subject: string, body: string): string {
   return `mailto:${a.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
+
+/* ------------------------------------------------------------------
+ *  BBMP per-zone grievance emails (roads/potholes are handled zone-wise)
+ *  Resolve from the report's location text. Fallback: central grievance cell.
+ *  Source: BBMP zone contact directory (public, verify before relying).
+ * ------------------------------------------------------------------ */
+export interface BBMPZoneContact {
+  zone: string;
+  email: string;
+  keywords: string[];
+}
+
+export const BBMP_ZONE_CONTACTS: BBMPZoneContact[] = [
+  {
+    zone: 'East',
+    email: 'zc-east@bbmp.gov.in',
+    keywords: ['indiranagar', 'cv raman nagar', 'kr puram', 'krpuram', 'baiyappanahalli', 'ulsoor', 'jeevan bima nagar', 'maruthi seva nagar', 'domlur', 'hal'],
+  },
+  {
+    zone: 'West',
+    email: 'zc-west@bbmp.gov.in',
+    keywords: ['rajajinagar', 'malleswaram', 'malleswaram', 'basaveshwaranagar', 'vijayanagar', 'kamakshipalya', 'chandra layout', 'nagarabhavi', 'rajajinagar'],
+  },
+  {
+    zone: 'South',
+    email: 'zc-south@bbmp.gov.in',
+    keywords: ['jayanagar', 'banashankari', 'btm', 'padmanabhanagar', 'kumaraswamy layout', 'uttarahalli', 'jp nagar', 'jayanagar', 'girinagar'],
+  },
+  {
+    zone: 'Mahadevapura',
+    email: 'bbmpjcmahadevapura@gmail.com',
+    keywords: ['whitefield', 'brookefield', 'marathahalli', 'bellandur', 'kadugodi', 'hoodi', 'varthur', 'mahadevapura', 'cv raman nagar'],
+  },
+];
+
+/** Best BBMP grievance email for a location string (empty → none matched). */
+export function bbmpGrievanceEmailFor(location?: string | null): string {
+  if (!location) return '';
+  const q = location.toLowerCase();
+  for (const z of BBMP_ZONE_CONTACTS) {
+    if (z.keywords.some((k) => q.includes(k))) return z.email;
+  }
+  return '';
+}
+
+/** True when the authority has an escalation email to send to (non-blank). */
+export const hasEscalationEmail = (a: Authority): boolean =>
+  a.email.trim().length > 0;
