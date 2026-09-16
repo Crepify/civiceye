@@ -1326,6 +1326,135 @@ export const CAMPUS_FLOORS = {
               "w": 110,
               "h": 46,
               "node": "n0"
+            },
+            {
+              "id": "c-b-g-11",
+              "type": "office",
+              "label": "B-G11",
+              "name": "CSE Faculty Room 1",
+              "shape": "rect",
+              "x": 26,
+              "y": 177,
+              "w": 178,
+              "h": 137,
+              "node": "n0",
+              "seats": [
+                {
+                  "id": "c-b-g-CSE-G11-0",
+                  "x": 47,
+                  "y": 248,
+                  "desk": "B-G11-01",
+                  "person": "Dr. Vineetha Jain K. V.",
+                  "role": "Vice Chairperson, Assistant Professor (Sl. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/jain-vineetha/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-1",
+                  "x": 81,
+                  "y": 248,
+                  "desk": "B-G11-02",
+                  "person": "Dr. Sreevidya B.",
+                  "role": "Vice Chairperson, Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/b-sreevidya/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-2",
+                  "x": 115,
+                  "y": 248,
+                  "desk": "B-G11-03",
+                  "person": "Dr. Peeta Basa Pati",
+                  "role": "Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/peeta-pati/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-3",
+                  "x": 149,
+                  "y": 248,
+                  "desk": "B-G11-04",
+                  "person": "Dr. Amudha J.",
+                  "role": "Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/j-amudha/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-4",
+                  "x": 183,
+                  "y": 248,
+                  "desk": "B-G11-05",
+                  "person": "Dr. Deepa Gupta",
+                  "role": "Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/dr-deepa-gupta/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-5",
+                  "x": 47,
+                  "y": 284,
+                  "desk": "B-G11-06",
+                  "person": "Dr. Supriya M.",
+                  "role": "Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/m-supriya/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-6",
+                  "x": 81,
+                  "y": 284,
+                  "desk": "B-G11-07",
+                  "person": "Dr. Suja P.",
+                  "role": "Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/p-suja/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-7",
+                  "x": 115,
+                  "y": 284,
+                  "desk": "B-G11-08",
+                  "person": "Dr. Beena B. M.",
+                  "role": "Associate Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/beena-bm/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-8",
+                  "x": 149,
+                  "y": 284,
+                  "desk": "B-G11-09",
+                  "person": "Dr. Manju Khanna",
+                  "role": "Associate Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/manju-khanna/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-g-CSE-G11-9",
+                  "x": 183,
+                  "y": 284,
+                  "desk": "B-G11-10",
+                  "person": "Dr. Tripty Singh",
+                  "role": "Associate Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/tripty-singh/",
+                  "hours": "\u2014"
+                }
+              ],
+              "meta": {
+                "Department": "CSE",
+                "Faculty": "46 listed",
+                "Source": "amrita.edu + enhanced from images"
+              }
             }
           ]
         },
@@ -1658,6 +1787,135 @@ export const CAMPUS_FLOORS = {
               "w": 66,
               "h": 46,
               "node": "n4"
+            },
+            {
+              "id": "c-b-1-11",
+              "type": "office",
+              "label": "B-111",
+              "name": "CSE Faculty Room 2",
+              "shape": "rect",
+              "x": 796,
+              "y": 177,
+              "w": 178,
+              "h": 137,
+              "node": "n4",
+              "seats": [
+                {
+                  "id": "c-b-1-CSE-111-0",
+                  "x": 817,
+                  "y": 248,
+                  "desk": "B-111-01",
+                  "person": "Dr. B. Uma Maheswari",
+                  "role": "Associate Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/b-uma/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-1",
+                  "x": 851,
+                  "y": 248,
+                  "desk": "B-111-02",
+                  "person": "Dr. Thangam S",
+                  "role": "Associate Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/s-thangam/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-2",
+                  "x": 885,
+                  "y": 248,
+                  "desk": "B-111-03",
+                  "person": "Dr. S. Santhanalakshmi",
+                  "role": "Assistant Professor (Sl. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/s-lakshmi/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-3",
+                  "x": 919,
+                  "y": 248,
+                  "desk": "B-111-04",
+                  "person": "Dr. Manju Venugopalan",
+                  "role": "Assistant Professor (Sl. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/manju-venugopalan/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-4",
+                  "x": 953,
+                  "y": 248,
+                  "desk": "B-111-05",
+                  "person": "Dr. Kumaran U.",
+                  "role": "Assistant Professor (Sl. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/kumaran-u/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-5",
+                  "x": 817,
+                  "y": 284,
+                  "desk": "B-111-06",
+                  "person": "Dr. Radha D.",
+                  "role": "Assistant Professor (Sl. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/d-radha/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-6",
+                  "x": 851,
+                  "y": 284,
+                  "desk": "B-111-07",
+                  "person": "Dr. Rimjhim Singh",
+                  "role": "Assistant Professor (Sl. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/dr-rimjhim-singh/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-7",
+                  "x": 885,
+                  "y": 284,
+                  "desk": "B-111-08",
+                  "person": "Dr. Meena Belwal",
+                  "role": "Assistant Professor (Sl. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/b-meena/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-8",
+                  "x": 919,
+                  "y": 284,
+                  "desk": "B-111-09",
+                  "person": "Dr. K Dinesh Kumar",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/dr-k-dinesh-kumar/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-1-CSE-111-9",
+                  "x": 953,
+                  "y": 284,
+                  "desk": "B-111-10",
+                  "person": "Dr. Gurupriya M.",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/gurupriya-m/",
+                  "hours": "\u2014"
+                }
+              ],
+              "meta": {
+                "Department": "CSE",
+                "Faculty": "10 listed",
+                "Source": "amrita.edu"
+              }
             }
           ]
         },
@@ -1985,6 +2243,135 @@ export const CAMPUS_FLOORS = {
               "w": 66,
               "h": 46,
               "node": "n4"
+            },
+            {
+              "id": "c-b-2-11",
+              "type": "office",
+              "label": "B-211",
+              "name": "CSE Faculty Room 3 + AIE",
+              "shape": "rect",
+              "x": 411,
+              "y": 177,
+              "w": 178,
+              "h": 137,
+              "node": "n2",
+              "seats": [
+                {
+                  "id": "c-b-2-CSE-211-0",
+                  "x": 432,
+                  "y": 248,
+                  "desk": "B-211-01",
+                  "person": "Dr. Vishwas H. N.",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/hn-vishwas/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-1",
+                  "x": 466,
+                  "y": 248,
+                  "desk": "B-211-02",
+                  "person": "Dr. Nalini Sampath",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/s-nalini/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-2",
+                  "x": 500,
+                  "y": 248,
+                  "desk": "B-211-03",
+                  "person": "Sreebha Bhaskaran",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/b-sreebha/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-3",
+                  "x": 534,
+                  "y": 248,
+                  "desk": "B-211-04",
+                  "person": "Kavitha C. R.",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/cr-kavitha/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-4",
+                  "x": 568,
+                  "y": 248,
+                  "desk": "B-211-05",
+                  "person": "Dr. Priyanka Vivek",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/v-priyanka/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-5",
+                  "x": 432,
+                  "y": 284,
+                  "desk": "B-211-06",
+                  "person": "Dr. Rajesh M.",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/rajesh-m/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-6",
+                  "x": 466,
+                  "y": 284,
+                  "desk": "B-211-07",
+                  "person": "Sangita Khare",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/k-sangita/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-7",
+                  "x": 500,
+                  "y": 284,
+                  "desk": "B-211-08",
+                  "person": "Dr. Ullas S",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/s-ullas/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-8",
+                  "x": 534,
+                  "y": 284,
+                  "desk": "B-211-09",
+                  "person": "Dr. Shinu M. R.",
+                  "role": "Assistant Professor (Sr. Gd.)",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/shinu-mr/",
+                  "hours": "\u2014"
+                },
+                {
+                  "id": "c-b-2-CSE-211-9",
+                  "x": 568,
+                  "y": 284,
+                  "desk": "B-211-10",
+                  "person": "Dr. Nandu C. Nair",
+                  "role": "Assistant Professor",
+                  "dept": "CSE",
+                  "url": "https://www.amrita.edu/faculty/nandu-c-nair/",
+                  "hours": "\u2014"
+                }
+              ],
+              "meta": {
+                "Department": "CSE/AIE",
+                "Faculty": "10 listed",
+                "Source": "amrita.edu"
+              }
             }
           ]
         }

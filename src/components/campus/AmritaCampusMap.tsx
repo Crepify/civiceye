@@ -837,10 +837,27 @@ export function AmritaCampusMap({
     }
     // building / block / etc
     const raw = info.raw || {};
+    const isMainAcademic = (raw.name || '').toLowerCase().includes('main academic') || (raw.osm === 'way/631815097') || (info.name || '').toLowerCase().includes('main academic');
     return (
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white">{info.name || raw.name}</h3>
         <div className="text-sm text-slate-500">{info.sub || raw.role || raw.kind}</div>
+        {isMainAcademic ? (
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <img src="/amrita-main-block-fountain.jpg" alt="Main academic block with fountain - peach facade, 4 floors, balconies, Amma photo on top" className="h-28 w-full rounded-xl object-cover" loading="lazy" />
+              <img src="/amrita-main-entrance-white.jpg" alt="White ornate entrance with arch and columns, 5 floors side wing" className="h-28 w-full rounded-xl object-cover" loading="lazy" />
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-5.jpg" alt="Academic building peach" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-2.jpg" alt="Campus building" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
+              <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-1.jpg" alt="Conference hall building" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
+            </div>
+            <div className="rounded-xl bg-[#A51636]/5 p-2.5 text-xs leading-relaxed text-slate-700 dark:bg-white/5 dark:text-slate-300">
+              <b>From your photos + Google Maps reference:</b> Main Academic Block is peach (front) + white (side) with ornate arch entrance, 4-5 floors visible, ~12 windows per floor per wing (~6m per room), central tower with Amma photo + satellite dish, fountain + flags in front, covered ground floor walkway. E-shaped comb from satellite: 4 parallel teeth (A-D) off spine + separate NE mass (E). Blocks order E,A,B,C,D confirmed. Each floor estimated 10-16 rooms based on window count.
+            </div>
+          </div>
+        ) : null}
         {raw.area_m2 ? <div className="text-sm">Area: {raw.area_m2.toLocaleString()} m² · {(raw.area_m2 / 4046.86).toFixed(2)} acres</div> : null}
         {raw.note ? <div className="rounded-xl bg-slate-50 p-3 text-sm leading-relaxed dark:bg-white/5">{raw.note}</div> : null}
         {raw.confidence ? (
