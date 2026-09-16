@@ -1438,19 +1438,23 @@ export function AmritaCampusMap({
                 </>
               ) : (
                 <>
-                  {/* Floor view - enhanced from your photos + Google Maps ref */}
+                  {/* Floor view - FIXED from your A Block 1st floor photos + E Block square correction + Google Maps + Google Images */}
                   {currentFloor ? (
                     <>
-                      {/* Show enhanced floor plan image as reference behind SVG - from your photos + Google Images */}
-                      <image
-                        href={`/amrita-block-${(view as any).buildingId}-floorplan.png`}
-                        x={0}
-                        y={0}
-                        width={currentFloor.width}
-                        height={currentFloor.height}
-                        preserveAspectRatio="none"
-                        opacity={0.15}
-                      />
+                      {/* Show enhanced floor plan images as reference behind SVG - from your photos + Google Images + Google Maps */}
+                      {(view as any).buildingId === 'a' && (view as any).floorId === 'a-1' ? (
+                        <>
+                          <image href="/amrita-a-block-1st-floor-real.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.18} />
+                          <image href="/amrita-block-a-floorplan.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.12} />
+                        </>
+                      ) : (view as any).buildingId === 'e' ? (
+                        <>
+                          <image href="/amrita-e-block-square-halls.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.18} />
+                          <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.12} />
+                        </>
+                      ) : (
+                        <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.15} />
+                      )}
                       <path d={currentFloor.outline} fill="#fff" fillOpacity={0.85} stroke="#e2e8f0" strokeWidth={2} />
                       {(currentFloor.corridors || []).map((c: any, i: number) => (
                         <path key={i} d={c.d} fill="#f8fafc" fillOpacity={0.7} stroke="#e2e8f0" strokeWidth={1} />
@@ -1492,10 +1496,32 @@ export function AmritaCampusMap({
             </g>
           </svg>
 
+          {/* A Block 1st floor real photos gallery - from your Drive */}
+          {(view as any).buildingId === 'a' && (view as any).floorId === 'a-1' ? (
+            <div className="absolute bottom-12 left-3 right-3 z-10 flex gap-1.5 overflow-x-auto rounded-xl border border-slate-200 bg-white/90 p-2 shadow backdrop-blur dark:border-white/10 dark:bg-black/70 lg:bottom-3 lg:left-3 lg:right-auto lg:max-w-[420px]">
+              {[
+                '/ablock/12NIyq5aonvzJdY5pu4VcsMSYIknyTsPJ.jpg',
+                '/ablock/1jf0Y4DaImnZZBpcYTDz8RTKUmlF2M34v.jpg',
+                '/ablock/1T6okRUiIL_LBD3V6E3OMVtXIv0d3-SXP.jpg',
+                '/ablock/1v3uEtzYkhfAxiTJkbY_z1VVYY__8R0Nh.jpg',
+                '/ablock/1VVv1IbeCOWnoHe6FyYFAP-uQjaPUk3Pb.jpg',
+                '/ablock/1jIWlVREBypG-jg7Cpdfpp2Aq610X73mG.jpg',
+                '/ablock/1KnIAh5DnqAnjgHEQ3g2U9xTB_tGVj7Mg.jpg',
+                '/ablock/1fockOhcUyZ_b2KU1WPDkyXFRhFORq19g.jpg',
+                '/ablock/1ZqYDL0Vc5HDirh4eauPaqKnuEmUIe7-b.jpg',
+                '/ablock/1bFZFS2qHwsA6nR-CfBj3IfXFr6uzbY6K.jpg',
+                '/ablock/1UFii8ResibMMjZtgHLmCQBtoJRmzAKLv.jpg',
+              ].map((src) => (
+                <img key={src} src={src} alt="A Block 1st floor real" className="h-16 w-24 shrink-0 rounded-lg object-cover" loading="lazy" />
+              ))}
+              <div className="shrink-0 rounded-lg bg-[#A51636]/10 px-2.5 py-1 text-[10px] font-bold text-[#A51636]">A Block 1st floor — real photos from your Drive — corridor south open with railings facing fountain, rooms north, Akshaya Hall, Indo-US blue curved wall, staircase Amma photo</div>
+            </div>
+          ) : null}
+
           {/* Scale */}
           <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 px-2.5 py-1.5 text-[10px] font-medium text-slate-600 shadow backdrop-blur dark:bg-black/60 dark:text-slate-300">
             <div className="mb-1 h-1 w-[50px] rounded bg-slate-600 dark:bg-slate-300" style={{ width: `${50 * cam.k}px` }} />
-            50 m · 1 unit = 1 m
+            50 m · 1 unit = 1 m · E Block square per your correction
           </div>
 
           {/* Attribution */}

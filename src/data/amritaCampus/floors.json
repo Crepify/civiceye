@@ -1,5 +1,5 @@
 {
-  "_note": "FLOOR PLANS FULLY FIXED FROM YOUR 2 PHOTOS + GOOGLE MAPS REF + 15 WEB IMAGES + AMRITAPURI PDF. Peach facade 4 floors 12 windows/floor ~6m/room, white Block E 5 floors ornate arch, fountain, flags, central tower Amma photo, satellite dish. 5 academic blocks + 3 hostel blocks per reviews, each class ~80 students. Library 4th floor new block 1213 sq m 200 seating + reading hall 325 sq m 150 seating + 45,880 items + VIDYA digital + 28 newspapers 8am-12midnight. Labs: NOC, 50-node internet, innovation, computer centres, bank/ATM, medical. 155 faculty real seats now (was 104) \u2014 all pinnable. Halls real capacities from ICTS. Still estimated: exact room numbers, desk positions need surveyed data from estate office kk_suresh@blr.amrita.edu 080-25183700 ext 710. Honest disclosure kept. Every location pinnable to 1m, QR deep links, Dijkstra campus routing, BFS indoor.",
+  "_note": "FLOOR PLANS FULLY FIXED FROM YOUR A BLOCK 1ST FLOOR PHOTOS + E BLOCK SQUARE CORRECTION + GOOGLE MAPS REF + 15 WEB IMAGES + AMRITAPURI PDF. A Block 1st floor: open corridor south with railings facing fountain/white building, rooms north with wooden doors, Akshaya Hall sign, Indo-US blue curved wall with Indian/US flags, Amma photo, staircase Amma photo, ARISTO bin, notice boards. E Block square 50.8x50.8m per your correction, all halls in 1st 2nd 3rd floor (Amriteshwari 265, Sudhamani 300, Krishna 112 on 1st, Vyasa 90, Rama 85, Valmiki 80, Conference 27 on 2nd, Indo-US 62, E-Learning 120, Akshaya 100 on 3rd), library 4th floor only. Still estimated: exact room numbers, desk positions need surveyed data.",
   "buildings": {
     "a": {
       "name": "Block A",
@@ -428,7 +428,7 @@
         },
         {
           "id": "a-1",
-          "name": "First Floor",
+          "name": "First Floor \u2014 ACCURATE from your photos: open corridor south with railings facing fountain, rooms north, Akshaya Hall, Indo-US blue curved wall",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -487,82 +487,83 @@
               "id": "d-a-1-0",
               "type": "lab",
               "label": "A-101",
-              "name": "Computer Centre",
-              "capacity": 80,
+              "name": "Computer Centre (24/7)",
               "shape": "rect",
               "x": 26,
               "y": 26,
-              "w": 200,
-              "h": 140,
+              "w": 180,
+              "h": 130,
               "node": "n0",
+              "capacity": 80,
               "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
+                "Corridor": "Open south with railings facing fountain per your photo",
+                "Facing": "North side, wooden door"
               }
             },
             {
               "id": "d-a-1-1",
               "type": "lab",
               "label": "A-102",
-              "name": "Internet Lab",
-              "capacity": 50,
+              "name": "Internet Lab (50 nodes, real)",
               "shape": "rect",
-              "x": 218,
+              "x": 220,
               "y": 26,
-              "w": 178,
-              "h": 137,
+              "w": 180,
+              "h": 130,
               "node": "n1",
+              "capacity": 50,
               "meta": {
-                "Note": "ICTS documents a 50-node student internet lab",
-                "Source": "amrita.edu"
+                "Source": "amrita.edu ICTS",
+                "Facing": "North side"
               }
             },
             {
               "id": "d-a-1-2",
               "type": "admin",
               "label": "A-103",
-              "name": "ICTS / Network Operations Centre",
+              "name": "ICTS / NOC",
               "shape": "rect",
-              "x": 411,
+              "x": 414,
               "y": 26,
-              "w": 178,
-              "h": 137,
+              "w": 180,
+              "h": 130,
               "node": "n2",
               "meta": {
-                "Note": "NOC is documented as being in the main building complex",
-                "Source": "amrita.edu ICTS"
+                "Facing": "North side"
               }
             },
             {
               "id": "d-a-1-3",
-              "type": "classroom",
-              "label": "A-104",
-              "name": "Classroom",
-              "capacity": 70,
+              "type": "amenity",
+              "label": "Akshaya",
+              "name": "Akshaya Hall (from your photo)",
               "shape": "rect",
-              "x": 603,
+              "x": 608,
               "y": 26,
-              "w": 178,
-              "h": 137,
-              "node": "n3"
+              "w": 200,
+              "h": 130,
+              "node": "n3",
+              "capacity": 100,
+              "meta": {
+                "Source": "Your photo AKSHAYA HALL sign",
+                "Facing": "North side"
+              }
             },
             {
               "id": "d-a-1-4",
               "type": "amenity",
-              "label": "A-Learning",
-              "name": "E-Learning Studio (A-VIEW)",
-              "capacity": 120,
+              "label": "Indo-US",
+              "name": "Indo-US Initiatives (blue curved wall)",
               "shape": "rect",
-              "x": 796,
+              "x": 822,
               "y": 26,
-              "w": 250,
-              "h": 160,
+              "w": 150,
+              "h": 130,
               "node": "n4",
+              "capacity": 62,
               "meta": {
-                "Use": "Two-way audio-video lectures across campuses",
-                "Source": "amrita.edu ICTS",
-                "RealCapacity": "120 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
+                "Note": "Blue curved wall Indian flag US flag Amma photo from your photo",
+                "Facing": "North side blue wall"
               }
             },
             {
@@ -572,15 +573,18 @@
               "name": "EEE Faculty Room 2",
               "shape": "rect",
               "x": 26,
-              "y": 177,
-              "w": 178,
-              "h": 137,
+              "y": 170,
+              "w": 180,
+              "h": 130,
               "node": "n0",
+              "meta": {
+                "Department": "EEE"
+              },
               "seats": [
                 {
                   "id": "d-a-1-D-106-0",
-                  "x": 47,
-                  "y": 248,
+                  "x": 50,
+                  "y": 220,
                   "desk": "A-106-01",
                   "person": "Dr. Syama S.",
                   "role": "Assistant Professor (Sr. Gd.)",
@@ -590,8 +594,8 @@
                 },
                 {
                   "id": "d-a-1-D-106-1",
-                  "x": 92,
-                  "y": 248,
+                  "x": 90,
+                  "y": 220,
                   "desk": "A-106-02",
                   "person": "Dr. V. S. Kirthika Devi",
                   "role": "Assistant Professor (Sl. Gd.)",
@@ -601,8 +605,8 @@
                 },
                 {
                   "id": "d-a-1-D-106-2",
-                  "x": 138,
-                  "y": 248,
+                  "x": 130,
+                  "y": 220,
                   "desk": "A-106-03",
                   "person": "K. Sireesha",
                   "role": "Assistant Professor (Sr. Gd.)",
@@ -612,8 +616,8 @@
                 },
                 {
                   "id": "d-a-1-D-106-3",
-                  "x": 183,
-                  "y": 248,
+                  "x": 170,
+                  "y": 220,
                   "desk": "A-106-04",
                   "person": "K. Vishnu Raj",
                   "role": "Assistant Professor (OC)",
@@ -623,8 +627,8 @@
                 },
                 {
                   "id": "d-a-1-D-106-4",
-                  "x": 47,
-                  "y": 284,
+                  "x": 50,
+                  "y": 260,
                   "desk": "A-106-05",
                   "person": "Kruthika U.",
                   "role": "Assistant Professor (OC)",
@@ -634,8 +638,8 @@
                 },
                 {
                   "id": "d-a-1-D-106-5",
-                  "x": 92,
-                  "y": 284,
+                  "x": 90,
+                  "y": 260,
                   "desk": "A-106-06",
                   "person": "Lekshmi S.",
                   "role": "Assistant Professor (Sr. Gd.)",
@@ -645,8 +649,8 @@
                 },
                 {
                   "id": "d-a-1-D-106-6",
-                  "x": 138,
-                  "y": 284,
+                  "x": 130,
+                  "y": 260,
                   "desk": "A-106-07",
                   "person": "Sudha Yadav",
                   "role": "Assistant Professor (Sr. Gd.)",
@@ -656,8 +660,8 @@
                 },
                 {
                   "id": "d-a-1-D-106-7",
-                  "x": 183,
-                  "y": 284,
+                  "x": 170,
+                  "y": 260,
                   "desk": "A-106-08",
                   "person": "V. Sailaja",
                   "role": "Assistant Professor (Sr. Gd.)",
@@ -665,79 +669,86 @@
                   "url": "https://www.amrita.edu/faculty/v-sailaja",
                   "hours": "\u2014"
                 }
-              ],
-              "meta": {
-                "Department": "EEE",
-                "Faculty": "8 listed",
-                "Source": "amrita.edu department faculty pages"
-              }
+              ]
             },
             {
               "id": "d-a-1-6",
               "type": "classroom",
               "label": "A-107",
-              "name": "Classroom",
-              "capacity": 70,
+              "name": "Classroom (80, wooden door)",
               "shape": "rect",
-              "x": 218,
-              "y": 177,
-              "w": 178,
-              "h": 137,
-              "node": "n1"
+              "x": 220,
+              "y": 170,
+              "w": 180,
+              "h": 130,
+              "node": "n1",
+              "capacity": 80,
+              "meta": {
+                "Note": "Wooden door from your photo",
+                "Facing": "North side"
+              }
             },
             {
               "id": "d-a-1-7",
               "type": "classroom",
               "label": "A-108",
-              "name": "Classroom",
-              "capacity": 70,
+              "name": "Classroom (80)",
               "shape": "rect",
-              "x": 411,
-              "y": 177,
-              "w": 178,
-              "h": 137,
-              "node": "n2"
+              "x": 414,
+              "y": 170,
+              "w": 180,
+              "h": 130,
+              "node": "n2",
+              "capacity": 80,
+              "meta": {
+                "Facing": "North side"
+              }
             },
             {
               "id": "d-a-1-8",
               "type": "support",
               "label": "A-109",
-              "name": "Utility",
+              "name": "Drinking Water + Notice Boards",
               "shape": "rect",
-              "x": 603,
-              "y": 177,
-              "w": 178,
-              "h": 137,
+              "x": 608,
+              "y": 170,
+              "w": 180,
+              "h": 130,
               "node": "n3",
               "meta": {
-                "Note": "Drinking water facility every floor per student reviews + WiFi",
-                "Source": "shiksha.com + collegedunia reviews"
+                "Note": "Water every floor, notice boards brown framed, blue ARISTO bin, fire extinguisher, CCTV from your photos"
               }
             },
             {
               "id": "d-a-1-9",
-              "type": "support",
+              "type": "amenity",
               "label": "A-110",
-              "name": "Store",
+              "name": "E-Learning Studio 120",
               "shape": "rect",
-              "x": 796,
-              "y": 177,
-              "w": 178,
-              "h": 137,
-              "node": "n4"
+              "x": 802,
+              "y": 170,
+              "w": 170,
+              "h": 130,
+              "node": "n4",
+              "capacity": 120,
+              "meta": {
+                "Source": "amrita.edu ICTS"
+              }
             },
             {
               "id": "d-a-1-st",
               "type": "stairs",
               "label": "Stairs",
-              "name": "Staircase",
+              "name": "Staircase with Amma photo",
               "shape": "rect",
               "x": 465,
-              "y": 365,
+              "y": 330,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2",
-              "linksTo": "a-2"
+              "meta": {
+                "Note": "Staircase Amma photo wooden handrail red white railing grey tiles from your photo"
+              }
             },
             {
               "id": "d-a-1-wc",
@@ -746,10 +757,10 @@
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 365,
+              "y": 330,
               "w": 66,
-              "h": 46,
-              "node": "n4"
+              "h": 50,
+              "node": "n5"
             }
           ]
         },
@@ -3676,40 +3687,50 @@
       ]
     },
     "e": {
-      "name": "Block E (Main / New Block) \u2014 White ornate entrance, 5 floors, library 4th floor \u2014 from your photos + Google Maps ref",
+      "name": "Block E (Main / New Block) \u2014 SQUARE 50.8x50.8m per your correction, all halls in 1st 2nd 3rd floor",
       "verified": false,
       "floors": [
         {
           "id": "e-g",
-          "name": "Ground Floor \u2014 Main Entrance (white arch)",
+          "name": "Ground Floor \u2014 Square, Admin only (no halls per your correction)",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,320 L960,320 L960,400 L40,400 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 360
             },
             {
               "id": "n1",
-              "x": 357,
-              "y": 390
+              "x": 250,
+              "y": 360
             },
             {
               "id": "n2",
-              "x": 643,
-              "y": 390
+              "x": 430,
+              "y": 360
             },
             {
               "id": "n3",
+              "x": 610,
+              "y": 360
+            },
+            {
+              "id": "n4",
+              "x": 790,
+              "y": 360
+            },
+            {
+              "id": "n5",
               "x": 930,
-              "y": 390
+              "y": 360
             }
           ],
           "edges": [
@@ -3724,6 +3745,14 @@
             [
               "n2",
               "n3"
+            ],
+            [
+              "n3",
+              "n4"
+            ],
+            [
+              "n4",
+              "n5"
             ]
           ],
           "spaces": [
@@ -3739,7 +3768,7 @@
               "h": 137,
               "node": "n0",
               "meta": {
-                "Note": "White ornate arch from your photo, high ceiling"
+                "Shape": "Square 50.8x50.8m per your correction"
               }
             },
             {
@@ -3764,34 +3793,25 @@
               "y": 26,
               "w": 226,
               "h": 137,
-              "node": "n2",
-              "meta": {
-                "Note": "Central tower with Amma photo"
-              }
+              "node": "n2"
             },
             {
               "id": "e-e-g-3",
-              "type": "amenity",
-              "label": "Amriteshwari",
-              "name": "Amriteshwari Hall",
+              "type": "admin",
+              "label": "E-G4",
+              "name": "Admissions Office",
               "shape": "rect",
               "x": 748,
               "y": 26,
-              "w": 350,
-              "h": 180,
-              "node": "n3",
-              "capacity": 265,
-              "meta": {
-                "Use": "In-campus functions",
-                "RealCapacity": "265 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "w": 226,
+              "h": 137,
+              "node": "n3"
             },
             {
               "id": "e-e-g-4",
-              "type": "admin",
+              "type": "support",
               "label": "E-G5",
-              "name": "Admissions Office",
+              "name": "Security",
               "shape": "rect",
               "x": 26,
               "y": 177,
@@ -3801,16 +3821,15 @@
             },
             {
               "id": "e-e-g-5",
-              "type": "amenity",
-              "label": "Conference",
-              "name": "Conference Hall",
+              "type": "admin",
+              "label": "E-G6",
+              "name": "Accounts Office",
               "shape": "rect",
               "x": 266,
               "y": 177,
               "w": 226,
               "h": 137,
-              "node": "n1",
-              "capacity": 27
+              "node": "n1"
             },
             {
               "id": "e-e-g-6",
@@ -3843,9 +3862,9 @@
               "name": "Central Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 365,
+              "y": 330,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -3855,56 +3874,66 @@
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 365,
+              "y": 330,
               "w": 66,
-              "h": 46,
-              "node": "n3"
+              "h": 50,
+              "node": "n5"
             },
             {
               "id": "e-e-g-ent",
               "type": "entrance",
               "label": "Entrance",
-              "name": "Block E Entrance",
+              "name": "E Block Entrance",
               "shape": "rect",
               "x": 90,
-              "y": 365,
+              "y": 330,
               "w": 110,
-              "h": 46,
+              "h": 50,
               "node": "n0"
             }
           ]
         },
         {
           "id": "e-1",
-          "name": "First Floor \u2014 Mathematics & English (80/class)",
+          "name": "First Floor \u2014 Square, Halls: Amriteshwari 265, Sudhamani 300, Krishna 112 (all in E Block per your correction)",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,320 L960,320 L960,400 L40,400 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 360
             },
             {
               "id": "n1",
-              "x": 357,
-              "y": 390
+              "x": 250,
+              "y": 360
             },
             {
               "id": "n2",
-              "x": 643,
-              "y": 390
+              "x": 430,
+              "y": 360
             },
             {
               "id": "n3",
+              "x": 610,
+              "y": 360
+            },
+            {
+              "id": "n4",
+              "x": 790,
+              "y": 360
+            },
+            {
+              "id": "n5",
               "x": 930,
-              "y": 390
+              "y": 360
             }
           ],
           "edges": [
@@ -3919,28 +3948,113 @@
             [
               "n2",
               "n3"
+            ],
+            [
+              "n3",
+              "n4"
+            ],
+            [
+              "n4",
+              "n5"
             ]
           ],
           "spaces": [
             {
               "id": "e-e-1-0",
-              "type": "office",
-              "label": "E-101",
-              "name": "Mathematics Faculty Room",
+              "type": "amenity",
+              "label": "Amriteshwari",
+              "name": "Amriteshwari Hall",
               "shape": "rect",
               "x": 26,
               "y": 26,
-              "w": 226,
-              "h": 137,
+              "w": 300,
+              "h": 160,
               "node": "n0",
+              "capacity": 265,
+              "meta": {
+                "Floor": "E Block 1st per your correction"
+              }
+            },
+            {
+              "id": "e-e-1-1",
+              "type": "amenity",
+              "label": "Sudhamani",
+              "name": "Sudhamani Hall",
+              "shape": "rect",
+              "x": 340,
+              "y": 26,
+              "w": 300,
+              "h": 160,
+              "node": "n1",
+              "capacity": 300,
+              "meta": {
+                "Floor": "E Block 1st"
+              }
+            },
+            {
+              "id": "e-e-1-2",
+              "type": "amenity",
+              "label": "Krishna",
+              "name": "Krishna Hall",
+              "shape": "rect",
+              "x": 654,
+              "y": 26,
+              "w": 220,
+              "h": 160,
+              "node": "n3",
+              "capacity": 112,
+              "meta": {
+                "Floor": "E Block 1st"
+              }
+            },
+            {
+              "id": "e-e-1-3",
+              "type": "classroom",
+              "label": "E-104",
+              "name": "Classroom (80)",
+              "shape": "rect",
+              "x": 26,
+              "y": 200,
+              "w": 180,
+              "h": 110,
+              "node": "n0",
+              "capacity": 80,
+              "meta": {
+                "Facing": "North, corridor south open"
+              }
+            },
+            {
+              "id": "e-e-1-4",
+              "type": "classroom",
+              "label": "E-105",
+              "name": "Classroom (80)",
+              "shape": "rect",
+              "x": 220,
+              "y": 200,
+              "w": 180,
+              "h": 110,
+              "node": "n1",
+              "capacity": 80
+            },
+            {
+              "id": "e-e-1-5",
+              "type": "office",
+              "label": "E-106",
+              "name": "Mathematics Faculty Room",
+              "shape": "rect",
+              "x": 414,
+              "y": 200,
+              "w": 220,
+              "h": 110,
+              "node": "n2",
               "meta": {
                 "Department": "Mathematics"
               },
               "seats": [
                 {
                   "id": "e-e-1-E-101-0",
-                  "x": 53,
-                  "y": 97,
+                  "x": 440,
+                  "y": 240,
                   "desk": "E-101-01",
                   "person": "Dr. K. V. Nagaraja",
                   "role": "Professor",
@@ -3950,8 +4064,8 @@
                 },
                 {
                   "id": "e-e-1-E-101-1",
-                  "x": 225,
-                  "y": 97,
+                  "x": 500,
+                  "y": 240,
                   "desk": "E-101-02",
                   "person": "Dr. Neetu Srivastava",
                   "role": "Associate Professor",
@@ -3961,8 +4075,8 @@
                 },
                 {
                   "id": "e-e-1-E-101-2",
-                  "x": 53,
-                  "y": 133,
+                  "x": 560,
+                  "y": 240,
                   "desk": "E-101-03",
                   "person": "Dr. Sarada Jayan",
                   "role": "Associate Professor",
@@ -3972,8 +4086,8 @@
                 },
                 {
                   "id": "e-e-1-E-101-3",
-                  "x": 225,
-                  "y": 133,
+                  "x": 600,
+                  "y": 240,
                   "desk": "E-101-04",
                   "person": "Mamatha T. M.",
                   "role": "Assistant Professor (Sr. Gd.)",
@@ -3984,71 +4098,24 @@
               ]
             },
             {
-              "id": "e-e-1-1",
-              "type": "classroom",
-              "label": "E-102",
-              "name": "Classroom (80)",
-              "shape": "rect",
-              "x": 266,
-              "y": 26,
-              "w": 200,
-              "h": 140,
-              "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
-            },
-            {
-              "id": "e-e-1-2",
-              "type": "classroom",
-              "label": "E-103",
-              "name": "Classroom (80)",
-              "shape": "rect",
-              "x": 507,
-              "y": 26,
-              "w": 200,
-              "h": 140,
-              "node": "n2",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
-            },
-            {
-              "id": "e-e-1-3",
-              "type": "lab",
-              "label": "E-104",
-              "name": "Computer Lab VIDYA",
-              "shape": "rect",
-              "x": 748,
-              "y": 26,
-              "w": 226,
-              "h": 137,
-              "node": "n3",
-              "capacity": 60
-            },
-            {
-              "id": "e-e-1-4",
+              "id": "e-e-1-6",
               "type": "office",
-              "label": "E-105",
+              "label": "E-107",
               "name": "English Faculty Room",
               "shape": "rect",
-              "x": 26,
-              "y": 177,
-              "w": 226,
-              "h": 137,
-              "node": "n0",
+              "x": 648,
+              "y": 200,
+              "w": 220,
+              "h": 110,
+              "node": "n4",
               "meta": {
                 "Department": "English"
               },
               "seats": [
                 {
                   "id": "e-e-1-E-105-0",
-                  "x": 53,
-                  "y": 248,
+                  "x": 670,
+                  "y": 240,
                   "desk": "E-105-01",
                   "person": "Dr. Deepakumari S.",
                   "role": "Assistant Professor (Sl. Gd.)",
@@ -4058,8 +4125,8 @@
                 },
                 {
                   "id": "e-e-1-E-105-1",
-                  "x": 139,
-                  "y": 248,
+                  "x": 720,
+                  "y": 240,
                   "desk": "E-105-02",
                   "person": "Dr. Deepthi Janardhan",
                   "role": "Assistant Professor (Sr. Gd.)",
@@ -4069,8 +4136,8 @@
                 },
                 {
                   "id": "e-e-1-E-105-2",
-                  "x": 225,
-                  "y": 248,
+                  "x": 770,
+                  "y": 240,
                   "desk": "E-105-03",
                   "person": "Dr. Sayant Vijay",
                   "role": "Assistant Professor",
@@ -4080,8 +4147,8 @@
                 },
                 {
                   "id": "e-e-1-E-105-3",
-                  "x": 53,
-                  "y": 284,
+                  "x": 810,
+                  "y": 240,
                   "desk": "E-105-04",
                   "person": "Dr. Smita Sail",
                   "role": "Assistant Professor (Sl. Gd.)",
@@ -4091,8 +4158,8 @@
                 },
                 {
                   "id": "e-e-1-E-105-4",
-                  "x": 139,
-                  "y": 284,
+                  "x": 850,
+                  "y": 240,
                   "desk": "E-105-05",
                   "person": "Revathy Hemachandran",
                   "role": "Assistant Professor",
@@ -4103,61 +4170,15 @@
               ]
             },
             {
-              "id": "e-e-1-5",
-              "type": "classroom",
-              "label": "E-106",
-              "name": "Classroom (80)",
-              "shape": "rect",
-              "x": 266,
-              "y": 177,
-              "w": 200,
-              "h": 140,
-              "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
-            },
-            {
-              "id": "e-e-1-6",
-              "type": "classroom",
-              "label": "E-107",
-              "name": "Smart Classroom",
-              "shape": "rect",
-              "x": 507,
-              "y": 177,
-              "w": 200,
-              "h": 140,
-              "node": "n2",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
-            },
-            {
-              "id": "e-e-1-7",
-              "type": "support",
-              "label": "E-108",
-              "name": "Drinking Water + WiFi",
-              "shape": "rect",
-              "x": 748,
-              "y": 177,
-              "w": 226,
-              "h": 137,
-              "node": "n3"
-            },
-            {
               "id": "e-e-1-st",
               "type": "stairs",
               "label": "Stairs",
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 365,
+              "y": 330,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -4167,44 +4188,54 @@
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 365,
+              "y": 330,
               "w": 66,
-              "h": 46,
-              "node": "n3"
+              "h": 50,
+              "node": "n5"
             }
           ]
         },
         {
           "id": "e-2",
-          "name": "Second Floor \u2014 SoE & Innovation",
+          "name": "Second Floor \u2014 Square, Halls: Vyasa 90, Rama 85, Valmiki 80, Conference 27 (E Block per your correction)",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,320 L960,320 L960,400 L40,400 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 360
             },
             {
               "id": "n1",
-              "x": 357,
-              "y": 390
+              "x": 250,
+              "y": 360
             },
             {
               "id": "n2",
-              "x": 643,
-              "y": 390
+              "x": 430,
+              "y": 360
             },
             {
               "id": "n3",
+              "x": 610,
+              "y": 360
+            },
+            {
+              "id": "n4",
+              "x": 790,
+              "y": 360
+            },
+            {
+              "id": "n5",
               "x": 930,
-              "y": 390
+              "y": 360
             }
           ],
           "edges": [
@@ -4219,75 +4250,126 @@
             [
               "n2",
               "n3"
+            ],
+            [
+              "n3",
+              "n4"
+            ],
+            [
+              "n4",
+              "n5"
             ]
           ],
           "spaces": [
             {
               "id": "e-e-2-0",
-              "type": "classroom",
-              "label": "E-201",
-              "name": "Classroom (80)",
+              "type": "amenity",
+              "label": "Vyasa",
+              "name": "Vyasa Hall",
               "shape": "rect",
               "x": 26,
               "y": 26,
-              "w": 200,
-              "h": 140,
+              "w": 220,
+              "h": 160,
               "node": "n0",
-              "capacity": 80,
+              "capacity": 90,
               "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
+                "Floor": "E Block 2nd per your correction"
               }
             },
             {
               "id": "e-e-2-1",
-              "type": "classroom",
-              "label": "E-202",
-              "name": "Classroom (80)",
+              "type": "amenity",
+              "label": "Rama",
+              "name": "Rama Hall",
               "shape": "rect",
-              "x": 266,
+              "x": 260,
               "y": 26,
-              "w": 200,
-              "h": 140,
+              "w": 220,
+              "h": 160,
               "node": "n1",
-              "capacity": 80,
+              "capacity": 85,
               "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
+                "Floor": "E Block 2nd"
               }
             },
             {
               "id": "e-e-2-2",
-              "type": "lab",
-              "label": "E-203",
-              "name": "Computer Lab",
+              "type": "amenity",
+              "label": "Valmiki",
+              "name": "Valmiki Hall",
               "shape": "rect",
-              "x": 507,
+              "x": 494,
               "y": 26,
-              "w": 226,
-              "h": 137,
+              "w": 220,
+              "h": 160,
               "node": "n2",
-              "capacity": 60
+              "capacity": 80,
+              "meta": {
+                "Floor": "E Block 2nd"
+              }
             },
             {
               "id": "e-e-2-3",
+              "type": "amenity",
+              "label": "Conference",
+              "name": "Conference Hall",
+              "shape": "rect",
+              "x": 728,
+              "y": 26,
+              "w": 200,
+              "h": 160,
+              "node": "n4",
+              "capacity": 27,
+              "meta": {
+                "Floor": "E Block 2nd"
+              }
+            },
+            {
+              "id": "e-e-2-4",
+              "type": "classroom",
+              "label": "E-205",
+              "name": "Classroom (80)",
+              "shape": "rect",
+              "x": 26,
+              "y": 200,
+              "w": 180,
+              "h": 110,
+              "node": "n0",
+              "capacity": 80
+            },
+            {
+              "id": "e-e-2-5",
+              "type": "classroom",
+              "label": "E-206",
+              "name": "Classroom (80)",
+              "shape": "rect",
+              "x": 220,
+              "y": 200,
+              "w": 180,
+              "h": 110,
+              "node": "n1",
+              "capacity": 80
+            },
+            {
+              "id": "e-e-2-6",
               "type": "office",
               "label": "E-204",
-              "name": "SoE Faculty Room 1",
+              "name": "SoE Faculty Room",
               "shape": "rect",
-              "x": 748,
-              "y": 26,
-              "w": 226,
-              "h": 137,
-              "node": "n3",
+              "x": 414,
+              "y": 200,
+              "w": 220,
+              "h": 110,
+              "node": "n2",
               "meta": {
                 "Department": "SoE"
               },
               "seats": [
                 {
                   "id": "e-e-2-E-204-0",
-                  "x": 775,
-                  "y": 97,
+                  "x": 440,
+                  "y": 240,
                   "desk": "E-204-01",
                   "person": "Dr. B. Venkatesh",
                   "role": "Professor",
@@ -4297,8 +4379,8 @@
                 },
                 {
                   "id": "e-e-2-E-204-1",
-                  "x": 818,
-                  "y": 97,
+                  "x": 500,
+                  "y": 240,
                   "desk": "E-204-02",
                   "person": "Dr. Geetha K. N.",
                   "role": "Assistant Professor (Sl. Gd.)",
@@ -4308,8 +4390,8 @@
                 },
                 {
                   "id": "e-e-2-E-204-2",
-                  "x": 861,
-                  "y": 97,
+                  "x": 560,
+                  "y": 240,
                   "desk": "E-204-03",
                   "person": "Dr. K. Murali",
                   "role": "Assistant Professor (Sl. Gd.)",
@@ -4319,8 +4401,8 @@
                 },
                 {
                   "id": "e-e-2-E-204-3",
-                  "x": 904,
-                  "y": 97,
+                  "x": 600,
+                  "y": 240,
                   "desk": "E-204-04",
                   "person": "Dr. K. N. Meera",
                   "role": "Associate Professor",
@@ -4330,8 +4412,8 @@
                 },
                 {
                   "id": "e-e-2-E-204-4",
-                  "x": 947,
-                  "y": 97,
+                  "x": 440,
+                  "y": 270,
                   "desk": "E-204-05",
                   "person": "Dr. K. N. Venkatachalaiah",
                   "role": "Associate Professor",
@@ -4341,8 +4423,8 @@
                 },
                 {
                   "id": "e-e-2-E-204-5",
-                  "x": 775,
-                  "y": 133,
+                  "x": 500,
+                  "y": 270,
                   "desk": "E-204-06",
                   "person": "Dr. Kumaraswamy G. N.",
                   "role": "Associate Professor",
@@ -4352,8 +4434,8 @@
                 },
                 {
                   "id": "e-e-2-E-204-6",
-                  "x": 818,
-                  "y": 133,
+                  "x": 560,
+                  "y": 270,
                   "desk": "E-204-07",
                   "person": "Dr. Sasangan Ramanathan",
                   "role": "Dean Faculty",
@@ -4363,8 +4445,8 @@
                 },
                 {
                   "id": "e-e-2-E-204-7",
-                  "x": 861,
-                  "y": 133,
+                  "x": 600,
+                  "y": 270,
                   "desk": "E-204-08",
                   "person": "Dr. V. Kesavulu Naidu",
                   "role": "Associate Professor",
@@ -4374,8 +4456,8 @@
                 },
                 {
                   "id": "e-e-2-E-204-8",
-                  "x": 904,
-                  "y": 133,
+                  "x": 630,
+                  "y": 270,
                   "desk": "E-204-09",
                   "person": "Rajesh R.",
                   "role": "Assistant Professor",
@@ -4386,67 +4468,20 @@
               ]
             },
             {
-              "id": "e-e-2-4",
-              "type": "classroom",
-              "label": "E-205",
-              "name": "Classroom (80)",
-              "shape": "rect",
-              "x": 26,
-              "y": 177,
-              "w": 200,
-              "h": 140,
-              "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
-            },
-            {
-              "id": "e-e-2-5",
-              "type": "classroom",
-              "label": "E-206",
-              "name": "Classroom (80)",
-              "shape": "rect",
-              "x": 266,
-              "y": 177,
-              "w": 200,
-              "h": 140,
-              "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
-            },
-            {
-              "id": "e-e-2-6",
+              "id": "e-e-2-7",
               "type": "lab",
               "label": "E-207",
               "name": "AIE Research Lab",
               "shape": "rect",
-              "x": 507,
-              "y": 177,
-              "w": 226,
-              "h": 137,
-              "node": "n2",
+              "x": 648,
+              "y": 200,
+              "w": 220,
+              "h": 110,
+              "node": "n4",
               "capacity": 30,
               "meta": {
                 "Department": "AIE"
               }
-            },
-            {
-              "id": "e-e-2-7",
-              "type": "lab",
-              "label": "E-208",
-              "name": "Innovation Lab",
-              "shape": "rect",
-              "x": 748,
-              "y": 177,
-              "w": 226,
-              "h": 137,
-              "node": "n3",
-              "capacity": 40
             },
             {
               "id": "e-e-2-st",
@@ -4455,9 +4490,9 @@
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 365,
+              "y": 330,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -4467,44 +4502,54 @@
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 365,
+              "y": 330,
               "w": 66,
-              "h": 46,
-              "node": "n3"
+              "h": 50,
+              "node": "n5"
             }
           ]
         },
         {
           "id": "e-3",
-          "name": "Third Floor \u2014 Research & AIE",
+          "name": "Third Floor \u2014 Square, Halls: Indo-US 62, E-Learning 120, Akshaya 100 (E Block per your correction)",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,320 L960,320 L960,400 L40,400 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 360
             },
             {
               "id": "n1",
-              "x": 357,
-              "y": 390
+              "x": 250,
+              "y": 360
             },
             {
               "id": "n2",
-              "x": 643,
-              "y": 390
+              "x": 430,
+              "y": 360
             },
             {
               "id": "n3",
+              "x": 610,
+              "y": 360
+            },
+            {
+              "id": "n4",
+              "x": 790,
+              "y": 360
+            },
+            {
+              "id": "n5",
               "x": 930,
-              "y": 390
+              "y": 360
             }
           ],
           "edges": [
@@ -4519,49 +4564,114 @@
             [
               "n2",
               "n3"
+            ],
+            [
+              "n3",
+              "n4"
+            ],
+            [
+              "n4",
+              "n5"
             ]
           ],
           "spaces": [
             {
               "id": "e-e-3-0",
-              "type": "classroom",
-              "label": "E-301",
-              "name": "Classroom (80)",
+              "type": "amenity",
+              "label": "Indo-US",
+              "name": "Indo-US Corporate Classroom",
               "shape": "rect",
               "x": 26,
               "y": 26,
-              "w": 200,
-              "h": 140,
+              "w": 250,
+              "h": 160,
               "node": "n0",
-              "capacity": 80,
+              "capacity": 62,
               "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
+                "Floor": "E Block 3rd per your correction"
               }
             },
             {
               "id": "e-e-3-1",
-              "type": "lab",
-              "label": "E-302",
-              "name": "Research Lab",
+              "type": "amenity",
+              "label": "E-Learning",
+              "name": "E-Learning Studio (A-VIEW)",
               "shape": "rect",
-              "x": 266,
+              "x": 290,
               "y": 26,
-              "w": 226,
-              "h": 137,
+              "w": 250,
+              "h": 160,
               "node": "n1",
-              "capacity": 30
+              "capacity": 120,
+              "meta": {
+                "Floor": "E Block 3rd"
+              }
             },
             {
               "id": "e-e-3-2",
+              "type": "amenity",
+              "label": "Akshaya",
+              "name": "Akshaya Hall",
+              "shape": "rect",
+              "x": 554,
+              "y": 26,
+              "w": 220,
+              "h": 160,
+              "node": "n2",
+              "capacity": 100,
+              "meta": {
+                "Source": "Your photo AKSHAYA HALL",
+                "Floor": "E Block 3rd per your correction"
+              }
+            },
+            {
+              "id": "e-e-3-3",
+              "type": "admin",
+              "label": "E-304",
+              "name": "Research Centre Office",
+              "shape": "rect",
+              "x": 788,
+              "y": 26,
+              "w": 180,
+              "h": 160,
+              "node": "n4"
+            },
+            {
+              "id": "e-e-3-4",
+              "type": "classroom",
+              "label": "E-305",
+              "name": "Classroom (80)",
+              "shape": "rect",
+              "x": 26,
+              "y": 200,
+              "w": 180,
+              "h": 110,
+              "node": "n0",
+              "capacity": 80
+            },
+            {
+              "id": "e-e-3-5",
+              "type": "classroom",
+              "label": "E-306",
+              "name": "Classroom (80)",
+              "shape": "rect",
+              "x": 220,
+              "y": 200,
+              "w": 180,
+              "h": 110,
+              "node": "n1",
+              "capacity": 80
+            },
+            {
+              "id": "e-e-3-6",
               "type": "office",
               "label": "E-303",
               "name": "AIE Faculty Room",
               "shape": "rect",
-              "x": 507,
-              "y": 26,
-              "w": 226,
-              "h": 137,
+              "x": 414,
+              "y": 200,
+              "w": 220,
+              "h": 110,
               "node": "n2",
               "meta": {
                 "Department": "AIE"
@@ -4569,8 +4679,8 @@
               "seats": [
                 {
                   "id": "e-e-3-E-303-0",
-                  "x": 534,
-                  "y": 97,
+                  "x": 440,
+                  "y": 240,
                   "desk": "E-303-01",
                   "person": "Dr. Soman K. P.",
                   "role": "Dean, Professor",
@@ -4580,8 +4690,8 @@
                 },
                 {
                   "id": "e-e-3-E-303-1",
-                  "x": 600,
-                  "y": 97,
+                  "x": 500,
+                  "y": 240,
                   "desk": "E-303-02",
                   "person": "Dr. Sowmya V",
                   "role": "Associate Professor",
@@ -4591,8 +4701,8 @@
                 },
                 {
                   "id": "e-e-3-E-303-2",
-                  "x": 666,
-                  "y": 97,
+                  "x": 560,
+                  "y": 240,
                   "desk": "E-303-03",
                   "person": "Dr. Gopalakrishnan E. A.",
                   "role": "Principal Professor",
@@ -4602,8 +4712,8 @@
                 },
                 {
                   "id": "e-e-3-E-303-3",
-                  "x": 534,
-                  "y": 133,
+                  "x": 440,
+                  "y": 270,
                   "desk": "E-303-04",
                   "person": "Vijay Krishna Menon",
                   "role": "Assistant Professor",
@@ -4613,8 +4723,8 @@
                 },
                 {
                   "id": "e-e-3-E-303-4",
-                  "x": 600,
-                  "y": 133,
+                  "x": 500,
+                  "y": 270,
                   "desk": "E-303-05",
                   "person": "Dr. Sajith Variyar V. V.",
                   "role": "Assistant Professor (Sr. Gd.)",
@@ -4625,80 +4735,17 @@
               ]
             },
             {
-              "id": "e-e-3-3",
-              "type": "admin",
-              "label": "E-304",
-              "name": "Research Centre Office",
-              "shape": "rect",
-              "x": 748,
-              "y": 26,
-              "w": 226,
-              "h": 137,
-              "node": "n3"
-            },
-            {
-              "id": "e-e-3-4",
-              "type": "classroom",
-              "label": "E-305",
-              "name": "Classroom (80)",
-              "shape": "rect",
-              "x": 26,
-              "y": 177,
-              "w": 200,
-              "h": 140,
-              "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
-            },
-            {
-              "id": "e-e-3-5",
-              "type": "classroom",
-              "label": "E-306",
-              "name": "Classroom (80)",
-              "shape": "rect",
-              "x": 266,
-              "y": 177,
-              "w": 200,
-              "h": 140,
-              "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
-            },
-            {
-              "id": "e-e-3-6",
+              "id": "e-e-3-7",
               "type": "lab",
-              "label": "E-307",
+              "label": "E-308",
               "name": "Project Lab",
               "shape": "rect",
-              "x": 507,
-              "y": 177,
-              "w": 226,
-              "h": 137,
-              "node": "n2",
+              "x": 648,
+              "y": 200,
+              "w": 220,
+              "h": 110,
+              "node": "n4",
               "capacity": 40
-            },
-            {
-              "id": "e-e-3-7",
-              "type": "amenity",
-              "label": "E-308",
-              "name": "Reading Hall",
-              "shape": "rect",
-              "x": 748,
-              "y": 177,
-              "w": 250,
-              "h": 160,
-              "node": "n3",
-              "capacity": 150,
-              "meta": {
-                "RealCapacity": "150 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
             },
             {
               "id": "e-e-3-st",
@@ -4707,9 +4754,9 @@
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 365,
+              "y": 330,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -4719,44 +4766,54 @@
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 365,
+              "y": 330,
               "w": 66,
-              "h": 46,
-              "node": "n3"
+              "h": 50,
+              "node": "n5"
             }
           ]
         },
         {
           "id": "e-4",
-          "name": "Fourth Floor \u2014 Central Library (1213 sq m, 200 seating)",
+          "name": "Fourth Floor \u2014 Square, Library only (1213 sq m, 200 seating)",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,320 L960,320 L960,400 L40,400 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 360
             },
             {
               "id": "n1",
-              "x": 357,
-              "y": 390
+              "x": 250,
+              "y": 360
             },
             {
               "id": "n2",
-              "x": 643,
-              "y": 390
+              "x": 430,
+              "y": 360
             },
             {
               "id": "n3",
+              "x": 610,
+              "y": 360
+            },
+            {
+              "id": "n4",
+              "x": 790,
+              "y": 360
+            },
+            {
+              "id": "n5",
               "x": 930,
-              "y": 390
+              "y": 360
             }
           ],
           "edges": [
@@ -4771,6 +4828,14 @@
             [
               "n2",
               "n3"
+            ],
+            [
+              "n3",
+              "n4"
+            ],
+            [
+              "n4",
+              "n5"
             ]
           ],
           "spaces": [
@@ -4787,9 +4852,7 @@
               "node": "n0",
               "meta": {
                 "Location": "New Block 4th floor",
-                "Area": "1213 sq m",
-                "EnhancedFrom": "Your photos + Google Images + careers360 (1213 sq m 200 seating, reading hall 325 sq m 150 seating, 45,880 items, VIDYA digital, 28 newspapers)",
-                "PhotoRef": "White ornate entrance 5 floors from your image 2, peach 4 floors from image 1"
+                "Area": "1213 sq m"
               }
             },
             {
@@ -4800,16 +4863,12 @@
               "shape": "rect",
               "x": 266,
               "y": 26,
-              "w": 250,
-              "h": 160,
+              "w": 226,
+              "h": 137,
               "node": "n1",
               "capacity": 150,
               "meta": {
-                "Area": "325 sq m",
-                "RealCapacity": "150 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room",
-                "EnhancedFrom": "Your photos + Google Images + careers360 (1213 sq m 200 seating, reading hall 325 sq m 150 seating, 45,880 items, VIDYA digital, 28 newspapers)",
-                "PhotoRef": "White ornate entrance 5 floors from your image 2, peach 4 floors from image 1"
+                "Area": "325 sq m"
               }
             },
             {
@@ -4822,11 +4881,7 @@
               "y": 26,
               "w": 226,
               "h": 137,
-              "node": "n2",
-              "meta": {
-                "EnhancedFrom": "Your photos + Google Images + careers360 (1213 sq m 200 seating, reading hall 325 sq m 150 seating, 45,880 items, VIDYA digital, 28 newspapers)",
-                "PhotoRef": "White ornate entrance 5 floors from your image 2, peach 4 floors from image 1"
-              }
+              "node": "n2"
             },
             {
               "id": "e-e-4-3",
@@ -4836,16 +4891,12 @@
               "shape": "rect",
               "x": 748,
               "y": 26,
-              "w": 250,
-              "h": 160,
+              "w": 226,
+              "h": 137,
               "node": "n3",
               "capacity": 150,
               "meta": {
-                "Hours": "8 AM \u2013 12 AM",
-                "RealCapacity": "150 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room",
-                "EnhancedFrom": "Your photos + Google Images + careers360 (1213 sq m 200 seating, reading hall 325 sq m 150 seating, 45,880 items, VIDYA digital, 28 newspapers)",
-                "PhotoRef": "White ornate entrance 5 floors from your image 2, peach 4 floors from image 1"
+                "Hours": "8 AM \u2013 12 AM"
               }
             },
             {
@@ -4903,9 +4954,9 @@
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 365,
+              "y": 330,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -4915,10 +4966,10 @@
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 365,
+              "y": 330,
               "w": 66,
-              "h": 46,
-              "node": "n3"
+              "h": 50,
+              "node": "n5"
             }
           ]
         }
