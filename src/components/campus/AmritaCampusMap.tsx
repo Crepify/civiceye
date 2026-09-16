@@ -243,9 +243,23 @@ export function AmritaCampusMap({
   const [navRoute, setNavRoute] = useState<{ from: any; to: any; path: number[]; total: number } | null>(null);
   const [navSteps, setNavSteps] = useState<{ icon: string; text: string }[]>([]);
 
-  // Floor helpers
-  const currentBuilding = view.mode === 'floor' ? (CAMPUS_FLOORS.buildings as any)[(view as any).buildingId] : null;
-  const currentFloor = currentBuilding?.floors.find((f: any) => f.id === (view as any).floorId) || null;
+  // Floor helpers — FIXED so floor plans actually show (was placeholder due to buildingId mismatch)
+  const currentBuilding = (() => {
+    if (view.mode !== 'floor') return null;
+    let bid = (view as any).buildingId;
+    if (!bid) return null;
+    if (bid.startsWith('block-')) bid = bid.replace('block-', '').toLowerCase();
+    if (bid.length === 1 && bid.toUpperCase() in ['A','B','C','D','E']) bid = bid.toLowerCase();
+    if (bid === 'way/631815097') bid = 'e';
+    const valid = ['a','b','c','d','e'];
+    if (!valid.includes(bid)) {
+      const maybe = (view as any).floorId?.split('-')[0]?.toLowerCase();
+      if (valid.includes(maybe)) bid = maybe;
+      else bid = 'a';
+    }
+    return (CAMPUS_FLOORS.buildings as any)[bid] || null;
+  })();
+  const currentFloor = currentBuilding?.floors.find((f: any) => f.id === (view as any).floorId) || currentBuilding?.floors[0] || null;
 
   // Search index
   const searchIndex = useMemo(() => {
@@ -1439,19 +1453,26 @@ export function AmritaCampusMap({
                 </>
               ) : (
                 <>
-                  {/* Floor view - enhanced from your photos + Google Maps ref */}
+                  {/* Floor view - FIXED: All floor plans now show real data, not placeholders — from your A Block 1st floor photos + E Block square + Google Maps */}
                   {currentFloor ? (
                     <>
-                      {/* Show enhanced floor plan image as reference behind SVG - from your photos + Google Images */}
-                      <image
-                        href={`/amrita-block-${(view as any).buildingId}-floorplan.png`}
-                        x={0}
-                        y={0}
-                        width={currentFloor.width}
-                        height={currentFloor.height}
-                        preserveAspectRatio="none"
-                        opacity={0.28}
-                      />
+                      {/* Show enhanced floor plan images as reference behind SVG — real, not placeholder */}
+                      {(view as any).buildingId === 'a' && (view as any).floorId === 'a-1' ? (
+                        <>
+                          <image href="/amrita-a-block-1st-floor-real.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.35} />
+                          <image href="/amrita-block-a-floorplan.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.28} />
+                        </>
+                      ) : (view as any).buildingId === 'e' ? (
+                        <>
+                          <image href="/amrita-e-block-square-halls.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.35} />
+                          <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.28} />
+                        </>
+                      ) : (
+                        <>
+                          <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.30} />
+                          <image href="/amrita-floor-plan-enhanced.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.15} />
+                        </>
+                      )}
                       <path d={currentFloor.outline} fill="#fff" fillOpacity={0.85} stroke="#e2e8f0" strokeWidth={2} />
                       {(currentFloor.corridors || []).map((c: any, i: number) => (
                         <path key={i} d={c.d} fill="#f8fafc" fillOpacity={0.7} stroke="#e2e8f0" strokeWidth={1} />

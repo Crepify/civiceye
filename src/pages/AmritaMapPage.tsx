@@ -16,15 +16,34 @@ export function AmritaMapPage() {
   const [searchParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Support deep links: /amrita/map?b=block-c&f=c-g&room=C-G7&person=<id>
-  // The map component itself handles building/floor/room focusing via search.
+  // Support deep links: /amrita/map?b=block-c&f=c-g&room=C-G7&person=<id> — fix buildingId mapping so floor plans actually show (was placeholder)
+  // b can be: 'a','b','c','d','e' or 'block-a'..'block-e' or osm id 'way/631815097' (main academic -> pick block)
   const initialView = (() => {
-    const b = searchParams.get('b');
+    const bParam = searchParams.get('b');
     const f = searchParams.get('f');
-    if (b && f) {
-      return { mode: 'floor' as const, buildingId: b, floorId: f };
+    if (!bParam || !f) return undefined;
+    let buildingId = bParam;
+    // Map block- prefix: block-c -> c, block-C -> c, etc.
+    if (buildingId.startsWith('block-')) {
+      buildingId = buildingId.replace('block-', '').toLowerCase();
     }
-    return undefined;
+    // Map letter A-E to lower case a-e
+    if (buildingId.length === 1 && buildingId.toUpperCase() in ['A','B','C','D','E']) {
+      buildingId = buildingId.toLowerCase();
+    }
+    // Map osm main academic block to first block (E is main)
+    if (buildingId === 'way/631815097') {
+      buildingId = 'e';
+    }
+    // Validate buildingId exists in floors
+    const valid = ['a','b','c','d','e'];
+    if (!valid.includes(buildingId)) {
+      // Try to extract letter from param like 'block-c' already handled, or 'c-g' floor id contains block letter
+      const maybe = f.split('-')[0].toLowerCase();
+      if (valid.includes(maybe)) buildingId = maybe;
+      else buildingId = 'a'; // fallback to A Block
+    }
+    return { mode: 'floor' as const, buildingId, floorId: f };
   })();
 
   useEffect(() => {
