@@ -30,6 +30,7 @@ import type { Report, Coordinates } from '@/types';
 import { CAMPUS_GEO } from '@/data/amritaCampus/geo';
 import { CAMPUS_FLOORS } from '@/data/amritaCampus/floors';
 import { ALL_FACULTY } from '@/data/amritaCampus/allFaculty';
+import { generateProperFloorPlan, ProperFloorPlanSVG } from '@/tools/amritaFloorPlanTool';
 import { cn } from '@/utils/cn';
 import { useToast } from '@/hooks/useToast';
 
@@ -1497,58 +1498,12 @@ export function AmritaCampusMap({
  </>
  ) : (
  <>
- {/* Floor view - FIXED: All floor plans now show real data, not placeholders — from your A Block 1st floor photos + E Block square + Google Maps */}
- {currentFloor ? (
- <>
- {/* Show enhanced floor plan images as reference behind SVG — real, not placeholder */}
- {(view as any).buildingId === 'a' && (view as any).floorId === 'a-1' ? (
- <><rect x={0} y={0} width={currentFloor.width} height={currentFloor.height} fill="#ffffff" />
-</>
- ) : (view as any).buildingId === 'e' ? (
- <><image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.28} />
- </>
- ) : (
- <>
- <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.30} /></>
- )}
- <path d={currentFloor.outline} fill="#fff" fillOpacity={0.85} stroke="#e2e8f0" strokeWidth={2} />
- {(currentFloor.corridors || []).map((c: any, i: number) => (
- <path key={i} d={c.d} fill="#f8fafc" fillOpacity={0.7} stroke="#e2e8f0" strokeWidth={1} />
- ))}
- {currentFloor.spaces.map((sp: any) => (
- <g key={sp.id} className="campus-interactive cursor-pointer" onClick={() => { setInfo({ type: 'space', space: sp, buildingId: (view as any).buildingId, floorId: (view as any).floorId }); setInfoOpen(true); }}>
- <rect x={sp.x} y={sp.y} width={sp.w} height={sp.h} rx={8} fill={TYPE_COLOR[sp.type] || '#64748b'} fillOpacity={0.12} stroke={TYPE_COLOR[sp.type] || '#64748b'} strokeWidth={1.2} />
- <text x={sp.x + sp.w / 2} y={sp.y + 16} textAnchor="middle" fontSize={12} fontWeight={700} fill="#0f172a">
- {sp.label}
- </text>
- <text x={sp.x + sp.w / 2} y={sp.y + 30} textAnchor="middle" fontSize={10} fill="#475569">
- {sp.name.length > 22 ? sp.name.slice(0, 22) + '…' : sp.name}
- </text>
- {true && sp.seats
- ? sp.seats.map((seat: any) => (
- <g key={seat.id} className="cursor-pointer" onClick={(e) => { e.stopPropagation(); setInfo({ type: 'faculty', faculty: seat, buildingId: (view as any).buildingId, floorId: (view as any).floorId }); setInfoOpen(true); }}>
- <circle cx={seat.x} cy={seat.y} r={11} fill="#fff" stroke="#0f172a" strokeWidth={1.5} />
- <text x={seat.x} y={seat.y + 3} textAnchor="middle" fontSize={8} fontWeight={700} fill="#0f172a">
- {seat.desk.split('-').pop()}
- </text>
- </g>
- ))
- : null}
- </g>
- ))}
- {/* Reports on this floor (approx) */}
- {campusReportMarkers
- .filter(() => (view as any).buildingId) // simplistic: show all for now
- .slice(0, 5)
- .map(({ report }, i) => (
- <g key={report.id} transform={`translate(${60 + i * 40}, 380)`} className="cursor-pointer" onClick={() => { setInfo({ type: 'report', report, point: [60 + i * 40, 380] }); setInfoOpen(true); }}>
- <circle r={8} fill={SEV_COLOR[report.severity] || '#ef4444'} stroke="#fff" strokeWidth={2} />
- </g>
- ))}
- </>
- ) : null}
- </>
- )}
+                   {/* Floor view — Proper floor plans using proper floor plan tool for Amrita Bangalore only — no placeholders, everything adapts to tentative floor plans */}
+                  {currentFloor ? (
+                    <ProperFloorPlanSVG plan={generateProperFloorPlan((view as any).buildingId, (view as any).floorId)} onRoomClick={(room) => { setInfo({ type: 'space', space: { label: room.label, name: room.name, type: room.type, capacity: room.capacity, meta: { Department: room.department } }, buildingId: (view as any).buildingId, floorId: (view as any).floorId }); setInfoOpen(true); }} />
+                  ) : null}
+              </>
+            )}
  </g>
  </svg>
 
