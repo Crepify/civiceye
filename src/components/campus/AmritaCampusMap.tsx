@@ -1402,8 +1402,8 @@ export function AmritaCampusMap({
  <svg ref={svgRef} className="h-full w-full touch-none select-none" style={{ cursor: drag ? 'grabbing' : 'grab' }}>
  <g ref={gRef}>
  {/* Satellite */}
- {showSat ? <image href="/amrita-satellite.jpg" x={0} y={0} width={WIDTH_M} height={HEIGHT_M} preserveAspectRatio="none" opacity={0.85} /> : null}
-              <rect x={0} y={0} width={WIDTH_M} height={HEIGHT_M} fill="#ffffff" fillOpacity={0.3} />
+ {view.mode === 'campus' && showSat ? <image href="/amrita-satellite.jpg" x={0} y={0} width={WIDTH_M} height={HEIGHT_M} preserveAspectRatio="none" opacity={0.85} /> : null}
+              {view.mode === 'campus' ? <rect x={0} y={0} width={WIDTH_M} height={HEIGHT_M} fill="#ffffff" fillOpacity={0.3} /> : null}
 
  {view.mode === 'campus' ? (
  <>
