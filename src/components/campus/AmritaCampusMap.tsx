@@ -5,7 +5,6 @@ import {
  MapPin,
  Layers,
  Satellite,
- Users,
  Building2,
  Navigation,
  X,
@@ -226,7 +225,6 @@ export function AmritaCampusMap({
  }, [initialView]);
  const [showSat, setShowSat] = useState(false);
  const [showBlocks, setShowBlocks] = useState(true);
- const [showSeats, setShowSeats] = useState(true);
  const [showReports, setShowReports] = useState(true);
  const [search, setSearch] = useState('');
  const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -267,7 +265,7 @@ export function AmritaCampusMap({
  kind: 'building',
  id: b.osm,
  name: b.name,
- sub: `${b.kind} · ${b.zone === 'south' ? 'Academic' : 'Residential'} · ${b.area_m2} m²`,
+ sub: `${b.kind}`,
  rank: 2,
  point: b.c,
  raw: b,
@@ -297,7 +295,7 @@ export function AmritaCampusMap({
  });
  });
  (CAMPUS_GEO.zones as unknown as any[]).forEach((z: any) => {
- items.push({ kind: 'zone', id: z.id, name: z.name, sub: `Zone · ${(z.area_m2 / 4046.86).toFixed(1)} acres`, rank: 4, point: z.c, raw: z });
+ items.push({ kind: 'zone', id: z.id, name: z.name, sub: `Zone`, rank: 4, point: z.c, raw: z });
  });
  NAV_POIS.forEach((p: any) => {
  items.push({
@@ -736,7 +734,7 @@ export function AmritaCampusMap({
  </button>
  )}
  <div className="rounded-lg bg-amber-50 p-2.5 text-xs leading-relaxed text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
- <Info className="mr-1 inline h-3.5 w-3.5" /> This point is pinnable. Every location on campus can be pinpointed to 1m accuracy.
+ <Info className="mr-1 inline h-3.5 w-3.5" /> Tap to use this location for reporting.
  </div>
  </div>
  );
@@ -978,7 +976,7 @@ export function AmritaCampusMap({
  </div>
  </div>
  ) : null}
- {raw.area_m2 ? <div className="text-sm">Area: {raw.area_m2.toLocaleString()} m² · {(raw.area_m2 / 4046.86).toFixed(2)} acres</div> : null}
+ {raw.area_m2 ? <div className="text-sm"></div> : null}
  {raw.note ? <div className="rounded-xl bg-slate-50 p-3 text-sm leading-relaxed dark:bg-white/5">{raw.note}</div> : null}
  {raw.confidence ? (
  <div className="rounded-lg bg-amber-50 p-2.5 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
@@ -1060,16 +1058,7 @@ export function AmritaCampusMap({
  showSat ? 'border-[#A51636] bg-[#A51636] text-white' : 'border-slate-200 bg-white text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300',
  )}
  >
- <Satellite className="h-4 w-4" /> Sat
- </button>
- <button
- onClick={() => setShowSeats((v) => !v)}
- className={cn(
- 'flex h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-bold',
- showSeats ? 'border-[#A51636] bg-[#A51636] text-white' : 'border-slate-200 bg-white text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300',
- )}
- >
- <Users className="h-4 w-4" /> Seats
+ <Satellite className="h-4 w-4" /> Satellite
  </button>
  <button
  onClick={() => setShowReports((v) => !v)}
@@ -1081,13 +1070,13 @@ export function AmritaCampusMap({
  <Flag className="h-4 w-4" /> Issues
  </button>
  <div className="mx-1 h-6 w-px bg-slate-200 dark:bg-white/10" />
- <button onClick={() => setCam((c) => ({ ...c, k: Math.min(6, c.k * 1.25) }))} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-white/5">
+ <button onClick={() => setCam((c) => ({ ...c, k: Math.min(4, c.k * 1.25) }))} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5 dark:text-white">
  <ZoomIn className="h-4 w-4" />
  </button>
- <button onClick={() => setCam((c) => ({ ...c, k: Math.max(0.2, c.k * 0.8) }))} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-white/5">
+ <button onClick={() => setCam((c) => ({ ...c, k: Math.max(0.3, c.k * 0.8) }))} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5 dark:text-white">
  <ZoomOut className="h-4 w-4" />
  </button>
- <button onClick={resetView} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-white/5">
+ <button onClick={resetView} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5 dark:text-white">
  <Maximize2 className="h-4 w-4" />
  </button>
  </div>
@@ -1098,7 +1087,7 @@ export function AmritaCampusMap({
  <span className="font-semibold text-[#A51636]">Amrita Eye · Bengaluru</span>
  <span className="text-slate-400">·</span>
  <span className="text-slate-600 dark:text-slate-300">
- {view.mode === 'campus' ? `Campus overview · ${((CAMPUS_GEO.zones as unknown as any[]).reduce((a: number, z: any) => a + z.area_m2, 0) / 4046.86).toFixed(1)} acres · 1 unit = 1m` : `${currentBuilding?.name} › ${currentFloor?.name}`}
+ {view.mode === 'campus' ? `Campus` : `${currentBuilding?.name} › ${currentFloor?.name}`}
  </span>
  {view.mode === 'floor' ? (
  <div className="ml-auto flex gap-1">
@@ -1255,7 +1244,7 @@ export function AmritaCampusMap({
  </div>
  ) : activeTab === 'issues' ? (
  <div className="p-2">
- <div className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-slate-500">{reports.length} campus issues · pinnable</div>
+ <div className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-slate-500">{reports.length} campus issues</div>
  {reports.length ? (
  reports.map((r) => (
  <button
@@ -1289,7 +1278,7 @@ export function AmritaCampusMap({
  <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center dark:border-white/10">
  <Flag className="mx-auto h-8 w-8 text-slate-300" />
  <div className="mt-2 text-sm font-semibold">No campus issues yet</div>
- <div className="text-xs text-slate-500">Be the first to report · every location pinnable</div>
+ <div className="text-xs text-slate-500">Be the first to report · Pin any location</div>
  </div>
  )}
  </div>
@@ -1332,7 +1321,7 @@ export function AmritaCampusMap({
  onClick={() => {
  setView({ mode: 'campus' });
  focusPoint(b.c[0], b.c[1], 100);
- setInfo({ type: 'building', raw: b, name: b.name, sub: `${b.kind} · ${b.area_m2} m²`, point: b.c });
+ setInfo({ type: 'building', raw: b, name: b.name, sub: `${b.kind}`, point: b.c });
  setInfoOpen(true);
  }}
  className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5"
@@ -1342,14 +1331,14 @@ export function AmritaCampusMap({
  </span>
  <span className="min-w-0 flex-1">
  <span className="block truncate text-sm font-semibold">{b.short}</span>
- <span className="block truncate text-xs text-slate-500">{b.area_m2} m² · {b.zone}</span>
+ <span className="block truncate text-xs text-slate-500">{b.kind}</span>
  </span>
  </button>
  ))}
  </div>
  {/* Blocks A-E */}
  <div className="mb-3">
- <div className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-slate-500">Blocks A–E · confirmed order E,A,B,C,D</div>
+ <div className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-slate-500">Blocks A–E</div>
  <div className="grid grid-cols-2 gap-2">
  {(CAMPUS_GEO.blocks as unknown as any[]).filter((b: any) => b.part === 0).map((b: any) => (
  <button
@@ -1367,7 +1356,7 @@ export function AmritaCampusMap({
  <span className="text-sm font-bold">Block {b.block}</span>
  </div>
  <div className="mt-1 text-xs text-slate-500">{b.role}</div>
- <div className="mt-1 text-xs font-mono text-slate-400">{b.area_m2} m²</div>
+ <div className="mt-1 text-xs font-mono text-slate-400"></div>
  </button>
  ))}
  </div>
@@ -1408,18 +1397,19 @@ export function AmritaCampusMap({
  {sidebarOpen ? <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} /> : null}
 
  {/* Stage */}
- <div ref={stageRef} className="relative flex-1 overflow-hidden bg-[#FFF5F7] dark:bg-[#0a0607]" onClick={handleCanvasClick}>
+ <div ref={stageRef} className="relative flex-1 overflow-hidden bg-[#FFF5F7] dark:bg-[#1a0f14]" onClick={handleCanvasClick}>
  <svg ref={svgRef} className="h-full w-full touch-none select-none" style={{ cursor: drag ? 'grabbing' : 'grab' }}>
  <g ref={gRef}>
  {/* Satellite */}
- {showSat ? <image href="/amrita-satellite.jpg" x={0} y={0} width={WIDTH_M} height={HEIGHT_M} preserveAspectRatio="none" opacity={0.9} /> : null}
+ {showSat ? <image href="/amrita-satellite.jpg" x={0} y={0} width={WIDTH_M} height={HEIGHT_M} preserveAspectRatio="none" opacity={0.85} /> : null}
+              <rect x={0} y={0} width={WIDTH_M} height={HEIGHT_M} fill="#ffffff" fillOpacity={0.3} />
 
  {view.mode === 'campus' ? (
  <>
  {/* Zones */}
  {(CAMPUS_GEO.zones as unknown as any[]).map((z: any) => (
  <g key={z.id} className="campus-interactive cursor-pointer">
- <path d={z.d} fill={showSat ? 'rgba(0,0,0,0.18)' : z.id === 'south' ? '#fff1f3' : '#f5f0ff'} stroke={z.id === 'south' ? '#A51636' : '#6b7280'} strokeWidth={showSat ? 3 : 2} opacity={0.9} onClick={() => { setInfo({ type: 'zone', raw: z, name: z.name, sub: `${(z.area_m2 / 4046.86).toFixed(1)} acres`, point: z.c }); setInfoOpen(true); }} />
+ <path d={z.d} fill={showSat ? 'rgba(0,0,0,0.18)' : z.id === 'south' ? '#fff1f3' : '#f5f0ff'} stroke={z.id === 'south' ? '#A51636' : '#6b7280'} strokeWidth={showSat ? 3 : 2} opacity={0.9} onClick={() => { setInfo({ type: 'zone', raw: z, name: z.name, sub: ``, point: z.c }); setInfoOpen(true); }} />
  </g>
  ))}
  {/* Roads */}
@@ -1438,7 +1428,7 @@ export function AmritaCampusMap({
  {/* Buildings */}
  {(CAMPUS_GEO.buildings as unknown as any[]).map((b: any) => (
  <g key={b.osm} className="campus-interactive cursor-pointer">
- <path d={b.d} fill={KIND_COLOR[b.kind] || '#A51636'} fillOpacity={showSat ? 0.85 : 0.15} stroke={KIND_COLOR[b.kind] || '#A51636'} strokeWidth={1.5} onClick={() => { setInfo({ type: 'building', raw: b, name: b.name, sub: `${b.kind} · ${b.area_m2} m²`, point: b.c }); setInfoOpen(true); focusPoint(b.c[0], b.c[1], 100); }} />
+ <path d={b.d} fill={KIND_COLOR[b.kind] || '#A51636'} fillOpacity={showSat ? 0.85 : 0.15} stroke={KIND_COLOR[b.kind] || '#A51636'} strokeWidth={1.5} onClick={() => { setInfo({ type: 'building', raw: b, name: b.name, sub: `${b.kind}`, point: b.c }); setInfoOpen(true); focusPoint(b.c[0], b.c[1], 100); }} />
  <text x={b.c[0]} y={b.c[1]} textAnchor="middle" fontSize={11 / cam.k} fontWeight={600} fill="#1e293b" style={{ paintOrder: 'stroke', stroke: 'white', strokeWidth: 3 / cam.k }}>
  {b.short}
  </text>
@@ -1512,20 +1502,14 @@ export function AmritaCampusMap({
  <>
  {/* Show enhanced floor plan images as reference behind SVG — real, not placeholder */}
  {(view as any).buildingId === 'a' && (view as any).floorId === 'a-1' ? (
- <>
- <image href="/amrita-a-block-1st-floor-real.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.35} />
- <image href="/amrita-block-a-floorplan.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.28} />
- </>
+ <><rect x={0} y={0} width={currentFloor.width} height={currentFloor.height} fill="#ffffff" />
+</>
  ) : (view as any).buildingId === 'e' ? (
- <>
- <image href="/amrita-e-block-square-halls.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.35} />
- <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.28} />
+ <><image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.28} />
  </>
  ) : (
  <>
- <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.30} />
- <image href="/amrita-floor-plan-enhanced.png" x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.15} />
- </>
+ <image href={`/amrita-block-${(view as any).buildingId}-floorplan.png`} x={0} y={0} width={currentFloor.width} height={currentFloor.height} preserveAspectRatio="none" opacity={0.30} /></>
  )}
  <path d={currentFloor.outline} fill="#fff" fillOpacity={0.85} stroke="#e2e8f0" strokeWidth={2} />
  {(currentFloor.corridors || []).map((c: any, i: number) => (
@@ -1540,7 +1524,7 @@ export function AmritaCampusMap({
  <text x={sp.x + sp.w / 2} y={sp.y + 30} textAnchor="middle" fontSize={10} fill="#475569">
  {sp.name.length > 22 ? sp.name.slice(0, 22) + '…' : sp.name}
  </text>
- {showSeats && sp.seats
+ {true && sp.seats
  ? sp.seats.map((seat: any) => (
  <g key={seat.id} className="cursor-pointer" onClick={(e) => { e.stopPropagation(); setInfo({ type: 'faculty', faculty: seat, buildingId: (view as any).buildingId, floorId: (view as any).floorId }); setInfoOpen(true); }}>
  <circle cx={seat.x} cy={seat.y} r={11} fill="#fff" stroke="#0f172a" strokeWidth={1.5} />

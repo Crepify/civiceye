@@ -12,39 +12,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -360,7 +360,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase with Amma photo",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n2"
@@ -372,7 +372,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n5"
@@ -384,7 +384,7 @@ export const CAMPUS_FLOORS = {
               "name": "A Block Entrance",
               "shape": "rect",
               "x": 90,
-              "y": 330,
+              "y": 340,
               "w": 110,
               "h": 50,
               "node": "n0"
@@ -399,39 +399,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -676,7 +676,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase with Amma photo",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n2"
@@ -688,7 +688,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n5"
@@ -703,39 +703,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -999,7 +999,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n2"
@@ -1011,7 +1011,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n5"
@@ -1032,39 +1032,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -1433,7 +1433,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n2"
@@ -1445,7 +1445,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n5"
@@ -1457,7 +1457,7 @@ export const CAMPUS_FLOORS = {
               "name": "B Block Entrance",
               "shape": "rect",
               "x": 90,
-              "y": 330,
+              "y": 340,
               "w": 110,
               "h": 50,
               "node": "n0"
@@ -1472,39 +1472,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -1886,7 +1886,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n2"
@@ -1898,7 +1898,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n5"
@@ -1913,39 +1913,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -2419,7 +2419,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n2"
@@ -2431,7 +2431,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n5"
@@ -2452,39 +2452,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -2746,7 +2746,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n2"
@@ -2758,7 +2758,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n5"
@@ -2770,7 +2770,7 @@ export const CAMPUS_FLOORS = {
               "name": "C Block Entrance",
               "shape": "rect",
               "x": 90,
-              "y": 330,
+              "y": 340,
               "w": 110,
               "h": 50,
               "node": "n0"
@@ -2785,39 +2785,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -3067,7 +3067,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n2"
@@ -3079,7 +3079,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n5"
@@ -3100,39 +3100,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -3241,7 +3241,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n1"
@@ -3253,7 +3253,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n2"
@@ -3265,7 +3265,7 @@ export const CAMPUS_FLOORS = {
               "name": "D Block Entrance (near cafeteria)",
               "shape": "rect",
               "x": 90,
-              "y": 330,
+              "y": 340,
               "w": 110,
               "h": 50,
               "node": "n0"
@@ -3280,39 +3280,39 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,320 L960,320 L960,400 L40,400 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n1",
               "x": 250,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n2",
               "x": 430,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n3",
               "x": 610,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n4",
               "x": 790,
-              "y": 360
+              "y": 300
             },
             {
               "id": "n5",
               "x": 930,
-              "y": 360
+              "y": 300
             }
           ],
           "edges": [
@@ -3496,7 +3496,7 @@ export const CAMPUS_FLOORS = {
               "name": "Staircase",
               "shape": "rect",
               "x": 465,
-              "y": 330,
+              "y": 340,
               "w": 70,
               "h": 50,
               "node": "n1"
@@ -3508,7 +3508,7 @@ export const CAMPUS_FLOORS = {
               "name": "Restrooms",
               "shape": "rect",
               "x": 850,
-              "y": 330,
+              "y": 340,
               "w": 66,
               "h": 50,
               "node": "n2"
@@ -3529,29 +3529,29 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n1",
               "x": 357,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n2",
               "x": 643,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n3",
               "x": 930,
-              "y": 390
+              "y": 300
             }
           ],
           "edges": [
@@ -3576,9 +3576,9 @@ export const CAMPUS_FLOORS = {
               "name": "Main Entrance & Reception",
               "shape": "rect",
               "x": 26,
-              "y": 26,
-              "w": 226,
-              "h": 137,
+              "y": 340,
+              "w": 110,
+              "h": 50,
               "node": "n0"
             },
             {
@@ -3679,7 +3679,7 @@ export const CAMPUS_FLOORS = {
               "x": 465,
               "y": 365,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -3691,7 +3691,7 @@ export const CAMPUS_FLOORS = {
               "x": 850,
               "y": 365,
               "w": 66,
-              "h": 46,
+              "h": 50,
               "node": "n3"
             },
             {
@@ -3703,7 +3703,7 @@ export const CAMPUS_FLOORS = {
               "x": 90,
               "y": 365,
               "w": 110,
-              "h": 46,
+              "h": 50,
               "node": "n0"
             }
           ]
@@ -3716,29 +3716,29 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n1",
               "x": 357,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n2",
               "x": 643,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n3",
               "x": 930,
-              "y": 390
+              "y": 300
             }
           ],
           "edges": [
@@ -3966,7 +3966,7 @@ export const CAMPUS_FLOORS = {
               "x": 465,
               "y": 365,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -3978,7 +3978,7 @@ export const CAMPUS_FLOORS = {
               "x": 850,
               "y": 365,
               "w": 66,
-              "h": 46,
+              "h": 50,
               "node": "n3"
             }
           ]
@@ -3991,29 +3991,29 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n1",
               "x": 357,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n2",
               "x": 643,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n3",
               "x": 930,
-              "y": 390
+              "y": 300
             }
           ],
           "edges": [
@@ -4241,7 +4241,7 @@ export const CAMPUS_FLOORS = {
               "x": 465,
               "y": 365,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -4253,7 +4253,7 @@ export const CAMPUS_FLOORS = {
               "x": 850,
               "y": 365,
               "w": 66,
-              "h": 46,
+              "h": 50,
               "node": "n3"
             }
           ]
@@ -4266,29 +4266,29 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n1",
               "x": 357,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n2",
               "x": 643,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n3",
               "x": 930,
-              "y": 390
+              "y": 300
             }
           ],
           "edges": [
@@ -4472,7 +4472,7 @@ export const CAMPUS_FLOORS = {
               "x": 465,
               "y": 365,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -4484,7 +4484,7 @@ export const CAMPUS_FLOORS = {
               "x": 850,
               "y": 365,
               "w": 66,
-              "h": 46,
+              "h": 50,
               "node": "n3"
             }
           ]
@@ -4497,29 +4497,29 @@ export const CAMPUS_FLOORS = {
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
           "corridors": [
             {
-              "d": "M40,355 L960,355 L960,415 L40,415 Z"
+              "d": "M40,280 L960,280 L960,320 L40,320 Z"
             }
           ],
           "nodes": [
             {
               "id": "n0",
               "x": 70,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n1",
               "x": 357,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n2",
               "x": 643,
-              "y": 390
+              "y": 300
             },
             {
               "id": "n3",
               "x": 930,
-              "y": 390
+              "y": 300
             }
           ],
           "edges": [
@@ -4654,7 +4654,7 @@ export const CAMPUS_FLOORS = {
               "x": 465,
               "y": 365,
               "w": 70,
-              "h": 46,
+              "h": 50,
               "node": "n2"
             },
             {
@@ -4666,7 +4666,7 @@ export const CAMPUS_FLOORS = {
               "x": 850,
               "y": 365,
               "w": 66,
-              "h": 46,
+              "h": 50,
               "node": "n3"
             }
           ]

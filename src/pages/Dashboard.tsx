@@ -412,7 +412,7 @@ export function Dashboard() {
       {/* Map + top areas */}
       <div className="section-pad mt-5 grid gap-5 lg:grid-cols-3 [&>*]:min-w-0">
         <ChartCard
-          title={isAmrita ? "Campus map · every location pinnable" : "Live ward map"}
+          title={isAmrita ? "Campus map" : "Live ward map"}
           subtitle={isAmrita ? "Custom campus map · no Google Maps · 155 faculty · 163 rooms" : "Click a pin to inspect a report"}
           className="lg:col-span-2"
         >
