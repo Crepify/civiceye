@@ -901,7 +901,7 @@ function LocationStep({
         {isAmrita ? (
           <div className="space-y-3">
             <div className="rounded-xl border border-[#A51636]/20 bg-[#A51636]/5 p-3 text-xs leading-relaxed text-[#A51636] dark:bg-[#A51636]/10">
-              <b>Amrita Eye · Custom campus map · No Google Maps</b> — Every location pinnable to 1m. Tap any building, block, floor, room or open area to set your report location. Campus issues only show up on this map. Search 155 faculty, 163 rooms, 12 buildings.
+              <b>Campus Map</b> — Tap any building, block, floor, or room to set your report location.
             </div>
             <AmritaCampusMap
               reports={[]}

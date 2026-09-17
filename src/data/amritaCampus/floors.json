@@ -1,13 +1,12 @@
 {
-  "_note": "ALL FLOOR PLANS FIXED FROM YOUR A BLOCK 1ST FLOOR PHOTOS + E BLOCK SQUARE CORRECTION + GOOGLE MAPS SHAPES + CLASSROOMS FACING CORRECT. A Block 1st floor: open corridor south with railings facing fountain/white building, rooms north with wooden doors, Akshaya Hall sign, Indo-US blue curved wall with Indian/US flags Amma photo, staircase Amma photo, ARISTO bin, notice boards \u2014 now accurate. All blocks: corridor south open with railings, rooms north facing correct per your photos. E Block square 50.8x50.8m per your correction, all halls in E Block 1st 2nd 3rd floor (Amriteshwari 265, Sudhamani 300, Krishna 112 on 1st, Vyasa 90, Rama 85, Valmiki 80, Conference 27 on 2nd, Indo-US 62, E-Learning 120, Akshaya 100 on 3rd), library 4th floor only. Google Maps satellite shows E-shaped comb 4 teeth A-D + square E, order E,A,B,C,D, 5 academic blocks + 3 hostel blocks, each class 80 students, water every floor, canteen ground floor, medical, bank/ATM. Still estimated: exact room numbers, desk positions need surveyed data from estate office kk_suresh@blr.amrita.edu 080-25183700 ext 710. Honest disclosure kept. Every location pinnable to 1m, QR deep links, Dijkstra campus routing, BFS indoor.",
   "buildings": {
     "a": {
-      "name": "Block A \u2014 22x97.2m 3 floors, open corridor south with railings facing fountain per your photos, rooms north, ACCURATE from your Drive photos",
+      "name": "Block A",
       "verified": false,
       "floors": [
         {
           "id": "a-g",
-          "name": "Ground Floor \u2014 Open corridor south with railings facing fountain per your photos, rooms north",
+          "name": "Ground Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -81,11 +80,7 @@
               "y": 26,
               "w": 180,
               "h": 130,
-              "node": "n0",
-              "meta": {
-                "Facing": "North, corridor south open with railings facing fountain per your photo",
-                "Corridor": "Open south with railings, tiled green grey white diamond pattern"
-              }
+              "node": "n0"
             },
             {
               "id": "d-a-g-1",
@@ -97,10 +92,7 @@
               "y": 26,
               "w": 180,
               "h": 130,
-              "node": "n1",
-              "meta": {
-                "Facing": "North"
-              }
+              "node": "n1"
             },
             {
               "id": "d-a-g-2",
@@ -112,10 +104,7 @@
               "y": 26,
               "w": 180,
               "h": 130,
-              "node": "n2",
-              "meta": {
-                "Facing": "North"
-              }
+              "node": "n2"
             },
             {
               "id": "d-a-g-3",
@@ -128,11 +117,7 @@
               "w": 180,
               "h": 130,
               "node": "n3",
-              "capacity": 80,
-              "meta": {
-                "Note": "Wooden door from your photo",
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-g-4",
@@ -145,10 +130,7 @@
               "w": 150,
               "h": 130,
               "node": "n4",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-g-5",
@@ -173,8 +155,7 @@
                   "person": "Dr. J. Ramprabhakar",
                   "role": "Vice Chairperson",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/j-ramprabhakar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/j-ramprabhakar"
                 },
                 {
                   "id": "d-a-g-D-G7-1",
@@ -184,8 +165,7 @@
                   "person": "Dr. K. Deepa",
                   "role": "Professor",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/k-deepa",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-deepa"
                 },
                 {
                   "id": "d-a-g-D-G7-2",
@@ -195,8 +175,7 @@
                   "person": "Dr. Rashmi M. R.",
                   "role": "Professor",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/rashmi-m-r",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/rashmi-m-r"
                 },
                 {
                   "id": "d-a-g-D-G7-3",
@@ -206,8 +185,7 @@
                   "person": "Dr. Vidya H. A.",
                   "role": "Chairperson",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/vidya-h-a",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/vidya-h-a"
                 },
                 {
                   "id": "d-a-g-D-G7-4",
@@ -217,8 +195,7 @@
                   "person": "Dr. M. Nithya",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/m-nithya",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/m-nithya"
                 },
                 {
                   "id": "d-a-g-D-G7-5",
@@ -228,8 +205,7 @@
                   "person": "Dr. Manitha P. V.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/manitha-p-v",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/manitha-p-v"
                 },
                 {
                   "id": "d-a-g-D-G7-6",
@@ -239,8 +215,7 @@
                   "person": "Dr. Mini Sujith",
                   "role": "Associate Professor",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/mini-sujith",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/mini-sujith"
                 },
                 {
                   "id": "d-a-g-D-G7-7",
@@ -250,8 +225,7 @@
                   "person": "Dr. Sujit Kumar",
                   "role": "Assistant Professor",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/sujit-kumar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sujit-kumar"
                 },
                 {
                   "id": "d-a-g-D-G7-8",
@@ -261,8 +235,7 @@
                   "person": "Dr. Surekha P.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/surekha-p",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/surekha-p"
                 }
               ]
             },
@@ -277,10 +250,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-g-7",
@@ -292,10 +262,7 @@
               "y": 170,
               "w": 180,
               "h": 130,
-              "node": "n2",
-              "meta": {
-                "Note": "Drinking water every floor per reviews, notice boards, ARISTO bin, CCTV from your photos"
-              }
+              "node": "n2"
             },
             {
               "id": "d-a-g-8",
@@ -307,10 +274,7 @@
               "y": 170,
               "w": 180,
               "h": 130,
-              "node": "n3",
-              "meta": {
-                "Note": "WiFi entire campus"
-              }
+              "node": "n3"
             },
             {
               "id": "d-a-g-9",
@@ -335,8 +299,7 @@
                   "person": "Divya K V",
                   "role": "Assistant Professor (OC)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/divya-k-v/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/divya-k-v/"
                 },
                 {
                   "id": "d-a-g-CSE-11-1",
@@ -346,8 +309,7 @@
                   "person": "Pooja Gowda",
                   "role": "Assistant Professor (OC)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/pooja-gowda/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/pooja-gowda/"
                 },
                 {
                   "id": "d-a-g-CSE-11-2",
@@ -357,8 +319,7 @@
                   "person": "Shalini Tiwari",
                   "role": "Assistant Professor (OC)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/shalini-tiwari/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/shalini-tiwari/"
                 },
                 {
                   "id": "d-a-g-CSE-11-3",
@@ -368,8 +329,7 @@
                   "person": "Neera Chaudhary",
                   "role": "Assistant Professor (OC)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/neera-chaudhary/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/neera-chaudhary/"
                 },
                 {
                   "id": "d-a-g-CSE-11-4",
@@ -379,8 +339,7 @@
                   "person": "Arya Suresh",
                   "role": "Assistant Professor (OC)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/arya-suresh/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/arya-suresh/"
                 },
                 {
                   "id": "d-a-g-CSE-11-5",
@@ -390,8 +349,7 @@
                   "person": "Penki Lavanya",
                   "role": "Assistant Professor (OC)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/p-lavanya/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/p-lavanya/"
                 }
               ]
             },
@@ -405,10 +363,7 @@
               "y": 330,
               "w": 70,
               "h": 50,
-              "node": "n2",
-              "meta": {
-                "Note": "Staircase Amma photo wooden handrail red from your photo"
-              }
+              "node": "n2"
             },
             {
               "id": "d-a-g-wc",
@@ -438,7 +393,7 @@
         },
         {
           "id": "a-1",
-          "name": "First Floor \u2014 ACCURATE from your photos: open corridor south with railings facing fountain, rooms north, Akshaya Hall, Indo-US blue curved wall",
+          "name": "First Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -513,12 +468,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "Corridor": "Open south with railings facing fountain per your photo",
-                "Facing": "North side, wooden door",
-                "Note": "24/7 computer labs per shiksha"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-1-1",
@@ -531,12 +481,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 50,
-              "meta": {
-                "Source": "amrita.edu ICTS",
-                "Real": "Yes",
-                "Facing": "North"
-              }
+              "capacity": 50
             },
             {
               "id": "d-a-1-2",
@@ -548,30 +493,20 @@
               "y": 26,
               "w": 180,
               "h": 130,
-              "node": "n2",
-              "meta": {
-                "Note": "NOC in main building complex",
-                "Facing": "North"
-              }
+              "node": "n2"
             },
             {
               "id": "d-a-1-3",
               "type": "amenity",
               "label": "Akshaya",
-              "name": "Akshaya Hall (from your photo)",
+              "name": "Akshaya Hall",
               "shape": "rect",
               "x": 608,
               "y": 26,
               "w": 200,
               "h": 130,
               "node": "n3",
-              "capacity": 100,
-              "meta": {
-                "Source": "Your photo AKSHAYA HALL sign",
-                "Real": "Yes",
-                "Photo": "IMG20260916102147.jpg shows AKSHAYA HALL sign",
-                "Facing": "North"
-              }
+              "capacity": 100
             },
             {
               "id": "d-a-1-4",
@@ -584,13 +519,7 @@
               "w": 150,
               "h": 130,
               "node": "n4",
-              "capacity": 62,
-              "meta": {
-                "Note": "Blue curved wall Indian flag US flag Amma photo Mata Math logo glass doors from your photo",
-                "Source": "Your photo VID20260916102059 + IMG20260916102210.jpg",
-                "Facing": "North blue wall",
-                "Real": "Yes"
-              }
+              "capacity": 62
             },
             {
               "id": "d-a-1-5",
@@ -615,8 +544,7 @@
                   "person": "Dr. Syama S.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/s-syama",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-syama"
                 },
                 {
                   "id": "d-a-1-D-106-1",
@@ -626,8 +554,7 @@
                   "person": "Dr. V. S. Kirthika Devi",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/s-kirthika",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-kirthika"
                 },
                 {
                   "id": "d-a-1-D-106-2",
@@ -637,8 +564,7 @@
                   "person": "K. Sireesha",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/k-sireesha",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-sireesha"
                 },
                 {
                   "id": "d-a-1-D-106-3",
@@ -648,8 +574,7 @@
                   "person": "K. Vishnu Raj",
                   "role": "Assistant Professor (OC)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/k-vishnu-raj",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-vishnu-raj"
                 },
                 {
                   "id": "d-a-1-D-106-4",
@@ -659,8 +584,7 @@
                   "person": "Kruthika U.",
                   "role": "Assistant Professor (OC)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/kruthika-u",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/kruthika-u"
                 },
                 {
                   "id": "d-a-1-D-106-5",
@@ -670,8 +594,7 @@
                   "person": "Lekshmi S.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/s-lekshmi",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-lekshmi"
                 },
                 {
                   "id": "d-a-1-D-106-6",
@@ -681,8 +604,7 @@
                   "person": "Sudha Yadav",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/sy-sudha",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sy-sudha"
                 },
                 {
                   "id": "d-a-1-D-106-7",
@@ -692,8 +614,7 @@
                   "person": "V. Sailaja",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "EEE",
-                  "url": "https://www.amrita.edu/faculty/v-sailaja",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/v-sailaja"
                 }
               ]
             },
@@ -708,11 +629,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "Note": "Wooden door from your photo IMG20260916102200.jpg",
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-1-7",
@@ -725,10 +642,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-1-8",
@@ -740,10 +654,7 @@
               "y": 170,
               "w": 180,
               "h": 130,
-              "node": "n3",
-              "meta": {
-                "Note": "Water every floor, notice boards brown framed, blue ARISTO bin, fire extinguisher, CCTV from your photos"
-              }
+              "node": "n3"
             },
             {
               "id": "d-a-1-9",
@@ -756,10 +667,7 @@
               "w": 170,
               "h": 130,
               "node": "n4",
-              "capacity": 120,
-              "meta": {
-                "Source": "amrita.edu ICTS"
-              }
+              "capacity": 120
             },
             {
               "id": "d-a-1-st",
@@ -771,11 +679,7 @@
               "y": 330,
               "w": 70,
               "h": 50,
-              "node": "n2",
-              "meta": {
-                "Note": "Staircase Amma photo wooden handrail red white railing grey tiles from your photo IMG20260916102202.jpg",
-                "Real": "Yes"
-              }
+              "node": "n2"
             },
             {
               "id": "d-a-1-wc",
@@ -793,7 +697,7 @@
         },
         {
           "id": "a-2",
-          "name": "Second Floor \u2014 Open corridor south, rooms north, ECE Faculty",
+          "name": "Second Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -868,10 +772,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North, corridor south open"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-2-1",
@@ -884,10 +785,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-2-2",
@@ -900,10 +798,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 30,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 30
             },
             {
               "id": "d-a-2-3",
@@ -928,8 +823,7 @@
                   "person": "Dr. Vivek Venugopal",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/vivekvenugopal",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/vivekvenugopal"
                 },
                 {
                   "id": "d-a-2-D-204-1",
@@ -939,8 +833,7 @@
                   "person": "Gayathri R.",
                   "role": "Assistant Professor (OC)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/gayathri-r",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/gayathri-r"
                 },
                 {
                   "id": "d-a-2-D-204-2",
@@ -950,8 +843,7 @@
                   "person": "Giriraja C. V.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/cv-giriraja",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/cv-giriraja"
                 },
                 {
                   "id": "d-a-2-D-204-3",
@@ -961,8 +853,7 @@
                   "person": "Jayashree M. Oli",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/jayashree-m",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/jayashree-m"
                 },
                 {
                   "id": "d-a-2-D-204-4",
@@ -972,8 +863,7 @@
                   "person": "Kirti S. Pande",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/sp-kirti",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sp-kirti"
                 },
                 {
                   "id": "d-a-2-D-204-5",
@@ -983,8 +873,7 @@
                   "person": "Priya B. K.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/bk-priya",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/bk-priya"
                 },
                 {
                   "id": "d-a-2-D-204-6",
@@ -994,8 +883,7 @@
                   "person": "Sagar B.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/b-sagar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/b-sagar"
                 },
                 {
                   "id": "d-a-2-D-204-7",
@@ -1005,8 +893,7 @@
                   "person": "Sonali Agrawal",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/a-sonali",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/a-sonali"
                 },
                 {
                   "id": "d-a-2-D-204-8",
@@ -1016,8 +903,7 @@
                   "person": "Swaminadhan Rajula",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/r-swaminadhan",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/r-swaminadhan"
                 },
                 {
                   "id": "d-a-2-D-204-9",
@@ -1027,8 +913,7 @@
                   "person": "Vignesh V.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/v-vignesh",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/v-vignesh"
                 }
               ]
             },
@@ -1042,10 +927,7 @@
               "y": 26,
               "w": 150,
               "h": 130,
-              "node": "n4",
-              "meta": {
-                "Facing": "North"
-              }
+              "node": "n4"
             },
             {
               "id": "d-a-2-5",
@@ -1058,10 +940,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-2-6",
@@ -1074,10 +953,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "d-a-2-7",
@@ -1090,10 +966,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "d-a-2-8",
@@ -1105,10 +978,7 @@
               "y": 170,
               "w": 180,
               "h": 130,
-              "node": "n3",
-              "meta": {
-                "Note": "Water every floor"
-              }
+              "node": "n3"
             },
             {
               "id": "d-a-2-9",
@@ -1151,12 +1021,12 @@
       ]
     },
     "b": {
-      "name": "Block B \u2014 21.7x96.7m 3 floors, open corridor south with railings facing courtyard per your A Block photos, rooms north, CSE + ECE, no halls per your E Block correction",
+      "name": "Block B",
       "verified": false,
       "floors": [
         {
           "id": "b-g",
-          "name": "Ground Floor \u2014 Open corridor south, rooms north, ECE + CSE",
+          "name": "Ground Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -1231,10 +1101,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North, corridor south open"
-              }
+              "capacity": 40
             },
             {
               "id": "c-b-g-1",
@@ -1247,10 +1114,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "c-b-g-2",
@@ -1263,10 +1127,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "c-b-g-3",
@@ -1279,10 +1140,7 @@
               "w": 180,
               "h": 130,
               "node": "n3",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-g-4",
@@ -1295,10 +1153,7 @@
               "w": 150,
               "h": 130,
               "node": "n4",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-g-5",
@@ -1323,8 +1178,7 @@
                   "person": "Dr. M. Vinodhini",
                   "role": "Vice Chairperson",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/m-vinodhini",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/m-vinodhini"
                 },
                 {
                   "id": "c-b-g-C-G7-1",
@@ -1334,8 +1188,7 @@
                   "person": "Dr. Navin Kumar",
                   "role": "Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/k-navin",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-navin"
                 },
                 {
                   "id": "c-b-g-C-G7-2",
@@ -1345,8 +1198,7 @@
                   "person": "Dr. T. K. Ramesh",
                   "role": "Chairperson",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/tk-ramesh",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/tk-ramesh"
                 },
                 {
                   "id": "c-b-g-C-G7-3",
@@ -1356,8 +1208,7 @@
                   "person": "Late Dr. Dhanesh G. Kurup (Memorial Page)",
                   "role": "Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/dg-kurup",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/dg-kurup"
                 },
                 {
                   "id": "c-b-g-C-G7-4",
@@ -1367,8 +1218,7 @@
                   "person": "Dr. Anusaya Swain",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/anusaya-swain",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/anusaya-swain"
                 },
                 {
                   "id": "c-b-g-C-G7-5",
@@ -1378,8 +1228,7 @@
                   "person": "Dr. Ashish Goswami",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/ashish-goswami",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/ashish-goswami"
                 },
                 {
                   "id": "c-b-g-C-G7-6",
@@ -1389,8 +1238,7 @@
                   "person": "Dr. Bhavana V.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/v-bhavana",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/v-bhavana"
                 },
                 {
                   "id": "c-b-g-C-G7-7",
@@ -1400,8 +1248,7 @@
                   "person": "Dr. Chinthala Ramesh",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/c-ramesh",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/c-ramesh"
                 },
                 {
                   "id": "c-b-g-C-G7-8",
@@ -1411,8 +1258,7 @@
                   "person": "Dr. Ganapathi Hegde",
                   "role": "Associate Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/ganapathi-hedge",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/ganapathi-hedge"
                 },
                 {
                   "id": "c-b-g-C-G7-9",
@@ -1422,8 +1268,7 @@
                   "person": "Dr. Harshit Srivastava",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/harshit-srivastava",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/harshit-srivastava"
                 }
               ]
             },
@@ -1450,8 +1295,7 @@
                   "person": "Dr. Vineetha Jain K. V.",
                   "role": "Vice Chairperson, Assistant Professor (Sl. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/jain-vineetha/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/jain-vineetha/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-1",
@@ -1461,8 +1305,7 @@
                   "person": "Dr. Sreevidya B.",
                   "role": "Vice Chairperson, Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/b-sreevidya/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/b-sreevidya/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-2",
@@ -1472,8 +1315,7 @@
                   "person": "Dr. Peeta Basa Pati",
                   "role": "Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/peeta-pati/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/peeta-pati/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-3",
@@ -1483,8 +1325,7 @@
                   "person": "Dr. Amudha J.",
                   "role": "Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/j-amudha/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/j-amudha/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-4",
@@ -1494,8 +1335,7 @@
                   "person": "Dr. Deepa Gupta",
                   "role": "Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/dr-deepa-gupta/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/dr-deepa-gupta/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-5",
@@ -1505,8 +1345,7 @@
                   "person": "Dr. Supriya M.",
                   "role": "Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/m-supriya/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/m-supriya/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-6",
@@ -1516,8 +1355,7 @@
                   "person": "Dr. Suja P.",
                   "role": "Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/p-suja/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/p-suja/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-7",
@@ -1527,8 +1365,7 @@
                   "person": "Dr. Beena B. M.",
                   "role": "Associate Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/beena-bm/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/beena-bm/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-8",
@@ -1538,8 +1375,7 @@
                   "person": "Dr. Manju Khanna",
                   "role": "Associate Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/manju-khanna/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/manju-khanna/"
                 },
                 {
                   "id": "c-b-g-CSE-G11-9",
@@ -1549,8 +1385,7 @@
                   "person": "Dr. Tripty Singh",
                   "role": "Associate Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/tripty-singh/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/tripty-singh/"
                 }
               ]
             },
@@ -1565,10 +1400,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-g-8",
@@ -1592,10 +1424,7 @@
               "y": 170,
               "w": 130,
               "h": 130,
-              "node": "n4",
-              "meta": {
-                "Note": "Water every floor"
-              }
+              "node": "n4"
             },
             {
               "id": "c-b-g-st",
@@ -1637,7 +1466,7 @@
         },
         {
           "id": "b-1",
-          "name": "First Floor \u2014 Open corridor south, rooms north, AI/ML Lab, CSE Faculty",
+          "name": "First Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -1712,10 +1541,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 60,
-              "meta": {
-                "Facing": "North, corridor south open"
-              }
+              "capacity": 60
             },
             {
               "id": "c-b-1-1",
@@ -1728,10 +1554,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "c-b-1-2",
@@ -1744,10 +1567,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "c-b-1-3",
@@ -1760,10 +1580,7 @@
               "w": 180,
               "h": 130,
               "node": "n3",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-1-4",
@@ -1776,10 +1593,7 @@
               "w": 150,
               "h": 130,
               "node": "n4",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-1-5",
@@ -1804,8 +1618,7 @@
                   "person": "Dr. Jitendra Bahadur",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/jitendra-bahadur",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/jitendra-bahadur"
                 },
                 {
                   "id": "c-b-1-C-106-1",
@@ -1815,8 +1628,7 @@
                   "person": "Dr. Karnena Rohit Kumar",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/karnena-rohit-kumar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/karnena-rohit-kumar"
                 },
                 {
                   "id": "c-b-1-C-106-2",
@@ -1826,8 +1638,7 @@
                   "person": "Dr. Kaveri Hatti",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/kaveri-hatti",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/kaveri-hatti"
                 },
                 {
                   "id": "c-b-1-C-106-3",
@@ -1837,8 +1648,7 @@
                   "person": "Dr. Manoj Kumar Panda",
                   "role": "Associate Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/manoj-kumar-panda",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/manoj-kumar-panda"
                 },
                 {
                   "id": "c-b-1-C-106-4",
@@ -1848,8 +1658,7 @@
                   "person": "Dr. Nizampatnam Neelima",
                   "role": "Associate Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/n-neelima",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/n-neelima"
                 },
                 {
                   "id": "c-b-1-C-106-5",
@@ -1859,8 +1668,7 @@
                   "person": "Dr. Paramasivam C.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/c-paramasivam",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/c-paramasivam"
                 },
                 {
                   "id": "c-b-1-C-106-6",
@@ -1870,8 +1678,7 @@
                   "person": "Dr. Parul Mathur",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/p-mathur",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/p-mathur"
                 },
                 {
                   "id": "c-b-1-C-106-7",
@@ -1881,8 +1688,7 @@
                   "person": "Dr. Patthi Aruna",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/patthi-aruna",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/patthi-aruna"
                 },
                 {
                   "id": "c-b-1-C-106-8",
@@ -1892,8 +1698,7 @@
                   "person": "Dr. Phani Raj Harivanam",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/phani-raj-harivanam",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/phani-raj-harivanam"
                 },
                 {
                   "id": "c-b-1-C-106-9",
@@ -1903,8 +1708,7 @@
                   "person": "Dr. Priti Mandal",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/priti-mandal",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/priti-mandal"
                 }
               ]
             },
@@ -1918,10 +1722,7 @@
               "y": 170,
               "w": 200,
               "h": 130,
-              "node": "n1",
-              "meta": {
-                "Facing": "North"
-              }
+              "node": "n1"
             },
             {
               "id": "c-b-1-7",
@@ -1934,10 +1735,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-1-8",
@@ -1950,10 +1748,7 @@
               "w": 180,
               "h": 130,
               "node": "n3",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-1-9",
@@ -1965,10 +1760,7 @@
               "y": 170,
               "w": 130,
               "h": 130,
-              "node": "n4",
-              "meta": {
-                "Note": "Water every floor"
-              }
+              "node": "n4"
             },
             {
               "id": "c-b-1-10",
@@ -1993,8 +1785,7 @@
                   "person": "Dr. B. Uma Maheswari",
                   "role": "Associate Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/b-uma/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/b-uma/"
                 },
                 {
                   "id": "c-b-1-CSE-111-1",
@@ -2004,8 +1795,7 @@
                   "person": "Dr. Thangam S",
                   "role": "Associate Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/s-thangam/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-thangam/"
                 },
                 {
                   "id": "c-b-1-CSE-111-2",
@@ -2015,8 +1805,7 @@
                   "person": "Dr. S. Santhanalakshmi",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/s-lakshmi/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-lakshmi/"
                 },
                 {
                   "id": "c-b-1-CSE-111-3",
@@ -2026,8 +1815,7 @@
                   "person": "Dr. Manju Venugopalan",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/manju-venugopalan/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/manju-venugopalan/"
                 },
                 {
                   "id": "c-b-1-CSE-111-4",
@@ -2037,8 +1825,7 @@
                   "person": "Dr. Kumaran U.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/kumaran-u/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/kumaran-u/"
                 },
                 {
                   "id": "c-b-1-CSE-111-5",
@@ -2048,8 +1835,7 @@
                   "person": "Dr. Radha D.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/d-radha/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/d-radha/"
                 },
                 {
                   "id": "c-b-1-CSE-111-6",
@@ -2059,8 +1845,7 @@
                   "person": "Dr. Rimjhim Singh",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/dr-rimjhim-singh/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/dr-rimjhim-singh/"
                 },
                 {
                   "id": "c-b-1-CSE-111-7",
@@ -2070,8 +1855,7 @@
                   "person": "Dr. Meena Belwal",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/b-meena/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/b-meena/"
                 },
                 {
                   "id": "c-b-1-CSE-111-8",
@@ -2081,8 +1865,7 @@
                   "person": "Dr. K Dinesh Kumar",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/dr-k-dinesh-kumar/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/dr-k-dinesh-kumar/"
                 },
                 {
                   "id": "c-b-1-CSE-111-9",
@@ -2092,8 +1875,7 @@
                   "person": "Dr. Gurupriya M.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/gurupriya-m/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/gurupriya-m/"
                 }
               ]
             },
@@ -2125,7 +1907,7 @@
         },
         {
           "id": "b-2",
-          "name": "Second Floor \u2014 Open corridor south, rooms north, CSE Faculty 3+4",
+          "name": "Second Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -2200,10 +1982,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North, corridor south open"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-2-1",
@@ -2216,10 +1995,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-2-2",
@@ -2232,10 +2008,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 30,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 30
             },
             {
               "id": "c-b-2-3",
@@ -2248,10 +2021,7 @@
               "w": 180,
               "h": 130,
               "node": "n3",
-              "capacity": 30,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 30
             },
             {
               "id": "c-b-2-4",
@@ -2276,8 +2046,7 @@
                   "person": "Dr. R. V. Sanjika Devi",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/r-sanjika",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/r-sanjika"
                 },
                 {
                   "id": "c-b-2-C-205-1",
@@ -2287,8 +2056,7 @@
                   "person": "Dr. S. Lalitha",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/s-lalitha",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-lalitha"
                 },
                 {
                   "id": "c-b-2-C-205-2",
@@ -2298,8 +2066,7 @@
                   "person": "Dr. Sarda Sharma",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/dr-sarada-sharma",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/dr-sarada-sharma"
                 },
                 {
                   "id": "c-b-2-C-205-3",
@@ -2309,8 +2076,7 @@
                   "person": "Dr. Shivalila Hangaragi",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/shivalila-hangaragi",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/shivalila-hangaragi"
                 },
                 {
                   "id": "c-b-2-C-205-4",
@@ -2320,8 +2086,7 @@
                   "person": "Dr. Sreeja Kochuvila",
                   "role": "Associate Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/k-sreeja",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-sreeja"
                 },
                 {
                   "id": "c-b-2-C-205-5",
@@ -2331,8 +2096,7 @@
                   "person": "Dr. Sumathi S",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/sumathi-s",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sumathi-s"
                 },
                 {
                   "id": "c-b-2-C-205-6",
@@ -2342,8 +2106,7 @@
                   "person": "Dr. Sunitha R.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/r-sunitha",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/r-sunitha"
                 },
                 {
                   "id": "c-b-2-C-205-7",
@@ -2353,8 +2116,7 @@
                   "person": "Dr. Sushant Shendre",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/sushant-shendre",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sushant-shendre"
                 },
                 {
                   "id": "c-b-2-C-205-8",
@@ -2364,8 +2126,7 @@
                   "person": "Dr. Sushma B.",
                   "role": "Assistant Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/sushma-b",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sushma-b"
                 },
                 {
                   "id": "c-b-2-C-205-9",
@@ -2375,8 +2136,7 @@
                   "person": "Dr. Susmitha Vekkot",
                   "role": "Associate Professor",
                   "dept": "ECE",
-                  "url": "https://www.amrita.edu/faculty/susmitha-vekkot",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/susmitha-vekkot"
                 }
               ]
             },
@@ -2391,10 +2151,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "c-b-2-6",
@@ -2407,10 +2164,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "c-b-2-7",
@@ -2435,8 +2189,7 @@
                   "person": "Dr. Vishwas H. N.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/hn-vishwas/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/hn-vishwas/"
                 },
                 {
                   "id": "c-b-2-CSE-211-1",
@@ -2446,8 +2199,7 @@
                   "person": "Dr. Nalini Sampath",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/s-nalini/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-nalini/"
                 },
                 {
                   "id": "c-b-2-CSE-211-2",
@@ -2457,8 +2209,7 @@
                   "person": "Sreebha Bhaskaran",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/b-sreebha/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/b-sreebha/"
                 },
                 {
                   "id": "c-b-2-CSE-211-3",
@@ -2468,8 +2219,7 @@
                   "person": "Kavitha C. R.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/cr-kavitha/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/cr-kavitha/"
                 },
                 {
                   "id": "c-b-2-CSE-211-4",
@@ -2479,8 +2229,7 @@
                   "person": "Dr. Priyanka Vivek",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/v-priyanka/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/v-priyanka/"
                 },
                 {
                   "id": "c-b-2-CSE-211-5",
@@ -2490,8 +2239,7 @@
                   "person": "Dr. Rajesh M.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/rajesh-m/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/rajesh-m/"
                 },
                 {
                   "id": "c-b-2-CSE-211-6",
@@ -2501,8 +2249,7 @@
                   "person": "Sangita Khare",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/k-sangita/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-sangita/"
                 },
                 {
                   "id": "c-b-2-CSE-211-7",
@@ -2512,8 +2259,7 @@
                   "person": "Dr. Ullas S",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/s-ullas/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-ullas/"
                 },
                 {
                   "id": "c-b-2-CSE-211-8",
@@ -2523,8 +2269,7 @@
                   "person": "Dr. Shinu M. R.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/shinu-mr/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/shinu-mr/"
                 },
                 {
                   "id": "c-b-2-CSE-211-9",
@@ -2534,8 +2279,7 @@
                   "person": "Dr. Nandu C. Nair",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/nandu-c-nair/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/nandu-c-nair/"
                 }
               ]
             },
@@ -2562,8 +2306,7 @@
                   "person": "Dr. Nidhin Prabhakar T. V.",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/nidhin-prabhakar-t-v/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/nidhin-prabhakar-t-v/"
                 },
                 {
                   "id": "c-b-2-CSE-212-1",
@@ -2573,8 +2316,7 @@
                   "person": "Dr. Gayathri Ramasamy",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/gayathri-ramasamy/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/gayathri-ramasamy/"
                 },
                 {
                   "id": "c-b-2-CSE-212-2",
@@ -2584,8 +2326,7 @@
                   "person": "Dr. Reena Panwar",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/reena-panwar/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/reena-panwar/"
                 },
                 {
                   "id": "c-b-2-CSE-212-3",
@@ -2595,8 +2336,7 @@
                   "person": "Dr. Sajitha Krishnan",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/sajitha-krishnan/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sajitha-krishnan/"
                 },
                 {
                   "id": "c-b-2-CSE-212-4",
@@ -2606,8 +2346,7 @@
                   "person": "Dr. Daddala Yasoomkari",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/daddala-yasoomkari/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/daddala-yasoomkari/"
                 },
                 {
                   "id": "c-b-2-CSE-212-5",
@@ -2617,8 +2356,7 @@
                   "person": "Dr. Sanghamitra Mishra",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/sanghamitra-mishra/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sanghamitra-mishra/"
                 },
                 {
                   "id": "c-b-2-CSE-212-6",
@@ -2628,8 +2366,7 @@
                   "person": "Dr. Amulyashree S",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/amulyashree-s/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/amulyashree-s/"
                 },
                 {
                   "id": "c-b-2-CSE-212-7",
@@ -2639,8 +2376,7 @@
                   "person": "Dr. Niharika Panda",
                   "role": "Assistant Professor",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/niharika-panda/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/niharika-panda/"
                 },
                 {
                   "id": "c-b-2-CSE-212-8",
@@ -2650,8 +2386,7 @@
                   "person": "Niranjan D K",
                   "role": "Assistant Professor (OC)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/niranjan-d-k/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/niranjan-d-k/"
                 },
                 {
                   "id": "c-b-2-CSE-212-9",
@@ -2661,8 +2396,7 @@
                   "person": "Aiswariya Milan K.",
                   "role": "Assistant Professor (OC)",
                   "dept": "CSE",
-                  "url": "https://www.amrita.edu/faculty/aiswariya-milan-k/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/aiswariya-milan-k/"
                 }
               ]
             },
@@ -2676,10 +2410,7 @@
               "y": 170,
               "w": 130,
               "h": 130,
-              "node": "n4",
-              "meta": {
-                "Note": "Water every floor"
-              }
+              "node": "n4"
             },
             {
               "id": "c-b-2-st",
@@ -2710,12 +2441,12 @@
       ]
     },
     "c": {
-      "name": "Block C \u2014 23x93.6m 2 floors, open corridor south with railings, rooms north, Mechanical, no halls per your E correction",
+      "name": "Block C",
       "verified": false,
       "floors": [
         {
           "id": "c-g",
-          "name": "Ground Floor \u2014 Open corridor south, rooms north, Mechanical",
+          "name": "Ground Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -2790,10 +2521,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 60,
-              "meta": {
-                "Facing": "North, corridor south open"
-              }
+              "capacity": 60
             },
             {
               "id": "b-c-g-1",
@@ -2806,10 +2534,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 60,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 60
             },
             {
               "id": "b-c-g-2",
@@ -2822,10 +2547,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-g-3",
@@ -2838,10 +2560,7 @@
               "w": 180,
               "h": 130,
               "node": "n3",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-g-4",
@@ -2854,10 +2573,7 @@
               "w": 150,
               "h": 130,
               "node": "n4",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-g-5",
@@ -2882,8 +2598,7 @@
                   "person": "Dr. Rajeevlochana G. Chittawadigi",
                   "role": "Vice Chairperson Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/rg-chittawadigi",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/rg-chittawadigi"
                 },
                 {
                   "id": "b-c-g-B-G7-1",
@@ -2893,8 +2608,7 @@
                   "person": "Divya Sharma S. G.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/sg-divya",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sg-divya"
                 },
                 {
                   "id": "b-c-g-B-G7-2",
@@ -2904,8 +2618,7 @@
                   "person": "Dr. Bikram Singh Solanki",
                   "role": "Assistant Professor Level 10",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/bikram-singh-solanki",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/bikram-singh-solanki"
                 },
                 {
                   "id": "b-c-g-B-G7-3",
@@ -2915,8 +2628,7 @@
                   "person": "Dr. Dileep B. P.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/bp-dileep",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/bp-dileep"
                 },
                 {
                   "id": "b-c-g-B-G7-4",
@@ -2926,8 +2638,7 @@
                   "person": "Dr. Mohan Kumar S.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/s-mohankumar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-mohankumar"
                 },
                 {
                   "id": "b-c-g-B-G7-5",
@@ -2937,8 +2648,7 @@
                   "person": "Dr. Mrudula Prashanth",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/p-mrudula",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/p-mrudula"
                 },
                 {
                   "id": "b-c-g-B-G7-6",
@@ -2948,8 +2658,7 @@
                   "person": "Dr. Phanibhushana M. V.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/mv-phanibhushana",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/mv-phanibhushana"
                 },
                 {
                   "id": "b-c-g-B-G7-7",
@@ -2959,8 +2668,7 @@
                   "person": "Dr. Pradeep S. Jakkareddy",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/js-pradeep",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/js-pradeep"
                 },
                 {
                   "id": "b-c-g-B-G7-8",
@@ -2970,8 +2678,7 @@
                   "person": "Dr. Prakash Marimuthu K.",
                   "role": "Assistant Professor (Sl. Gd.) Deputy Academic Co-Ordinator",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/k-prakash",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-prakash"
                 },
                 {
                   "id": "b-c-g-B-G7-9",
@@ -2981,8 +2688,7 @@
                   "person": "Dr. Prashanth B N",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/bn-prashanth",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/bn-prashanth"
                 },
                 {
                   "id": "b-c-g-B-G7-10",
@@ -2992,8 +2698,7 @@
                   "person": "Dr. Puja Sengupta",
                   "role": "Assistant Professor Level 10",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/puja-sengupta",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/puja-sengupta"
                 }
               ]
             },
@@ -3008,10 +2713,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-g-7",
@@ -3023,10 +2725,7 @@
               "y": 170,
               "w": 180,
               "h": 130,
-              "node": "n2",
-              "meta": {
-                "Note": "Water every floor"
-              }
+              "node": "n2"
             },
             {
               "id": "b-c-g-8",
@@ -3080,7 +2779,7 @@
         },
         {
           "id": "c-1",
-          "name": "First Floor \u2014 Open corridor south, rooms north, Mechanical Faculty 2",
+          "name": "First Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -3155,10 +2854,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North, corridor south open"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-1-1",
@@ -3171,10 +2867,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-1-2",
@@ -3187,10 +2880,7 @@
               "w": 180,
               "h": 130,
               "node": "n2",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "b-c-1-3",
@@ -3203,10 +2893,7 @@
               "w": 180,
               "h": 130,
               "node": "n3",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-1-4",
@@ -3219,10 +2906,7 @@
               "w": 150,
               "h": 130,
               "node": "n4",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-1-5",
@@ -3247,8 +2931,7 @@
                   "person": "Dr. Ravi Kumar V.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/v-ravikumar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/v-ravikumar"
                 },
                 {
                   "id": "b-c-1-B-106-1",
@@ -3258,8 +2941,7 @@
                   "person": "Dr. Shali S.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/s-shali",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-shali"
                 },
                 {
                   "id": "b-c-1-B-106-2",
@@ -3269,8 +2951,7 @@
                   "person": "Dr. Shankara",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/k-shankara",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-shankara"
                 },
                 {
                   "id": "b-c-1-B-106-3",
@@ -3280,8 +2961,7 @@
                   "person": "Dr. Shashi Kumar M. E.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/me-shashikumar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/me-shashikumar"
                 },
                 {
                   "id": "b-c-1-B-106-4",
@@ -3291,8 +2971,7 @@
                   "person": "Dr. Smita Singh",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/smita-singh",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/smita-singh"
                 },
                 {
                   "id": "b-c-1-B-106-5",
@@ -3302,8 +2981,7 @@
                   "person": "Dr. Ulhas K Annigeri",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/uk-annigeri",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/uk-annigeri"
                 },
                 {
                   "id": "b-c-1-B-106-6",
@@ -3313,8 +2991,7 @@
                   "person": "Dr. Y. P. Deepthi",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/p-deepthi",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/p-deepthi"
                 },
                 {
                   "id": "b-c-1-B-106-7",
@@ -3324,8 +3001,7 @@
                   "person": "Prof. Sriram Devanathan",
                   "role": "Principal Professor",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/sriram",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sriram"
                 },
                 {
                   "id": "b-c-1-B-106-8",
@@ -3335,8 +3011,7 @@
                   "person": "Raghavendra Ravikiran K.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/kr-ravikiran",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/kr-ravikiran"
                 },
                 {
                   "id": "b-c-1-B-106-9",
@@ -3346,8 +3021,7 @@
                   "person": "S. Bhanu Prakash",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/b-prakash",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/b-prakash"
                 },
                 {
                   "id": "b-c-1-B-106-10",
@@ -3357,8 +3031,7 @@
                   "person": "Vinod Kotebavi",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "Mechanical",
-                  "url": "https://www.amrita.edu/faculty/k-vinod",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-vinod"
                 }
               ]
             },
@@ -3373,10 +3046,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 80
             },
             {
               "id": "b-c-1-7",
@@ -3388,10 +3058,7 @@
               "y": 170,
               "w": 180,
               "h": 130,
-              "node": "n2",
-              "meta": {
-                "Note": "Water every floor"
-              }
+              "node": "n2"
             },
             {
               "id": "b-c-1-st",
@@ -3422,12 +3089,12 @@
       ]
     },
     "d": {
-      "name": "Block D \u2014 15.3x37.8m 2 floors, small near cafeteria, open corridor south, rooms north, Sciences",
+      "name": "Block D",
       "verified": false,
       "floors": [
         {
           "id": "d-g",
-          "name": "Ground Floor \u2014 Near cafeteria, open corridor south, Physics/Chemistry Labs",
+          "name": "Ground Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -3502,10 +3169,7 @@
               "w": 220,
               "h": 130,
               "node": "n0",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North, corridor south open, near cafeteria"
-              }
+              "capacity": 40
             },
             {
               "id": "a-d-g-1",
@@ -3518,10 +3182,7 @@
               "w": 220,
               "h": 130,
               "node": "n1",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "a-d-g-2",
@@ -3546,10 +3207,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 40,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 40
             },
             {
               "id": "a-d-g-4",
@@ -3562,10 +3220,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 60,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 60
             },
             {
               "id": "a-d-g-5",
@@ -3577,10 +3232,7 @@
               "y": 170,
               "w": 180,
               "h": 130,
-              "node": "n2",
-              "meta": {
-                "Note": "Water every floor, near cafeteria"
-              }
+              "node": "n2"
             },
             {
               "id": "a-d-g-st",
@@ -3622,7 +3274,7 @@
         },
         {
           "id": "d-1",
-          "name": "First Floor \u2014 Sciences Faculty Room Chem/Phys 7 faculty",
+          "name": "First Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -3697,10 +3349,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 60,
-              "meta": {
-                "Facing": "North, corridor south open"
-              }
+              "capacity": 60
             },
             {
               "id": "a-d-1-1",
@@ -3713,10 +3362,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 60,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 60
             },
             {
               "id": "a-d-1-2",
@@ -3741,8 +3387,7 @@
                   "person": "Dr. S. Giridhar Reddy",
                   "role": "Chairperson",
                   "dept": "Chemistry",
-                  "url": "https://www.amrita.edu/faculty/s-giri",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-giri"
                 },
                 {
                   "id": "a-d-1-A-103-1",
@@ -3752,8 +3397,7 @@
                   "person": "Dr. Amrita Thakur",
                   "role": "Assistant Professor (Sl.Gd.)",
                   "dept": "Chemistry",
-                  "url": "https://www.amrita.edu/faculty/t-amrita",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/t-amrita"
                 },
                 {
                   "id": "a-d-1-A-103-2",
@@ -3763,8 +3407,7 @@
                   "person": "Dr. Anil Kumar S.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "Chemistry",
-                  "url": "https://www.amrita.edu/faculty/s-anilkumar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-anilkumar"
                 },
                 {
                   "id": "a-d-1-A-103-3",
@@ -3774,8 +3417,7 @@
                   "person": "Dr. B. L. Bhaskar",
                   "role": "Assistant Professor (Sl.Gd.)",
                   "dept": "Chemistry",
-                  "url": "https://www.amrita.edu/faculty/bl-bhaskar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/bl-bhaskar"
                 },
                 {
                   "id": "a-d-1-A-103-4",
@@ -3785,8 +3427,7 @@
                   "person": "Dr. B. Siva Kumar",
                   "role": "Associate Professor",
                   "dept": "Chemistry",
-                  "url": "https://www.amrita.edu/faculty/b-sivakumar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/b-sivakumar"
                 },
                 {
                   "id": "a-d-1-A-103-5",
@@ -3796,8 +3437,7 @@
                   "person": "Dr. T. M. Mohan Kumar",
                   "role": "Assistant Professor",
                   "dept": "Chemistry",
-                  "url": "https://www.amrita.edu/faculty/tm-mohankumar",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/tm-mohankumar"
                 },
                 {
                   "id": "a-d-1-A-103-6",
@@ -3807,8 +3447,7 @@
                   "person": "H. Manjunatha",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "Physics",
-                  "url": "https://www.amrita.edu/faculty/h-manjunath",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/h-manjunath"
                 }
               ]
             },
@@ -3823,10 +3462,7 @@
               "w": 180,
               "h": 130,
               "node": "n0",
-              "capacity": 60,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 60
             },
             {
               "id": "a-d-1-4",
@@ -3839,10 +3475,7 @@
               "w": 180,
               "h": 130,
               "node": "n1",
-              "capacity": 30,
-              "meta": {
-                "Facing": "North"
-              }
+              "capacity": 30
             },
             {
               "id": "a-d-1-5",
@@ -3854,10 +3487,7 @@
               "y": 170,
               "w": 180,
               "h": 130,
-              "node": "n2",
-              "meta": {
-                "Note": "Water every floor"
-              }
+              "node": "n2"
             },
             {
               "id": "a-d-1-st",
@@ -3888,12 +3518,12 @@
       ]
     },
     "e": {
-      "name": "Block E (Main / New Block) \u2014 White ornate entrance, 5 floors, library 4th floor \u2014 from your photos + Google Maps ref",
+      "name": "Block E",
       "verified": false,
       "floors": [
         {
           "id": "e-g",
-          "name": "Ground Floor \u2014 Main Entrance (white arch)",
+          "name": "Ground Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -3949,10 +3579,7 @@
               "y": 26,
               "w": 226,
               "h": 137,
-              "node": "n0",
-              "meta": {
-                "Note": "White ornate arch from your photo, high ceiling"
-              }
+              "node": "n0"
             },
             {
               "id": "e-e-g-1",
@@ -3976,10 +3603,7 @@
               "y": 26,
               "w": 226,
               "h": 137,
-              "node": "n2",
-              "meta": {
-                "Note": "Central tower with Amma photo"
-              }
+              "node": "n2"
             },
             {
               "id": "e-e-g-3",
@@ -3994,9 +3618,7 @@
               "node": "n3",
               "capacity": 265,
               "meta": {
-                "Use": "In-campus functions",
-                "RealCapacity": "265 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
+                "Use": "In-campus functions"
               }
             },
             {
@@ -4088,7 +3710,7 @@
         },
         {
           "id": "e-1",
-          "name": "First Floor \u2014 Mathematics & English (80/class)",
+          "name": "First Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -4157,8 +3779,7 @@
                   "person": "Dr. K. V. Nagaraja",
                   "role": "Professor",
                   "dept": "Mathematics",
-                  "url": "https://www.amrita.edu/faculty/kv-nagaraja",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/kv-nagaraja"
                 },
                 {
                   "id": "e-e-1-E-101-1",
@@ -4168,8 +3789,7 @@
                   "person": "Dr. Neetu Srivastava",
                   "role": "Associate Professor",
                   "dept": "Mathematics",
-                  "url": "https://www.amrita.edu/faculty/s-neetu",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-neetu"
                 },
                 {
                   "id": "e-e-1-E-101-2",
@@ -4179,8 +3799,7 @@
                   "person": "Dr. Sarada Jayan",
                   "role": "Associate Professor",
                   "dept": "Mathematics",
-                  "url": "https://www.amrita.edu/faculty/j-sarada",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/j-sarada"
                 },
                 {
                   "id": "e-e-1-E-101-3",
@@ -4190,8 +3809,7 @@
                   "person": "Mamatha T. M.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "Mathematics",
-                  "url": "https://www.amrita.edu/faculty/tm-mamatha",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/tm-mamatha"
                 }
               ]
             },
@@ -4206,11 +3824,7 @@
               "w": 200,
               "h": 140,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-1-2",
@@ -4223,11 +3837,7 @@
               "w": 200,
               "h": 140,
               "node": "n2",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-1-3",
@@ -4265,8 +3875,7 @@
                   "person": "Dr. Deepakumari S.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "English",
-                  "url": "https://www.amrita.edu/faculty/s-deepakumari",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-deepakumari"
                 },
                 {
                   "id": "e-e-1-E-105-1",
@@ -4276,8 +3885,7 @@
                   "person": "Dr. Deepthi Janardhan",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "English",
-                  "url": "https://www.amrita.edu/faculty/j-deepthi",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/j-deepthi"
                 },
                 {
                   "id": "e-e-1-E-105-2",
@@ -4287,8 +3895,7 @@
                   "person": "Dr. Sayant Vijay",
                   "role": "Assistant Professor",
                   "dept": "English",
-                  "url": "https://www.amrita.edu/faculty/sayant-vijay",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sayant-vijay"
                 },
                 {
                   "id": "e-e-1-E-105-3",
@@ -4298,8 +3905,7 @@
                   "person": "Dr. Smita Sail",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "English",
-                  "url": "https://www.amrita.edu/faculty/s-smita",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/s-smita"
                 },
                 {
                   "id": "e-e-1-E-105-4",
@@ -4309,8 +3915,7 @@
                   "person": "Revathy Hemachandran",
                   "role": "Assistant Professor",
                   "dept": "English",
-                  "url": "https://www.amrita.edu/faculty/revathy-hemachandran",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/revathy-hemachandran"
                 }
               ]
             },
@@ -4325,11 +3930,7 @@
               "w": 200,
               "h": 140,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-1-6",
@@ -4342,11 +3943,7 @@
               "w": 200,
               "h": 140,
               "node": "n2",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-1-7",
@@ -4388,7 +3985,7 @@
         },
         {
           "id": "e-2",
-          "name": "Second Floor \u2014 SoE & Innovation",
+          "name": "Second Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -4445,11 +4042,7 @@
               "w": 200,
               "h": 140,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-2-1",
@@ -4462,11 +4055,7 @@
               "w": 200,
               "h": 140,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-2-2",
@@ -4504,8 +4093,7 @@
                   "person": "Dr. B. Venkatesh",
                   "role": "Professor",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/b-venkatesh",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/b-venkatesh"
                 },
                 {
                   "id": "e-e-2-E-204-1",
@@ -4515,8 +4103,7 @@
                   "person": "Dr. Geetha K. N.",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/kn-geetha",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/kn-geetha"
                 },
                 {
                   "id": "e-e-2-E-204-2",
@@ -4526,8 +4113,7 @@
                   "person": "Dr. K. Murali",
                   "role": "Assistant Professor (Sl. Gd.)",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/k-murali",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/k-murali"
                 },
                 {
                   "id": "e-e-2-E-204-3",
@@ -4537,8 +4123,7 @@
                   "person": "Dr. K. N. Meera",
                   "role": "Associate Professor",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/kn-meera",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/kn-meera"
                 },
                 {
                   "id": "e-e-2-E-204-4",
@@ -4548,8 +4133,7 @@
                   "person": "Dr. K. N. Venkatachalaiah",
                   "role": "Associate Professor",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/kn-venkatachalaiah",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/kn-venkatachalaiah"
                 },
                 {
                   "id": "e-e-2-E-204-5",
@@ -4559,8 +4143,7 @@
                   "person": "Dr. Kumaraswamy G. N.",
                   "role": "Associate Professor",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/gnk-swamy",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/gnk-swamy"
                 },
                 {
                   "id": "e-e-2-E-204-6",
@@ -4570,8 +4153,7 @@
                   "person": "Dr. Sasangan Ramanathan",
                   "role": "Dean Faculty",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/sasangan",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sasangan"
                 },
                 {
                   "id": "e-e-2-E-204-7",
@@ -4581,8 +4163,7 @@
                   "person": "Dr. V. Kesavulu Naidu",
                   "role": "Associate Professor",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/v-kesavulu",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/v-kesavulu"
                 },
                 {
                   "id": "e-e-2-E-204-8",
@@ -4592,8 +4173,7 @@
                   "person": "Rajesh R.",
                   "role": "Assistant Professor",
                   "dept": "School of Engineering",
-                  "url": "https://www.amrita.edu/faculty/r-rajesh",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/r-rajesh"
                 }
               ]
             },
@@ -4608,11 +4188,7 @@
               "w": 200,
               "h": 140,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-2-5",
@@ -4625,11 +4201,7 @@
               "w": 200,
               "h": 140,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-2-6",
@@ -4688,7 +4260,7 @@
         },
         {
           "id": "e-3",
-          "name": "Third Floor \u2014 Research & AIE",
+          "name": "Third Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -4745,11 +4317,7 @@
               "w": 200,
               "h": 140,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-3-1",
@@ -4787,8 +4355,7 @@
                   "person": "Dr. Soman K. P.",
                   "role": "Dean, Professor",
                   "dept": "AIE",
-                  "url": "https://www.amrita.edu/faculty/soman-k-p/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/soman-k-p/"
                 },
                 {
                   "id": "e-e-3-E-303-1",
@@ -4798,8 +4365,7 @@
                   "person": "Dr. Sowmya V",
                   "role": "Associate Professor",
                   "dept": "AIE",
-                  "url": "https://www.amrita.edu/faculty/sowmya-v/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sowmya-v/"
                 },
                 {
                   "id": "e-e-3-E-303-2",
@@ -4809,8 +4375,7 @@
                   "person": "Dr. Gopalakrishnan E. A.",
                   "role": "Principal Professor",
                   "dept": "AIE",
-                  "url": "https://www.amrita.edu/faculty/gopalakrishnan-e-a/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/gopalakrishnan-e-a/"
                 },
                 {
                   "id": "e-e-3-E-303-3",
@@ -4820,8 +4385,7 @@
                   "person": "Vijay Krishna Menon",
                   "role": "Assistant Professor",
                   "dept": "AIE",
-                  "url": "https://www.amrita.edu/faculty/vijay-krishna-menon/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/vijay-krishna-menon/"
                 },
                 {
                   "id": "e-e-3-E-303-4",
@@ -4831,8 +4395,7 @@
                   "person": "Dr. Sajith Variyar V. V.",
                   "role": "Assistant Professor (Sr. Gd.)",
                   "dept": "AIE",
-                  "url": "https://www.amrita.edu/faculty/sajith-variyar/",
-                  "hours": "\u2014"
+                  "url": "https://www.amrita.edu/faculty/sajith-variyar/"
                 }
               ]
             },
@@ -4859,11 +4422,7 @@
               "w": 200,
               "h": 140,
               "node": "n0",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-3-5",
@@ -4876,11 +4435,7 @@
               "w": 200,
               "h": 140,
               "node": "n1",
-              "capacity": 80,
-              "meta": {
-                "RealCapacity": "80 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 80
             },
             {
               "id": "e-e-3-6",
@@ -4906,11 +4461,7 @@
               "w": 250,
               "h": 160,
               "node": "n3",
-              "capacity": 150,
-              "meta": {
-                "RealCapacity": "150 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room"
-              }
+              "capacity": 150
             },
             {
               "id": "e-e-3-st",
@@ -4940,7 +4491,7 @@
         },
         {
           "id": "e-4",
-          "name": "Fourth Floor \u2014 Central Library (1213 sq m, 200 seating)",
+          "name": "Fourth Floor",
           "width": 1000,
           "height": 460,
           "outline": "M20,20 L980,20 L980,440 L20,440 Z",
@@ -4999,9 +4550,7 @@
               "node": "n0",
               "meta": {
                 "Location": "New Block 4th floor",
-                "Area": "1213 sq m",
-                "EnhancedFrom": "Your photos + Google Images + careers360 (1213 sq m 200 seating, reading hall 325 sq m 150 seating, 45,880 items, VIDYA digital, 28 newspapers)",
-                "PhotoRef": "White ornate entrance 5 floors from your image 2, peach 4 floors from image 1"
+                "Area": "1213 sq m"
               }
             },
             {
@@ -5017,11 +4566,7 @@
               "node": "n1",
               "capacity": 150,
               "meta": {
-                "Area": "325 sq m",
-                "RealCapacity": "150 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room",
-                "EnhancedFrom": "Your photos + Google Images + careers360 (1213 sq m 200 seating, reading hall 325 sq m 150 seating, 45,880 items, VIDYA digital, 28 newspapers)",
-                "PhotoRef": "White ornate entrance 5 floors from your image 2, peach 4 floors from image 1"
+                "Area": "325 sq m"
               }
             },
             {
@@ -5034,11 +4579,7 @@
               "y": 26,
               "w": 226,
               "h": 137,
-              "node": "n2",
-              "meta": {
-                "EnhancedFrom": "Your photos + Google Images + careers360 (1213 sq m 200 seating, reading hall 325 sq m 150 seating, 45,880 items, VIDYA digital, 28 newspapers)",
-                "PhotoRef": "White ornate entrance 5 floors from your image 2, peach 4 floors from image 1"
-              }
+              "node": "n2"
             },
             {
               "id": "e-e-4-3",
@@ -5053,11 +4594,7 @@
               "node": "n3",
               "capacity": 150,
               "meta": {
-                "Hours": "8 AM \u2013 12 AM",
-                "RealCapacity": "150 seats (verified from amrita.edu ICTS)",
-                "InferredFrom": "Your photos + Google Maps + ICTS + window count ~6m/room",
-                "EnhancedFrom": "Your photos + Google Images + careers360 (1213 sq m 200 seating, reading hall 325 sq m 150 seating, 45,880 items, VIDYA digital, 28 newspapers)",
-                "PhotoRef": "White ornate entrance 5 floors from your image 2, peach 4 floors from image 1"
+                "Hours": "8 AM \u2013 12 AM"
               }
             },
             {

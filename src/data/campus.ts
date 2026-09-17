@@ -19,11 +19,11 @@ export interface CampusConfig {
 
 export const CAMPUS_CONFIG: CampusConfig = {
   name: 'Amrita Bengaluru Campus',
-  center: { lat: 12.894505, lng: 77.675084 }, // Verified: iCBSE + OSM relation 17297176, Kasavanahalli, Carmelaram P.O., 560035
+  center: { lat: 12.894505, lng: 77.675084 }, // Kasavanahalli, Carmelaram P.O., 560035
   radiusMeters: 800,
 };
 
-// Accurate campus bounding box from OSM api.openstreetmap.org/api/0.6/map bbox=77.6725,12.8910,77.6795,12.8990
+// Campus bounding box
 export const CAMPUS_BOUNDS = {
   south: 12.8910,
   north: 12.8990,
@@ -31,7 +31,7 @@ export const CAMPUS_BOUNDS = {
   east: 77.6795,
 };
 
-// Real campus acreage measured from OSM polygons: Academic 25.3 + Residential 11.8 = 37.2 acres (official says 50 acres with green cover)
+// Campus acreage
 export const CAMPUS_ACREAGE = {
   academic: 25.3,
   residential: 11.8,

@@ -16,7 +16,7 @@ const DETAILS = [
     icon: MapIcon,
     title: 'Interactive map, two engines',
     points: [
-      'CivicEye: Google Maps + fallback vector map · Amrita Eye: custom campus map (no Google Maps) — 1m pinnable, 155 faculty, 163 rooms',
+      'Interactive campus and city maps with live reports and directions',
       'Zero-config fallback vector map for instant demos',
       'Marker clustering, severity heatmap, live filters & search',
       'One-tap directions to any verified report',
