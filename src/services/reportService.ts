@@ -50,7 +50,6 @@ export function mapRow(row: ReportRow): Report {
     status: row.status,
     scope: row.scope,
     image: row.photo_url ?? '',
-    ai: (row.ai as any) ?? null,
     upvotes: row.upvotes,
     downvotes: row.downvotes,
     votes: row.upvotes - row.downvotes,
@@ -61,6 +60,7 @@ export function mapRow(row: ReportRow): Report {
     author: row.author_name,
     assignedTo: row.assigned_to ?? undefined,
     userId: row.user_id ?? undefined,
+    ai: (row.ai as any) ?? null,
   };
 }
 

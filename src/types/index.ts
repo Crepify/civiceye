@@ -35,48 +35,35 @@ export interface Coordinates {
 /** A single civic issue report. */
 export interface Report {
   id: string;
-  /** Human friendly public code, e.g. "CE-1A2B3C4D". */
   code?: string;
   title: string;
   description: string;
   coordinates: Coordinates;
-  /** Human friendly area label, e.g. "Indiranagar, Bengaluru". */
   locationName: string;
   category: CategoryId;
   severity: Severity;
   status: ReportStatus;
-  /** Absolute URL, public path, or data-URL of the evidence photo. */
   image: string;
-  /** Optional AI annotation data */
-  ai?: {
-    confidence?: number;
-    severity?: Severity;
-    category?: CategoryId;
-    description?: string;
-    objects?: string[];
-    annotatedImage?: string | null;
-    model?: string;
-    engine?: string;
-  } | null;
   upvotes: number;
   downvotes: number;
-  /** Net votes = upvotes - downvotes. */
   votes: number;
-  /** Number of neighbours who confirmed this report is real. */
   confirms: number;
-  /** Number of neighbours who rejected this report. */
   rejects: number;
-  /** ISO-8601 timestamp. */
   date: string;
   verified: boolean;
-  /** Public display name of the citizen (or "Anonymous citizen"). */
   author: string;
-  /** Authority agency currently handling it, when assigned. */
   assignedTo?: string;
-  /** Owning auth user id (uuid), when logged in. */
   userId?: string;
-  /** Which product this report belongs to: 'city' (CivicEye) or 'campus' (Amrita Eye). */
   scope: 'city' | 'campus';
+  ai?: {
+    confidence?: number;
+    objects?: string[];
+    summary?: string;
+    model?: string;
+    imageQuality?: string | null;
+    disclaimer?: string;
+    annotatedImage?: string | null;
+  } | null;
 }
 
 /** A user profile (mirrors the `profiles` table). */

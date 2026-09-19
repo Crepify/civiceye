@@ -251,6 +251,7 @@ function ReportWizard() {
           imageQuality: draft.analysis.imageQuality ?? null,
           disclaimer:
             'AI confidence is an estimate and may be inaccurate. Verify the issue before acting.',
+          annotatedImage: draft.analysis.annotatedImage ?? null,
         },
       });
       setCreatedId(report.id);

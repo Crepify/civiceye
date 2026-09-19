@@ -26,9 +26,6 @@ import { ReportCard } from '@/components/ReportCard';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { EmptyState } from '@/components/EmptyState';
 import { ReviewSection } from '@/components/ReviewSection';
-import { AIAnnotationViewer } from '@/components/AIAnnotationViewer';
-import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
-import { useBrand } from '@/hooks/useBrand';
 import { formatCoords, formatDateTime, timeAgo } from '@/utils/format';
 import { cn } from '@/utils/cn';
 
@@ -38,7 +35,6 @@ export function ReportDetails() {
   const navigate = useNavigate();
   const { reports, getById } = useReports();
   const toast = useToast();
-  const { isAmrita } = useBrand();
 
   const report = id ? getById(id) : undefined;
 
@@ -105,11 +101,11 @@ export function ReportDetails() {
             transition={{ duration: 0.45 }}
             className="space-y-6"
           >
-            {/* Hero image */}
+            {/* Hero image with AI annotation toggle */}
             <div className="card overflow-hidden">
               <div className="relative">
                 <img
-                  src={report.image}
+                  src={report.ai?.annotatedImage || report.image}
                   alt={report.title}
                   className="aspect-[16/9] w-full object-cover"
                 />
@@ -129,8 +125,30 @@ export function ReportDetails() {
                       <ShieldCheck className="h-3 w-3" /> Verified
                     </Badge>
                   ) : null}
+                  {report.ai?.annotatedImage ? (
+                    <Badge className="bg-sky-500/90 text-white backdrop-blur">AI Annotated</Badge>
+                  ) : null}
                 </div>
+                {report.ai?.annotatedImage ? (
+                  <div className="absolute left-3 top-3 flex gap-2">
+                    <span className="rounded-full bg-slate-900/80 px-3 py-1 text-xs font-bold text-white backdrop-blur">AI View: {report.ai.confidence ? Math.round(report.ai.confidence*100)+'%' : ''} {report.ai.model ?? ''}</span>
+                  </div>
+                ) : null}
               </div>
+
+              {report.ai ? (
+                <div className="grid gap-3 border-t border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/[0.03] sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <div className="text-xs font-bold uppercase tracking-widest text-slate-500">Original</div>
+                    <img src={report.image} alt="Original" className="h-32 w-full rounded-xl object-cover" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-xs font-bold uppercase tracking-widest text-emerald-600">AI Annotated with bounding boxes</div>
+                    <img src={report.ai.annotatedImage || report.image} alt="AI Annotated" className="h-32 w-full rounded-xl object-cover border border-emerald-300" />
+                    <div className="text-xs text-slate-500">Model: {report.ai.model} · Confidence: {report.ai.confidence ? Math.round(report.ai.confidence*100)+'%' : '—'} · Detected: {(report.ai.objects||[]).join(', ')}</div>
+                  </div>
+                </div>
+              ) : null}
 
               <div className="p-6 sm:p-8">
                 <p className="text-xs font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">
@@ -146,8 +164,6 @@ export function ReportDetails() {
                 <p className="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
                   {report.description}
                 </p>
-
-                <AIAnnotationViewer report={report} />
 
                 {/* Report meta */}
                 <div className="mt-7 grid gap-3 rounded-2xl bg-slate-50 p-5 text-sm sm:grid-cols-2 dark:bg-white/[0.04]">
@@ -232,19 +248,17 @@ export function ReportDetails() {
           >
             <div className="card overflow-hidden">
               <div className="h-56">
-                {report.scope === 'campus' || isAmrita ? (
-                  <AmritaCampusMap reports={[report]} selectedId={report.id} onSelect={() => {}} className="h-full w-full rounded-none border-0" />
-                ) : (
-                  <iframe
-                    title="Report location"
-                    src={`https://maps.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}&z=15&output=embed`}
-                    className="h-full w-full border-0 grayscale-[0.2]"
-                    loading="lazy"
-                  />
-                )}
+                <iframe
+                  title="Report location"
+                  src={`https://maps.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}&z=15&output=embed`}
+                  className="h-full w-full border-0 grayscale-[0.2]"
+                  loading="lazy"
+                />
               </div>
               <div className="flex items-center justify-between p-4">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{report.locationName}</p>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  {report.locationName}
+                </p>
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${report.coordinates.lat},${report.coordinates.lng}`}
                   target="_blank"

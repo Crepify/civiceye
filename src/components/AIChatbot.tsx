@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Send, X, Sparkles, Info } from 'lucide-react';
+import { Bot, Send, X, Sparkles, MapPin, Building2, Flag, GraduationCap, Phone, Mail } from 'lucide-react';
 import { useBrand } from '@/hooks/useBrand';
-import { useReports } from '@/hooks/useReports';
-import { cn } from '@/utils/cn';
+import { CAMPUS_ADDRESS } from '@/data/amritaCampus/campusInfo';
+import { AUTHORITIES } from '@/data/authorities';
 
 interface Message {
   id: string;
@@ -12,101 +12,73 @@ interface Message {
   timestamp: string;
 }
 
-const SUGGESTED_QUESTIONS = [
-  'How do I report a pothole?',
-  'Where is the Central Library?',
-  'Who handles garbage in my area?',
-  'How to track my campus issue?',
-  'What is the BBMP helpline?',
-];
-
-const MOCK_RESPONSES: Record<string, string> = {
-  'how do i report a pothole?': 'To report a pothole: 1) Go to Report page, 2) Select Pothole category, 3) Add photo (AI will auto-detect with bounding boxes), 4) Pin location on campus map (for Amrita Eye) or city map (for CivicEye) — every location pinnable to 1m, 5) Add title & description, 6) Submit. Your report will be emailed to BBMP (comm@bbmp.gov.in) with AI annotated image + Google Maps link + severity + report link.',
-  'where is the central library?': 'Central Library is in Block E, 4th Floor, New Block. Area 1213 sq m, 200 seating, Reading Hall 325 sq m 150 seating, 45,880+ items, Reference & Periodicals, Digital VIDYA with video/audio lectures, 28 newspapers 8am-12midnight. Find it on campus map: /amrita/map?b=e&f=e-4&room=Library',
-  'who handles garbage in my area?': 'For CivicEye (city): BBMP Solid Waste Management — email comm@bbmp.gov.in, phone 1533 / +918022660000, WhatsApp waste 9448197197, portal https://www.bbmp.gov.in. For Amrita Eye (campus): Facilities & Housekeeping — Estate Office, Ground Floor, Admin Block, email civiceyeoffcial@gmail.com (routed to staff). Your report will be auto-emailed with AI annotation + Maps link.',
-  'how to track my campus issue?': 'Campus issues only show on custom campus map (no Google Maps) — MapPage when Amrita user, AmritaMapCanvas on landing, Dashboard, Report location step, Features preview all use custom map. Pin any location to 1m, get QR deep links /amrita/map?b=block-c&f=c-g&room=C-G7. Track in Dashboard or Community with AI annotation view.',
-  'what is the bbmp helpline?': 'BBMP Helpline: Toll-free 1533, Citizen Helpline +918022660000 (080-2266 0000), WhatsApp grievance 919480685700, Waste WhatsApp 9448197197, Email comm@bbmp.gov.in, Zone emails: East zc-east@bbmp.gov.in, West zc-west@bbmp.gov.in, South zc-south@bbmp.gov.in, Mahadevapura bbmpjcmahadevapura@gmail.com, Portal https://www.bbmp.gov.in',
+const KNOWLEDGE = {
+  civiceye: [
+    { q: 'what is civiceye', a: 'CivicEye is a civic-issue reporting platform — making cities better, one report at a time. Citizens report potholes, garbage, broken lights, etc., with photo + AI analysis + location, community verifies, authorities fix.' },
+    { q: 'how to report', a: 'Go to Report → Pick category → Add photo (AI will auto-detect) → Pin location on map → Add details → Submit. Your report gets a code like CE-XXXX and goes live for community verification.' },
+    { q: 'bbmp', a: 'BBMP (Bruhat Bengaluru Mahanagara Palike) handles roads, potholes, garbage, etc. CivicEye auto-routes your report to comm@bbmp.gov.in (central grievance) + zone emails (East/West/South/Mahadevapura) based on location. Helpline 1533 / 080-2266 0000, WhatsApp 9480685700 (grievance) + 9448197197 (waste). Official portal: bbmp.gov.in' },
+    { q: 'email', a: 'When you click Report to Authority, CivicEye auto-generates an email with: attached original photo + AI annotated image with bounding boxes, Google Maps link https://www.google.com/maps?q=lat,lng, severity (LOW/MEDIUM/HIGH/CRITICAL), and link to report on website. For BBMP it goes to comm@bbmp.gov.in, for campus to Estate Office via civiceyeoffcial@gmail.com.' },
+    { q: 'ai', a: 'CivicEye uses Roboflow cloud primary → on-device YOLO fallback (civiceye-int8.onnx) → Hugging Face → mock. It auto-detects category, confidence, severity, objects, and produces annotated image with bounding boxes. You can view AI annotation in Community tab via View AI button on each card.' },
+    { q: 'community', a: 'Community tab shows citizen reports. Each card now has View AI button to toggle between original and AI annotated image with bounding boxes. You can upvote, confirm, reject, and review.' },
+  ],
+  amrita: [
+    { q: 'what is amrita eye', a: 'Amrita Eye is the campus portal for Amrita Bengaluru — Kasavanahalli, 560035, 50 acres official (37.2 measured). It uses a custom campus map ONLY (no Google Maps) with 12 buildings, 5 blocks A-E (E is square 50.8x50.8m per your correction, all halls in E Block 1st/2nd/3rd), 15 floors, 165 rooms, 155 faculty public searchable, every location pinnable to 1m.' },
+    { q: 'estate office', a: `Campus Estate & Civil Works handles potholes, broken roads, sidewalks, manholes, fallen trees. Email: ${CAMPUS_ADDRESS.email} (routed via civiceyeoffcial@gmail.com). Address: Estate Office, Admin Block, Amrita Campus. Hours: Mon–Sat 9-5. Facilities & Housekeeping handles garbage, sewage, water-leakage, street-light. Security Control Room handles safety & accidents 24x7.` },
+    { q: 'how to report campus', a: 'Go to Report → Pin location on custom campus map (tap any building, block, floor, room) → Add photo (AI annotated) → Submit. Your campus issue only shows on custom campus map, not city map. Estate office gets auto email with AI annotation + Google Maps link + severity + report link.' },
+    { q: 'floor plan', a: 'Floor plans are tentative but accurate from your A Block 1st floor photos (open corridor south with railings facing fountain, rooms north wooden doors, Akshaya Hall sign, Indo-US blue curved wall Indian flag US flag Amma photo) + E Block square 50.8x50.8m per your correction + Google Maps satellite E-shaped comb order E,A,B,C,D. All halls in E Block 1st/2nd/3rd per your correction. Library 4th floor only 1213 sq m 200 seating + reading hall 325 sq m 150.' },
+    { q: 'faculty', a: '155 faculty public searchable by name/dept/room from amrita.edu. Tap a faculty in campus map to see desk (indicative), room, floor, block, official profile link, and route from entrance.' },
+  ],
 };
 
-export function AIChatbot() {
-  const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      text: 'Hi! I’m CivicEye AI — your campus & city helper. Ask me about reporting, campus map, BBMP contacts, or your issues. I’m in progress, so I’m learning from your photos and reports!',
-      timestamp: new Date().toISOString(),
-    },
-  ]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { isAmrita } = useBrand();
-  const { reports } = useReports();
+function getResponse(input: string, isAmrita: boolean): string {
+  const q = input.toLowerCase();
+  const all = [...KNOWLEDGE.civiceye, ...(isAmrita ? KNOWLEDGE.amrita : [])];
+  for (const item of all) {
+    if (q.includes(item.q)) return item.a;
+  }
+  if (q.includes('hello') || q.includes('hi')) return `Hello! 👋 I'm CivicEye AI assistant — I can help with reporting issues, BBMP, Estate Office, campus map, AI annotations, community, etc. Ask me anything!`;
+  if (q.includes('map')) return isAmrita ? KNOWLEDGE.amrita[0].a : 'CivicEye map shows live issues with Google Maps + fallback vector map, clustering, heatmap, filters. Amrita Eye uses custom campus map only (no Google Maps) with floor plans.';
+  if (q.includes('library')) return 'Central Library — E Block 4th floor, New Block, 1213 sq m total (16,550 sq ft with reading hall), 200 seating + Reading Hall 325 sq m 150 seating, 45,880+ items, Reference & Periodicals, Digital VIDYA, 28 newspapers 8am-12midnight.';
+  if (q.includes('hall')) return 'Halls in E Block per your correction: Amriteshwari 265, Sudhamani 300, Krishna 112 on 1st floor, Vyasa 90, Rama 85, Valmiki 80, Conference 27 on 2nd floor, Indo-US 62, E-Learning 120, Akshaya 100 on 3rd floor — all in E Block square 50.8x50.8m.';
+  if (q.includes('contact') || q.includes('phone') || q.includes('email')) {
+    const auth = AUTHORITIES.filter((a) => (isAmrita ? a.scope === 'campus' : a.scope === 'city')).slice(0,3).map((a) => `${a.name}: ${a.email || a.phone}`).join(', ');
+    return `Authorities: ${auth}. For campus: Estate Office via ${CAMPUS_ADDRESS.email}. For city: BBMP comm@bbmp.gov.in helpline 1533.`;
+  }
+  return `I'm still learning! 🤖 For now I can help with: reporting issues, BBMP/Estate Office auto email with AI annotations + Google Maps link + severity + report link, campus map (12 buildings, 5 blocks A-E, E square, halls in E Block 1st/2nd/3rd, A Block 1st floor from your photos), faculty 155, community AI view, etc. Try asking about BBMP, Estate Office, floor plan, library, halls, or how to report.`;
+}
 
-  const campusIssues = reports.filter((r) => r.scope === 'campus').length;
-  const cityIssues = reports.filter((r) => r.scope === 'city').length;
+export function AIChatbot() {
+  const { isAmrita } = useBrand();
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '1', role: 'assistant', text: `Hi! I'm CivicEye AI 🤖 — ${isAmrita ? 'Amrita Eye campus helper' : 'city helper'}. I can help with reporting, BBMP, Estate Office, campus map, AI annotations, community, etc.`, timestamp: new Date().toISOString() },
+  ]);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  const handleSend = async (text: string = input) => {
-    if (!text.trim()) return;
-    
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      text: text.trim(),
-      timestamp: new Date().toISOString(),
-    };
-    
-    setMessages((prev) => [...prev, userMessage]);
+  const send = () => {
+    const text = input.trim();
+    if (!text) return;
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', text, timestamp: new Date().toISOString() };
+    setMessages((m) => [...m, userMsg]);
     setInput('');
-    setIsTyping(true);
-
-    // Simulate AI thinking
     setTimeout(() => {
-      const lower = text.toLowerCase().trim();
-      let response = MOCK_RESPONSES[lower] || '';
-
-      if (!response) {
-        if (lower.includes('pothole') || lower.includes('road')) {
-          response = MOCK_RESPONSES['how do i report a pothole?'];
-        } else if (lower.includes('library')) {
-          response = MOCK_RESPONSES['where is the central library?'];
-        } else if (lower.includes('garbage') || lower.includes('waste') || lower.includes('bbmp') || lower.includes('authority')) {
-          response = MOCK_RESPONSES['who handles garbage in my area?'];
-        } else if (lower.includes('campus') || lower.includes('track') || lower.includes('block') || lower.includes('floor')) {
-          response = MOCK_RESPONSES['how to track my campus issue?'];
-        } else if (lower.includes('helpline') || lower.includes('contact') || lower.includes('phone')) {
-          response = MOCK_RESPONSES['what is the bbmp helpline?'];
-        } else {
-          response = `I’m still learning! Right now I can help with:\n- Reporting potholes, garbage, etc. with AI annotations + Google Maps links\n- Campus map: Block E square with halls on 1st/2nd/3rd floor, A Block 1st floor open corridor south with railings facing fountain, rooms north, 155 faculty, every location pinnable\n- Authority routing: BBMP comm@bbmp.gov.in, 1533, WhatsApp 919480685700, Estate Office civiceyeoffcial@gmail.com\n- Community AI annotation view\n\nYou asked: "${text.trim()}" — I’ll get better as the AI chatbot progresses. Try one of the suggested questions below! We have ${isAmrita ? `${campusIssues} campus issues` : `${cityIssues} city issues`} live right now.`;
-        }
-      }
-
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        text: response,
-        timestamp: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsTyping(false);
-    }, 800);
+      const reply = getResponse(text, isAmrita);
+      const assistantMsg: Message = { id: (Date.now()+1).toString(), role: 'assistant', text: reply, timestamp: new Date().toISOString() };
+      setMessages((m) => [...m, assistantMsg]);
+    }, 600);
   };
 
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
-        className={cn(
-          'fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all hover:scale-105 sm:bottom-6 sm:right-6',
-          isAmrita ? 'bg-[#A51636] text-white shadow-[0_8px_24px_rgba(165,22,54,0.3)]' : 'bg-[#ffd630] text-[#172b44] border-[3px] border-[#172b44] shadow-[4px_4px_0_#172b44]',
-        )}
-        aria-label="Open AI Chatbot"
+        onClick={() => setOpen((v) => !v)}
+        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#A51636] text-white shadow-[0_8px_24px_rgba(165,22,54,0.3)] transition-transform hover:scale-105 active:scale-95 sm:bottom-6 sm:right-6"
+        title="AI Chatbot — in progress"
       >
         <Bot className="h-7 w-7" />
       </button>
@@ -114,89 +86,68 @@ export function AIChatbot() {
       <AnimatePresence>
         {open ? (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[90] flex items-end justify-end bg-black/40 p-4 backdrop-blur-sm sm:p-6"
-            onClick={() => setOpen(false)}
+            initial={{ opacity: 0, y: 20, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+            className="fixed bottom-28 right-4 z-50 flex h-[480px] w-[90vw] max-w-sm flex-col overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_16px_48px_rgba(0,0,0,0.2)] dark:border-white/10 dark:bg-[#1a0f14] sm:bottom-24 sm:right-6 sm:h-[520px]"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 26 }}
-              className={cn(
-                'flex h-[520px] w-full max-w-[380px] flex-col overflow-hidden sm:h-[600px]',
-                isAmrita ? 'rounded-[20px] border border-white/10 bg-white shadow-[0_24px_64px_rgba(0,0,0,0.2)] dark:bg-[#111]' : 'rounded-[20px] border-[4px] border-[#172b44] bg-[#fff8e7] shadow-[8px_8px_0_#172b44]',
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={cn('flex items-center justify-between border-b p-4', isAmrita ? 'border-[#A51636]/10 bg-[#FFF5F7] dark:border-white/5 dark:bg-[#1a0f14]' : 'border-[#172b44] bg-[#ffd630]')}>
-                <div className="flex items-center gap-3">
-                  <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', isAmrita ? 'bg-[#A51636] text-white' : 'bg-[#172b44] text-white')}>
-                    <Bot className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
-                      CivicEye AI <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-black uppercase text-slate-900">In Progress</span>
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{isAmrita ? 'Amrita Eye helper' : 'City helper'} · {isAmrita ? `${campusIssues} campus issues` : `${cityIssues} city issues`}</p>
+            <div className="flex items-center gap-3 border-b border-slate-200 bg-[#FFF5F7] p-4 dark:border-white/10 dark:bg-[#1a0f14]">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#A51636] text-white">
+                <Bot className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white">
+                  CivicEye AI <Sparkles className="h-4 w-4 text-[#A51636]" /> <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-800">In Progress</span>
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{isAmrita ? 'Amrita Eye campus helper' : 'City helper'} — BBMP + Estate Office + Maps + AI</div>
+              </div>
+              <button onClick={() => setOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-white/10">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto p-4 space-y-3">
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  {msg.role === 'assistant' ? (
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#A51636]/10 text-[#A51636]">
+                      <Bot className="h-4 w-4" />
+                    </div>
+                  ) : null}
+                  <div className={`max-w-[80%] rounded-[16px] px-3.5 py-2.5 text-[13px] leading-[1.5] ${msg.role === 'user' ? 'bg-[#A51636] text-white' : 'bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-slate-200'}`}>
+                    {msg.text}
                   </div>
                 </div>
-                <button onClick={() => setOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full bg-black/10 text-slate-600 hover:bg-black/20 dark:bg-white/10 dark:text-white">
-                  <X className="h-4 w-4" />
+              ))}
+              <div ref={bottomRef} />
+            </div>
+
+            <div className="border-t border-slate-200 p-3 dark:border-white/10">
+              <div className="flex flex-wrap gap-1.5 mb-2.5">
+                {[
+                  { label: 'How to report?', icon: Flag },
+                  { label: 'BBMP email?', icon: Mail },
+                  { label: 'Estate Office?', icon: Building2 },
+                  { label: 'Campus map?', icon: MapPin },
+                  { label: 'Faculty?', icon: GraduationCap },
+                  { label: 'AI annotation?', icon: Sparkles },
+                ].map((chip) => (
+                  <button key={chip.label} onClick={() => { setInput(chip.label); setTimeout(send, 100); }} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                    <chip.icon className="h-3 w-3" /> {chip.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} placeholder="Ask about BBMP, Estate, maps, AI..." className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#A51636] dark:border-white/10 dark:bg-white/5 dark:text-white" />
+                <button onClick={send} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#A51636] text-white shadow-sm hover:bg-[#8a1230]">
+                  <Send className="h-4 w-4" />
                 </button>
               </div>
-
-              <div className="flex-1 space-y-3 overflow-auto bg-slate-50 p-4 dark:bg-[#0a0a0f]">
-                {messages.map((msg) => (
-                  <div key={msg.id} className={cn('flex gap-2', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-                    {msg.role === 'assistant' ? (
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
-                        <Sparkles className="h-4 w-4" />
-                      </div>
-                    ) : null}
-                    <div className={cn('max-w-[80%] rounded-[16px] px-4 py-2.5 text-[13px] leading-relaxed', msg.role === 'user' ? (isAmrita ? 'bg-[#A51636] text-white' : 'bg-[#172b44] text-white') : 'bg-white text-slate-700 shadow-sm dark:bg-white/10 dark:text-slate-200')}>
-                      <p className="whitespace-pre-wrap">{msg.text}</p>
-                    </div>
-                  </div>
-                ))}
-                {isTyping ? (
-                  <div className="flex gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-500/10 text-violet-600">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <div className="rounded-[16px] bg-white px-4 py-2.5 shadow-sm dark:bg-white/10">
-                      <div className="flex gap-1">
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-                <div ref={messagesEndRef} />
+              <div className="mt-2 flex items-center justify-center gap-1 text-[10px] text-slate-400">
+                <Phone className="h-3 w-3" /> BBMP 1533 · Estate {CAMPUS_ADDRESS.phone} · <Mail className="h-3 w-3" /> {CAMPUS_ADDRESS.email}
               </div>
-
-              <div className="border-t border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-[#111]">
-                <div className="mb-2.5 flex flex-wrap gap-1.5">
-                  {SUGGESTED_QUESTIONS.map((q) => (
-                    <button key={q} onClick={() => handleSend(q)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-600 hover:border-[#A51636]/30 hover:bg-[#A51636]/5 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                      {q}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="Ask about reporting, campus map, BBMP..." className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-[#A51636] focus:ring-2 focus:ring-[#A51636]/20 dark:border-white/10 dark:bg-white/5 dark:text-white" />
-                  <button onClick={() => handleSend()} className={cn('flex h-10 w-10 items-center justify-center rounded-full text-white', isAmrita ? 'bg-[#A51636] hover:bg-[#8a1230]' : 'bg-[#172b44] hover:bg-black')}>
-                    <Send className="h-4 w-4" />
-                  </button>
-                </div>
-                <p className="mt-2 flex items-center justify-center gap-1 text-[10px] text-slate-400">
-                  <Info className="h-3 w-3" /> AI chatbot in progress · powered by CivicEye AI · {isAmrita ? 'Amrita Eye' : 'CivicEye'}
-                </p>
-              </div>
-            </motion.div>
+            </div>
           </motion.div>
         ) : null}
       </AnimatePresence>

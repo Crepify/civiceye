@@ -1,27 +1,37 @@
 /**
- * Vercel serverless function — "Report to Authority" email gateway with AI annotations.
+ * Vercel serverless function — "Report to Authority" email gateway.
  *
  * POST /api/report-authority
  * Body:
  *   {
- *     authorityId: "bbmp-42",
- *     message?: "...",
- *     report: {
- *       code?, id?, title, description, category, severity,
+ *     authorityId: "bbmp-42",                     // required (allow-listed)
+ *     message?: "...",                            // optional user note
+ *     report: {                                   // required
+ *       code? / id?, title, description, category, severity,
  *       locationName?, coordinates?: { lat, lng },
- *       image?, annotatedImage?, ai?, url?, author?, reporterEmail?, scope?
+ *       image?, url?, author?, reporterEmail?, scope?
  *     }
  *   }
  *
- * Features per your request:
- * - Auto email to BBMP / Estate Office with attached picture with AI annotations
- * - Google Maps coordinate link with severity and link to report on website
- * - Same for Amrita Eye (estate office)
- * - Community tab AI annotation view (handled in frontend)
+ * The recipient email is resolved SERVER-SIDE (env override first, then the
+ * built-in directory). The client can never choose the "to" address, so this
+ * function cannot be abused as an open spam relay.
+ *
+ * Delivery config (Vercel project → Settings → Environment Variables):
+ *   SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS   — any SMTP provider
+ *   SMTP_FROM                                       — e.g. "CivicEye <alerts@yourdomain.com>"
+ *   AUTHORITY_EMAIL_<ID>                            — e.g. AUTHORITY_EMAIL_BBMP_42
+ *                                                     (overrides the default official inbox)
+ *
+ * If SMTP is not configured the function responds 503 with
+ * { reason: "EMAIL_NOT_CONFIGURED" } and the UI falls back to a mailto: link,
+ * so the feature still works end-to-end during demos.
  */
 
 import nodemailer from 'nodemailer';
 
+/* Built-in authority directory (id → { name, department, email }).
+ * Keep in sync with src/data/authorities.ts. Env vars always win. */
 const DIRECTORY = {
   'bbmp-42': { name: 'BBMP — Roads & Potholes', department: 'Roads & Infrastructure', email: 'comm@bbmp.gov.in' },
   'bbmp-swm': { name: 'BBMP Solid Waste Management', department: 'Sanitation', email: 'comm@bbmp.gov.in' },
@@ -34,7 +44,7 @@ const DIRECTORY = {
   'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: 'civiceyeoffcial@gmail.com' },
 };
 
-const MAX_BODY_CHARS = 25_000;
+const MAX_BODY_CHARS = 20_000;
 
 const esc = (s) =>
   String(s ?? '')
@@ -62,22 +72,6 @@ function emailFor(authorityId) {
   return (process.env[envKey] || '').trim() || DIRECTORY[authorityId].email;
 }
 
-function parseDataUrl(dataUrl) {
-  // data:image/jpeg;base64,...
-  if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) return null;
-  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
-  if (!match) return null;
-  const mime = match[1];
-  const b64 = match[2];
-  try {
-    const buffer = Buffer.from(b64, 'base64');
-    const ext = mime.split('/')[1]?.split(';')[0] || 'jpg';
-    return { mime, buffer, ext };
-  } catch {
-    return null;
-  }
-}
-
 function buildEmail({ authority, report, message, ref }) {
   const lat = report?.coordinates?.lat;
   const lng = report?.coordinates?.lng;
@@ -86,99 +80,89 @@ function buildEmail({ authority, report, message, ref }) {
   const mapsDirUrl = hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : null;
   const reportUrl = report.url || (report.id ? `https://civiceye-pied.vercel.app/report/${report.id}` : null);
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
-  const ai = report.ai || {};
+  const isCampus = report.scope === 'campus';
+  const severityUpper = String(report.severity || '').toUpperCase();
+  const severityNote = report.severity === 'critical' ? 'Immediate action required — safety risk' : report.severity === 'high' ? 'High priority — please act within 24h' : report.severity === 'medium' ? 'Medium priority — 7 days' : 'Low priority — review when possible';
 
-  const severityUpper = (report.severity || 'medium').toUpperCase();
-  const confidencePct = ai.confidence ? `${Math.round(ai.confidence * 100)}%` : null;
+  const ai = report.ai || {};
+  const hasAnnotated = Boolean(ai.annotatedImage);
 
   const rows = [
     ['Reference', ref],
     ['Report', report.code || report.id || '—'],
     ['Title', report.title],
     ['Category', report.category],
-    ['Severity', `${severityUpper}${confidencePct ? ` (AI ${confidencePct})` : ''}`],
+    ['Severity', `${severityUpper} — ${severityNote}`],
     ['Location', report.locationName || (hasCoords ? `${lat}, ${lng}` : '—')],
-    ['Coordinates', hasCoords ? `${lat}, ${lng}` : '—'],
+    ['Google Maps', mapsUrl || '—'],
+    ['Directions', mapsDirUrl || '—'],
+    ['Report Link', reportUrl || '—'],
     ['Reported by', report.author || 'Citizen'],
     ['Citizen reply-to', report.reporterEmail || '—'],
-    ['Submitted via', appName],
-    ['SLA requested', '7 working days'],
-  ];
+    ['Submitted via', appName + (isCampus ? ' — Estate Office' : ' — BBMP')],
+    ['SLA requested', report.severity === 'critical' ? '24 hours' : '7 working days'],
+    ai.confidence ? ['AI Confidence', `${Math.round(ai.confidence*100)}%`] : null,
+    ai.model ? ['AI Model', ai.model] : null,
+    ai.objects ? ['AI Detected', (ai.objects||[]).join(', ')] : null,
+  ].filter(Boolean);
 
   const tableRows = rows
     .map(
       ([k, v]) => `
       <tr>
         <td style="padding:8px 12px;font-size:13px;color:#64748b;font-weight:600;white-space:nowrap;vertical-align:top;">${esc(k)}</td>
-        <td style="padding:8px 12px;font-size:14px;color:#0f172a;">${esc(v)}</td>
-      </tr>`,
-    )
-    .join('');
-
-  const aiRows = [
-    ai.category ? ['AI Detected Category', ai.category] : null,
-    confidencePct ? ['AI Confidence', confidencePct] : null,
-    ai.severity ? ['AI Severity', ai.severity.toUpperCase()] : null,
-    ai.description ? ['AI Description', ai.description] : null,
-    ai.objects && ai.objects.length ? ['AI Objects', ai.objects.join(', ')] : null,
-    ai.model ? ['AI Model', `${ai.model}${ai.engine ? ` (${ai.engine})` : ''}`] : null,
-  ].filter(Boolean);
-
-  const aiTableRows = aiRows
-    .map(
-      ([k, v]) => `
-      <tr>
-        <td style="padding:8px 12px;font-size:13px;color:#7c3aed;font-weight:600;white-space:nowrap;vertical-align:top;">${esc(k)}</td>
-        <td style="padding:8px 12px;font-size:14px;color:#4c1d95;">${esc(v)}</td>
+        <td style="padding:8px 12px;font-size:14px;color:#0f172a;word-break:break-all;">${esc(v)}</td>
       </tr>`,
     )
     .join('');
 
   const html = `<!doctype html>
 <html><body style="margin:0;padding:24px;background:#f8fafc;font-family:Inter,Segoe UI,Arial,sans-serif;">
-  <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
-    <div style="background:${report.scope === 'campus' ? 'linear-gradient(135deg,#A51636,#E52B50)' : 'linear-gradient(135deg,#f59e0b,#ef4444)'};padding:20px 24px;">
-      <p style="margin:0;color:#ffffff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;">${esc(appName)} · ${severityUpper} · Citizen escalation ${esc(ref)}</p>
-      <h1 style="margin:6px 0 0;color:#ffffff;font-size:20px;line-height:1.3;">${esc(report.title)}</h1>
-      <p style="margin:6px 0 0;color:#ffffff;font-size:13px;opacity:0.9;">Routed to: ${esc(authority.name)} (${esc(authority.department)})</p>
+  <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
+    <div style="background:${isCampus ? 'linear-gradient(135deg,#A51636,#E52B50)' : 'linear-gradient(135deg,#6366f1,#8b5cf6)'};padding:20px 24px;">
+      <p style="margin:0;color:#e0e7ff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;">${esc(appName)} · ${severityUpper} · ${esc(ref)}</p>
+      <h1 style="margin:6px 0 0;color:#ffffff;font-size:20px;">New ${isCampus ? 'campus' : 'civic'} issue reported — ${esc(severityUpper)}</h1>
+      <p style="margin:6px 0 0;color:#e0e7ff;font-size:13px;">Routed to: ${esc(authority.name)} (${esc(authority.department)}) — ${esc(severityNote)}</p>
     </div>
-    <div style="padding:20px 24px;">
-      <div style="margin-bottom:16px;padding:12px 16px;background:${severityUpper === 'CRITICAL' ? '#fef2f2' : severityUpper === 'HIGH' ? '#fff7ed' : severityUpper === 'MEDIUM' ? '#fefce8' : '#f0fdf4'};border:1px solid ${severityUpper === 'CRITICAL' ? '#fecaca' : severityUpper === 'HIGH' ? '#fed7aa' : severityUpper === 'MEDIUM' ? '#fde68a' : '#bbf7d0'};border-radius:12px;">
-        <p style="margin:0;font-size:13px;font-weight:700;color:${severityUpper === 'CRITICAL' ? '#dc2626' : severityUpper === 'HIGH' ? '#ea580c' : severityUpper === 'MEDIUM' ? '#ca8a04' : '#16a34a'};">Severity: ${esc(severityUpper)}${confidencePct ? ` · AI Confidence ${esc(confidencePct)}` : ''}</p>
-        ${hasCoords ? `<p style="margin:6px 0 0;font-size:13px;color:#334155;">Location: ${esc(report.locationName || '')} — <a href="${esc(mapsUrl)}" style="color:#4f46e5;font-weight:600;">${esc(`${lat}, ${lng}`)} — Open in Google Maps</a></p>` : ''}
-        ${reportUrl ? `<p style="margin:6px 0 0;font-size:13px;color:#334155;">Report Link: <a href="${esc(reportUrl)}" style="color:#4f46e5;font-weight:600;">${esc(reportUrl)}</a></p>` : ''}
-      </div>
-
-      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#f8fafc;border-radius:12px;overflow:hidden;">${tableRows}</table>
-
-      ${aiTableRows ? `<div style="margin-top:16px;"><p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;">AI Analysis with Annotations</p><table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#f5f3ff;border-radius:12px;overflow:hidden;">${aiTableRows}</table></div>` : ''}
-
+    <div style="padding:16px 24px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">${tableRows}</table>
+      
       <div style="margin:16px 0;padding:14px 16px;background:#f1f5f9;border-radius:12px;">
         <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;">Description</p>
         <p style="margin:0;font-size:14px;line-height:1.6;color:#1e293b;white-space:pre-wrap;">${esc(report.description)}</p>
       </div>
 
-      ${message ? `<div style="margin:16px 0;padding:14px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;"><p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:.08em;">Note from the citizen</p><p style="margin:0;font-size:14px;line-height:1.6;color:#7c2d12;white-space:pre-wrap;">${esc(message)}</p></div>` : ''}
+      ${hasAnnotated ? `
+      <div style="margin:16px 0;padding:14px 16px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;">
+        <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.08em;">AI Analysis — Annotated Image with Bounding Boxes</p>
+        <p style="margin:0 0 8px;font-size:13px;color:#065f46;">Model: ${esc(ai.model)} · Confidence: ${ai.confidence ? Math.round(ai.confidence*100)+'%' : '—'} · Detected: ${esc((ai.objects||[]).join(', '))}</p>
+        <p style="margin:0;font-size:13px;color:#065f46;">Summary: ${esc(ai.summary)}</p>
+        <p style="margin:8px 0 0;font-size:12px;color:#047857;">Annotated image is attached to this email and also visible on the report page. Original photo is also attached.</p>
+      </div>` : `
+      <div style="margin:16px 0;padding:14px 16px;background:#fef3c7;border:1px solid #fcd34d;border-radius:12px;">
+        <p style="margin:0;font-size:12px;color:#92400e;">AI annotated image not available for this report — original evidence photo is attached. View full report for AI details if available.</p>
+      </div>`}
+
+      ${
+        message
+          ? `<div style="margin:16px 0;padding:14px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:.08em;">Note from the citizen</p>
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#7c2d12;white-space:pre-wrap;">${esc(message)}</p>
+      </div>`
+          : ''
+      }
 
       <div style="margin:20px 0 8px;">
-        ${reportUrl ? `<a href="${esc(reportUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:12px 20px;background:${report.scope === 'campus' ? '#A51636' : '#f59e0b'};color:#ffffff;text-decoration:none;border-radius:12px;font-size:14px;font-weight:700;">View Report on Website</a>` : ''}
-        ${mapsUrl ? `<a href="${esc(mapsUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:12px 20px;background:#0f172a;color:#ffffff;text-decoration:none;border-radius:12px;font-size:14px;font-weight:700;">Open in Google Maps</a>` : ''}
-        ${mapsDirUrl ? `<a href="${esc(mapsDirUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:12px 20px;background:#334155;color:#ffffff;text-decoration:none;border-radius:12px;font-size:14px;font-weight:700;">Get Directions</a>` : ''}
+        ${reportUrl ? `<a href="${esc(reportUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:10px 18px;background:${isCampus ? '#A51636' : '#4f46e5'};color:#ffffff;text-decoration:none;border-radius:10px;font-size:14px;font-weight:700;">View full report & AI annotation on website</a>` : ''}
+        ${mapsUrl ? `<a href="${esc(mapsUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:10px 18px;background:#0f172a;color:#ffffff;text-decoration:none;border-radius:10px;font-size:14px;font-weight:700;">Open location in Google Maps — ${esc(severityUpper)}</a>` : ''}
+        ${mapsDirUrl ? `<a href="${esc(mapsDirUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:10px 18px;background:#ffffff;color:#0f172a;border:1px solid #e2e8f0;text-decoration:none;border-radius:10px;font-size:14px;font-weight:700;">Get directions</a>` : ''}
       </div>
 
-      <div style="margin-top:16px;padding:12px 16px;background:#f8fafc;border-radius:12px;border:1px dashed #cbd5e1;">
-        <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">
-          <b>Attached:</b> Original evidence photo${ai.annotatedImage ? ' + AI annotated image with bounding boxes and severity' : ''} — included as attachments.<br/>
-          <b>Google Maps:</b> ${mapsUrl ? `<a href="${esc(mapsUrl)}" style="color:#4f46e5;">${esc(mapsUrl)}</a> with severity ${esc(severityUpper)}` : '—'}<br/>
-          <b>Report Link:</b> ${reportUrl ? `<a href="${esc(reportUrl)}" style="color:#4f46e5;">${esc(reportUrl)}</a>` : '—'}<br/>
-          This email was auto-generated when a citizen pressed “Report to authority” in ${esc(appName)}.<br/>
-          ${report.scope === 'campus' ? 'For Amrita Eye, this is routed to Campus Estate & Civil Works / Facilities & Housekeeping / Security (estate office reporting).' : 'For CivicEye, this is routed to BBMP with zone-aware email (East/West/South/Mahadevapura) + BWSSB/BESCOM/Traffic Police.'}
-        </p>
-      </div>
-
-      <p style="margin-top:16px;font-size:11px;color:#94a3b8;line-height:1.6;">
-        This escalation includes attached picture with AI annotations, Google Maps coordinate link with severity, and link to report on website — same for Amrita Eye and CivicEye.<br/>
-        Please acknowledge within 7 working days SLA.
+      <p style="font-size:12px;color:#94a3b8;line-height:1.6;">
+        This escalation was auto-generated when a citizen pressed “Report to authority” in ${esc(appName)}.
+        ${isCampus ? 'Estate Office will review within SLA.' : 'BBMP will acknowledge within SLA.'} 
+        Evidence photos (original + AI annotated with bounding boxes) are attached to this email.
+        ${report.image ? `Original: ${esc(report.image)}` : ''}
       </p>
     </div>
   </div>
@@ -186,59 +170,34 @@ function buildEmail({ authority, report, message, ref }) {
 
   const text = [
     `${appName} — ${severityUpper} — Citizen escalation ${ref}`,
-    `Routed to: ${authority.name} (${authority.department})`,
+    `Routed to: ${authority.name} (${authority.department}) — ${severityNote}`,
     '',
     ...rows.map(([k, v]) => `${k}: ${v}`),
     '',
-    ...(aiRows.length ? ['AI Analysis:', ...aiRows.map(([k, v]) => `${k}: ${v}`), ''] : []),
-    `Description:\n${report.description}`,
-    message ? `\nNote from citizen:\n${message}` : '',
-    reportUrl ? `\nView Report on Website: ${reportUrl}` : '',
-    mapsUrl ? `\nGoogle Maps (with severity ${severityUpper}): ${mapsUrl}` : '',
-    mapsDirUrl ? `\nGet Directions: ${mapsDirUrl}` : '',
-    report.image ? `\nEvidence photo: ${report.image}` : '',
-    ai.annotatedImage ? `\nAI Annotated Photo: attached (with bounding boxes and severity)` : '',
+    ai.summary ? `AI Summary: ${ai.summary}` : '',
+    ai.objects ? `AI Detected: ${(ai.objects||[]).join(', ')}` : '',
+    ai.confidence ? `AI Confidence: ${Math.round(ai.confidence*100)}%` : '',
+    hasAnnotated ? `AI Annotated Image: Attached to this email (bounding boxes around ${report.category})` : '',
     '',
-    `Attached: Original evidence photo${ai.annotatedImage ? ' + AI annotated image with bounding boxes and severity' : ''}`,
-    `This email includes attached picture with AI annotations, Google Maps coordinate link with severity, and link to report on website — same for Amrita Eye and CivicEye.`,
+    `Description:\n${report.description}`,
+    message ? `\nNote from the citizen:\n${message}` : '',
+    reportUrl ? `\nFull report & AI annotation on website: ${reportUrl}` : '',
+    mapsUrl ? `\nGoogle Maps (Severity ${severityUpper}): ${mapsUrl}` : '',
+    mapsDirUrl ? `\nDirections: ${mapsDirUrl}` : '',
+    report.image ? `\nOriginal Evidence Photo: ${report.image}` : '',
+    hasAnnotated ? `\nAnnotated Evidence Photo (AI with bounding boxes): Attached` : '',
   ]
     .filter((l) => l !== '')
     .join('\n');
-
-  // Build attachments: original image + annotated image if available and is data URL
-  const attachments = [];
-  
-  const originalData = parseDataUrl(report.image);
-  if (originalData) {
-    attachments.push({
-      filename: `evidence-original-${ref}.${originalData.ext}`,
-      content: originalData.buffer,
-      contentType: originalData.mime,
-    });
-  } else if (report.image && report.image.startsWith('http')) {
-    // For http URLs, we cannot attach directly without fetching, but we can include as link
-    // Nodemailer can attach from URL if we fetch, but for simplicity we will not fetch here
-    // Instead, we will leave it as link in email
-  }
-
-  const annotatedData = parseDataUrl(report.annotatedImage || ai.annotatedImage);
-  if (annotatedData) {
-    attachments.push({
-      filename: `evidence-annotated-${ref}-${severityUpper}.${annotatedData.ext}`,
-      content: annotatedData.buffer,
-      contentType: annotatedData.mime,
-    });
-  }
 
   return {
     subject: `[${appName}] ${severityUpper} — ${report.title} — escalation ${ref}`.slice(0, 160),
     html,
     text,
-    attachments,
   };
 }
 
-export const config = { api: { bodyParser: { sizeLimit: '5mb' } } };
+export const config = { api: { bodyParser: { sizeLimit: '2mb' } } };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -269,18 +228,9 @@ export default async function handler(req, res) {
   const ref = `ESC-${Date.now().toString(36).toUpperCase()}`;
   const to = emailFor(authorityId);
 
-  if (!to) {
-    res.status(503).json({
-      reason: 'NO_PUBLIC_EMAIL',
-      ref,
-      to,
-      authority: { id: authorityId, name: authority.name, department: authority.department },
-    });
-    return;
-  }
-
   const smtp = smtpConfig();
   if (!smtp) {
+    // Not configured yet — tell the UI to fall back to a mailto: link.
     res.status(503).json({
       reason: 'EMAIL_NOT_CONFIGURED',
       ref,
@@ -293,6 +243,35 @@ export default async function handler(req, res) {
   try {
     const transport = nodemailer.createTransport(smtp);
     const mail = buildEmail({ authority, report, message, ref });
+
+    // Attach original + AI annotated pictures if they are data URLs or http URLs
+    const attachments = [];
+    const addAttachmentFromDataUrl = (dataUrl, filename) => {
+      if (!dataUrl || typeof dataUrl !== 'string') return;
+      if (dataUrl.startsWith('data:')) {
+        const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+        if (match) {
+          const contentType = match[1];
+          const base64 = match[2];
+          attachments.push({
+            filename,
+            content: Buffer.from(base64, 'base64'),
+            contentType,
+          });
+        }
+      }
+    };
+
+    // Original photo
+    addAttachmentFromDataUrl(report.image, `original-${ref}.jpg`);
+    // AI annotated photo
+    if (report.ai?.annotatedImage) {
+      addAttachmentFromDataUrl(report.ai.annotatedImage, `ai-annotated-${ref}.jpg`);
+    }
+
+    // If image is http URL (not data URL), we cannot attach directly without fetching, but we include link in email
+    // For data URLs we attach, for http we leave as link (to avoid fetching in serverless)
+
     await transport.sendMail({
       from: process.env.SMTP_FROM || `"CivicEye Alerts" <${process.env.SMTP_USER}>`,
       to,
@@ -300,7 +279,7 @@ export default async function handler(req, res) {
       subject: mail.subject,
       text: mail.text,
       html: mail.html,
-      attachments: mail.attachments,
+      attachments: attachments.length ? attachments : undefined,
     });
 
     res.status(200).json({

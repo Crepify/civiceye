@@ -1,11 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, ScanLine, Eye, EyeOff } from 'lucide-react';
 import type { Report } from '@/types';
 import { categoryById, SEVERITY_META, STATUS_META } from '@/data/categories';
 import { Badge } from './Badge';
 import { VoteButtons } from './VoteButtons';
-import { AIAnnotationViewer } from './AIAnnotationViewer';
 import { formatCoordsShort, timeAgo } from '@/utils/format';
 import { cn } from '@/utils/cn';
 
@@ -14,11 +14,13 @@ interface ReportCardProps {
   index?: number;
 }
 
-/** Community feed / list card with AI annotation view option. */
 export function ReportCard({ report, index = 0 }: ReportCardProps) {
   const category = categoryById(report.category);
   const severity = SEVERITY_META[report.severity];
   const status = STATUS_META[report.status];
+  const [showAnnotated, setShowAnnotated] = useState(false);
+  const hasAnnotated = Boolean(report.ai?.annotatedImage);
+  const displayImage = showAnnotated && hasAnnotated ? (report.ai?.annotatedImage as string) : report.image;
 
   return (
     <motion.article
@@ -31,11 +33,16 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
     >
       <Link to={`/report/${report.id}`} className="relative block overflow-hidden" aria-label={report.title}>
         <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-          <img src={report.image} alt={report.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <img src={displayImage} alt={report.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent" />
         <div className="absolute left-3 top-3 flex gap-2">
           <Badge className={cn('bg-white/90 text-slate-700 backdrop-blur dark:bg-slate-900/80 dark:text-slate-200')}>{category.label}</Badge>
+          {report.ai?.confidence ? (
+            <Badge className="bg-emerald-500/90 text-white backdrop-blur">
+              <ScanLine className="h-3 w-3" /> AI {Math.round((report.ai.confidence || 0) * 100)}%
+            </Badge>
+          ) : null}
         </div>
         <div className="absolute right-3 top-3 flex gap-2">
           <Badge className={cn('text-white backdrop-blur', status.bg)}>{status.label}</Badge>
@@ -47,6 +54,20 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
           </span>
           <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-slate-600 backdrop-blur dark:bg-slate-900/80 dark:text-slate-300">{timeAgo(report.date)}</span>
         </div>
+        {hasAnnotated ? (
+          <div className="absolute bottom-3 right-3 flex gap-1 lg:bottom-auto lg:top-[52px] lg:right-3">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowAnnotated((v) => !v);
+              }}
+              className="flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur hover:bg-slate-900"
+            >
+              {showAnnotated ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />} {showAnnotated ? 'Original' : 'AI View'}
+            </button>
+          </div>
+        ) : null}
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
@@ -55,6 +76,13 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
         </Link>
         <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{report.description}</p>
 
+        {report.ai?.summary ? (
+          <div className="mt-3 rounded-xl border border-emerald-200/50 bg-emerald-50/50 p-3 text-xs leading-relaxed text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/5 dark:text-emerald-200">
+            <span className="flex items-center gap-1 font-bold"><ScanLine className="h-3.5 w-3.5" /> AI: {report.ai.summary}</span>
+            {report.ai.objects?.length ? <span className="mt-1 block text-slate-500 dark:text-slate-400">Detected: {report.ai.objects.join(', ')}</span> : null}
+          </div>
+        ) : null}
+
         <div className="mt-4 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
           <MapPin className="h-3.5 w-3.5" />
           <span className="truncate">{report.locationName}</span>
@@ -62,11 +90,14 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
           <span className="tabular-nums">{formatCoordsShort(report.coordinates)}</span>
         </div>
 
-        <AIAnnotationViewer report={report} compact />
-
         <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-white/10">
           <VoteButtons report={report} compact />
           <div className="flex items-center gap-2">
+            {hasAnnotated ? (
+              <button onClick={() => setShowAnnotated((v) => !v)} className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-primary-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                <ScanLine className="h-3.5 w-3.5" /> {showAnnotated ? 'Original' : 'View AI'}
+              </button>
+            ) : null}
             <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{report.author}</span>
             <Link to={`https://www.google.com/maps/dir/?api=1&destination=${report.coordinates.lat},${report.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400" title="Get directions">
               <Navigation className="h-4 w-4" />

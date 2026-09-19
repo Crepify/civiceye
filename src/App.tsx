@@ -116,7 +116,6 @@ export default function App() {
       {!isAuthPage ? (amritaChrome ? <NavbarAmrita /> : <Navbar />) : null}
       {/* Global one-tap SOS (only shows for signed-in users). */}
       {!isAuthPage ? <SOSButton /> : null}
-      {/* Global AI Chatbot (in progress) — campus & city helper */}
       {!isAuthPage ? <AIChatbot /> : null}
       <AnimatePresence mode="wait">
         <motion.main
