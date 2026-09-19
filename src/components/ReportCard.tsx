@@ -90,6 +90,13 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
           <span className="tabular-nums">{formatCoordsShort(report.coordinates)}</span>
         </div>
 
+        {/* SLA tracking — shows time left for authority to act */}
+        <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs dark:bg-white/5">
+          <span className={`h-2 w-2 rounded-full ${report.severity === 'critical' ? 'bg-rose-500 animate-pulse' : report.severity === 'high' ? 'bg-orange-500' : 'bg-emerald-500'}`} />
+          <span className="font-medium text-slate-600 dark:text-slate-300">SLA: {report.severity === 'critical' ? '24h' : '7 days'} · {report.status === 'resolved' ? 'Resolved' : report.status === 'pending' ? 'Pending review' : report.status}</span>
+          {report.severity === 'critical' ? <span className="ml-auto rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-500/20 dark:text-rose-300">Immediate action</span> : null}
+        </div>
+
         <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-white/10">
           <VoteButtons report={report} compact />
           <div className="flex items-center gap-2">

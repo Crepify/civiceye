@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { SearchBar } from '@/components/SearchBar';
 import { FilterBar } from '@/components/FilterBar';
 import { ReportCard } from '@/components/ReportCard';
+import { Leaderboard } from '@/components/Leaderboard';
 import { Drawer } from '@/components/Drawer';
 import { EmptyState } from '@/components/EmptyState';
 import { Skeleton } from '@/components/Skeleton';
@@ -104,8 +105,13 @@ export function Community() {
       <PageHeader
         eyebrow="Community"
         title="Reports from your neighbours"
-        description="Every report below is citizen-submitted and community-validated. Search, filter and vote — the numbers decide what gets fixed first."
-      />
+        description="Every report below is citizen-submitted and community-validated. Search, filter and vote — the numbers decide what gets fixed first. View AI annotation on each card."
+      >
+        <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
+          <div className="text-sm text-slate-600 dark:text-slate-400">Community reports with AI view and leaderboard — gamification makes reporting fun.</div>
+          <Leaderboard />
+        </div>
+      </PageHeader>
 
       <section className="section-pad py-10 sm:py-14">
         {/* Controls */}
