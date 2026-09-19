@@ -1,10 +1,9 @@
-import { createContext, useCallback, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle, Sparkles } from 'lucide-react';
 import type { ToastItem } from '@/types';
 import { uid } from '@/utils/cn';
-import { useBrand } from '@/hooks/useBrand';
 
 const TOAST_DURATION = 4200;
 const VISIBLE_MAX = 4;
@@ -31,7 +30,28 @@ const ICONS = {
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const timers = useRef<Map<string, number>>(new Map());
-  const { isAmrita } = useBrand();
+  const [isAmrita, setIsAmrita] = useState(false);
+
+  // Brand detection without requiring BrandProvider (to avoid useBrand must be within BrandProvider error)
+  // ToastProvider wraps AuthProvider which wraps BrandProvider, so it cannot use useBrand directly
+  useEffect(() => {
+    const detect = () => {
+      const hasAmritaClass = typeof document !== 'undefined' && document.documentElement.classList.contains('amrita');
+      const isAmritaRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/amrita');
+      const brandQuery = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('brand') : null;
+      setIsAmrita(brandQuery === 'amrita' || hasAmritaClass || isAmritaRoute);
+    };
+    detect();
+    const observer = new MutationObserver(detect);
+    if (typeof document !== 'undefined') {
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    }
+    window.addEventListener('popstate', detect);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('popstate', detect);
+    };
+  }, []);
 
   const dismiss = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -82,7 +102,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <AnimatePresence>
           {toasts.map((toast) => {
             const Icon = ICONS[toast.type];
-            // Brand-aware colors matching your screenshots: dark toasts with yellow right bar for success, red for error
             const accent =
               toast.type === 'success'
                 ? isAmrita
@@ -119,14 +138,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 transition={{ type: 'spring', stiffness: 420, damping: 28 }}
                 className={
                   isAmrita
-                    ? `pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-[16px] border ${borderColor} bg-[#1a0f14]/95 shadow-[0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl dark:bg-[#1a0f14]/95`
+                    ? `pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-[16px] border ${borderColor} bg-[#1a0f14]/95 shadow-[0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl`
                     : `pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-[14px] border-2 border-[#172b44] bg-[#0f1a2e]/95 shadow-[6px_6px_0_#172b44] backdrop-blur-xl`
                 }
               >
-                {/* Right accent bar — yellow in your screenshot for success */}
                 <div className={`absolute bottom-0 right-0 top-0 w-[5px] ${accent}`} />
-
-                {/* Left icon */}
                 <div className="flex items-start gap-3 p-4 pr-10">
                   <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${toast.type === 'success' ? 'border-emerald-500/30 bg-emerald-500/10' : toast.type === 'error' ? 'border-rose-500/30 bg-rose-500/10' : toast.type === 'warning' ? 'border-amber-500/30 bg-amber-500/10' : isAmrita ? 'border-[#A51636]/30 bg-[#A51636]/10' : 'border-sky-500/30 bg-sky-500/10'}`}>
                     <Icon className={`h-5 w-5 ${iconColor}`} />
@@ -138,9 +154,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                       {toast.type === 'info' ? <Sparkles className="h-3.5 w-3.5 text-white/60" /> : null}
                     </p>
                     {toast.message ? (
-                      <p className="mt-1 text-[13px] leading-[1.45] text-slate-300/90 dark:text-slate-300/90">
-                        {toast.message}
-                      </p>
+                      <p className="mt-1 text-[13px] leading-[1.45] text-slate-300/90">{toast.message}</p>
                     ) : null}
                   </div>
                 </div>
@@ -153,7 +167,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   <X className="h-4 w-4" />
                 </button>
 
-                {/* Progress bar at bottom — matches your screenshot yellow bottom border */}
                 <motion.div
                   initial={{ scaleX: 1 }}
                   animate={{ scaleX: 0 }}
