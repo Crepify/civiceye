@@ -36,6 +36,8 @@ interface ReportsContextValue {
   markResolved: (id: string) => Promise<void>;
   assignToAuthority: (id: string, authorityId: string) => Promise<void>;
   rejectAsAuthority: (id: string) => Promise<void>;
+  addProof: (id: string, proof: { beforeImage: string; afterImage: string; fixedDate: string; verifiedByAI?: boolean; aiConfidence?: number; description?: string }) => Promise<void>;
+  escalateReport: (id: string, reason: string) => Promise<void>;
 }
 
 const ReportsContext = createContext<ReportsContextValue | null>(null);
@@ -161,6 +163,17 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
       assignToAuthority: (id, authorityId) =>
         run(() => reportService.markInProgress(id, authorityId)),
       rejectAsAuthority: (id) => run(() => reportService.rejectReport(id)),
+      addProof: (id, proof) => run(() => reportService.addProof(id, proof)),
+      escalateReport: (id, reason) => run(() => {
+        const existing = reports.find((r) => r.id === id);
+        const level = (existing?.escalation?.level || 0) + 1;
+        return reportService.escalate(id, {
+          level,
+          escalatedAt: new Date().toISOString(),
+          reason,
+          nextAuthority: level >= 2 ? 'Higher Authority' : 'Next Level',
+        });
+      }),
       removeReport: (id) => run(() => reportService.remove(id)),
       setScope: (id, scope) => run(() => reportService.updateScope(id, scope)),
     }),

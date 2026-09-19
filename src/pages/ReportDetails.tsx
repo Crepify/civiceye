@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Calendar,
   CheckCheck,
+  CheckCircle2,
   Crosshair,
   Mail,
   MapPin,
@@ -24,6 +25,8 @@ import { Badge } from '@/components/Badge';
 import { VoteButtons } from '@/components/VoteButtons';
 import { ReportCard } from '@/components/ReportCard';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
+import { BeforeAfterSlider, ProofOfFixUploader } from '@/components/BeforeAfterSlider';
+import { getSLAStatus, formatSLATime, getEscalationTarget } from '@/services/slaService';
 import { EmptyState } from '@/components/EmptyState';
 import { ReviewSection } from '@/components/ReviewSection';
 import { formatCoords, formatDateTime, timeAgo } from '@/utils/format';
@@ -191,6 +194,52 @@ export function ReportDetails() {
                       <span>Not yet assigned to an agency</span>
                     )}
                   </div>
+                </div>
+
+                {/* Proof of Fix - Before/After */}
+                {report.proof ? (
+                  <div className="mt-7">
+                    <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-500" /> Proof of Fix — Before / After Verified
+                    </h2>
+                    <BeforeAfterSlider 
+                      beforeImage={report.proof.beforeImage} 
+                      afterImage={report.proof.afterImage}
+                      aiVerified={report.proof.verifiedByAI}
+                      aiConfidence={report.proof.aiConfidence}
+                    />
+                    <div className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm dark:bg-emerald-500/10">
+                      <p className="font-medium text-emerald-800 dark:text-emerald-200">Fixed on {new Date(report.proof.fixedDate).toLocaleDateString()} — {report.proof.description || 'Issue has been resolved and verified'}</p>
+                    </div>
+                  </div>
+                ) : report.status === 'resolved' ? (
+                  <div className="mt-7">
+                    <h2 className="mb-3 text-base font-bold text-slate-900 dark:text-white">Proof of Fix</h2>
+                    <div className="rounded-2xl border border-slate-200 p-5 dark:border-white/10">
+                      <p className="text-sm text-slate-600 dark:text-slate-400">This issue is marked resolved but no after photo yet. Authorities can upload fix proof.</p>
+                      <div className="mt-4">
+                        <ProofOfFixUploader beforeImage={report.image} onUploadAfter={(url) => console.log('After uploaded', url)} onVerify={() => toast.success('AI verifying fix...')} />
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* SLA & Escalation */}
+                <div className="mt-7 rounded-2xl border border-slate-200 p-5 dark:border-white/10">
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#A51636]/10 text-[#A51636]">⏱</span> SLA & Escalation Tracking
+                  </h3>
+                  {(() => {
+                    const sla = getSLAStatus(report);
+                    return (
+                      <div className="mt-3 space-y-2 text-sm">
+                        <div className="flex justify-between"><span className="text-slate-500">Deadline</span><span className="font-mono font-medium">{new Date(sla.deadline).toLocaleDateString()}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-500">Time left</span><span className={`font-bold ${sla.status === 'breached' ? 'text-rose-600' : sla.status === 'at-risk' ? 'text-amber-600' : 'text-emerald-600'}`}>{formatSLATime(sla.hoursLeft)}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-500">Status</span><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${sla.status === 'breached' ? 'bg-rose-100 text-rose-700' : sla.status === 'at-risk' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{sla.status.toUpperCase()}</span></div>
+                        {report.escalation ? <div className="flex justify-between"><span className="text-slate-500">Escalated to</span><span className="font-medium">{getEscalationTarget(report)} L{report.escalation.level}</span></div> : null}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Community validation */}

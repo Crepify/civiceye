@@ -28,6 +28,9 @@ export interface ReportRow {
   location_name: string | null;
   photo_url: string | null;
   ai: unknown;
+  proof: unknown;
+  escalation: unknown;
+  sla: unknown;
   upvotes: number;
   downvotes: number;
   confirms: number;
@@ -61,6 +64,9 @@ export function mapRow(row: ReportRow): Report {
     assignedTo: row.assigned_to ?? undefined,
     userId: row.user_id ?? undefined,
     ai: (row.ai as any) ?? null,
+    proof: (row.proof as any) ?? null,
+    escalation: (row.escalation as any) ?? null,
+    sla: (row.sla as any) ?? null,
   };
 }
 
@@ -169,6 +175,27 @@ export const reportService = {
   async updateScope(id: string, scope: 'city' | 'campus'): Promise<void> {
     if (!supabase) return;
     const { error } = await supabase.from('reports').update({ scope }).eq('id', id);
+    if (error) throw error;
+  },
+
+  /** Proof of fix - before/after */
+  async addProof(id: string, proof: { beforeImage: string; afterImage: string; fixedDate: string; verifiedByAI?: boolean; aiConfidence?: number; description?: string }): Promise<void> {
+    if (!supabase) return;
+    const { error } = await supabase.from('reports').update({ proof, status: 'resolved' }).eq('id', id);
+    if (error) throw error;
+  },
+
+  /** SLA escalation */
+  async escalate(id: string, escalation: { level: number; escalatedAt: string; reason: string; nextAuthority?: string }): Promise<void> {
+    if (!supabase) return;
+    const { error } = await supabase.from('reports').update({ escalation }).eq('id', id);
+    if (error) throw error;
+  },
+
+  /** Update SLA */
+  async updateSLA(id: string, sla: { deadline: string; status: 'on-track' | 'at-risk' | 'breached'; escalated: boolean; createdAt: string }): Promise<void> {
+    if (!supabase) return;
+    const { error } = await supabase.from('reports').update({ sla }).eq('id', id);
     if (error) throw error;
   },
 };

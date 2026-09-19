@@ -24,6 +24,10 @@ import { ChartCard } from '@/components/ChartCard';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { MapView } from '@/components/map/MapView';
 import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
+import { Leaderboard } from '@/components/Leaderboard';
+import { BeforeAfterSlider } from '@/components/BeforeAfterSlider';
+import { EstateOfficeDashboard } from '@/components/EstateOfficeDashboard';
+import { getSLAStatus, formatSLATime, getEscalationTarget } from '@/services/slaService';
 import { Badge } from '@/components/Badge';
 import { CATEGORIES, SEVERITY_META, STATUS_META, categoryById } from '@/data/categories';
 import { authoritiesForScope, authorityById } from '@/data/authorities';
@@ -206,10 +210,9 @@ export function Dashboard() {
               <Building2 className="h-4 w-4" />
               Authorities · Prototype
             </p>
-            <h1 className="heading-xl mt-2">Ward Operations Dashboard</h1>
+            <h1 className="heading-xl mt-2">{isAmrita ? 'Estate Office Dashboard' : 'Ward Operations Dashboard'}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-slate-400 sm:text-base">
-              A live view of every citizen report in your jurisdiction — prioritised, verified and
-              ready to act on.
+              {isAmrita ? 'Campus issues, SLA tracking, proof of fix, and estate office operations for Amrita Bengaluru.' : 'A live view of every citizen report in your jurisdiction — prioritised, verified and ready to act on.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -281,6 +284,11 @@ export function Dashboard() {
             </>
           )}
         </div>
+        {isAmrita ? (
+          <div className="mt-8">
+            <EstateOfficeDashboard />
+          </div>
+        ) : null}
       </div>
 
       {/* Charts */}
@@ -409,11 +417,65 @@ export function Dashboard() {
         </ChartCard>
       </div>
 
+      {/* SLA Escalation + Leaderboard + Proof of Fix */}
+      <div className="section-pad mt-5 grid gap-5 lg:grid-cols-3">
+        <ChartCard title="SLA Escalation" subtitle="Auto-escalation when deadlines breach" className="lg:col-span-1">
+          <div className="space-y-3">
+            {(() => {
+              const breached = scopedReports.filter((r) => getSLAStatus(r).status === 'breached' && r.status !== 'resolved');
+              const atRisk = scopedReports.filter((r) => getSLAStatus(r).status === 'at-risk');
+              const escalated = scopedReports.filter((r) => r.escalation && r.escalation.level > 0);
+              return (
+                <>
+                  <div className="flex justify-between text-sm"><span>Breached</span><span className="font-bold text-rose-600">{breached.length}</span></div>
+                  <div className="flex justify-between text-sm"><span>At Risk</span><span className="font-bold text-amber-600">{atRisk.length}</span></div>
+                  <div className="flex justify-between text-sm"><span>Escalated</span><span className="font-bold text-amber-700">{escalated.length}</span></div>
+                  <div className="mt-3 space-y-2">
+                    {breached.slice(0,3).map((r) => {
+                      const sla = getSLAStatus(r);
+                      return (
+                        <div key={r.id} className="rounded-lg bg-rose-50 p-2 text-xs dark:bg-rose-500/10">
+                          <div className="font-bold truncate">{r.title}</div>
+                          <div className="text-rose-600/70">{formatSLATime(sla.hoursLeft)} → {getEscalationTarget(r)}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-slate-500">Critical: 24h, High: 48h, Medium: 7d, Low: 14d. Auto-escalates on breach.</p>
+                </>
+              );
+            })()}
+          </div>
+        </ChartCard>
+        <div className="lg:col-span-1">
+          <Leaderboard />
+        </div>
+        <ChartCard title="Proof of Fix" subtitle="Before/After verified fixes" className="lg:col-span-1">
+          <div className="space-y-3">
+            {(() => {
+              const fixed = scopedReports.filter((r) => r.proof?.afterImage);
+              const resolved = scopedReports.filter((r) => r.status === 'resolved');
+              return (
+                <>
+                  <div className="flex justify-between text-sm"><span>Fixed with proof</span><span className="font-bold text-emerald-600">{fixed.length}</span></div>
+                  <div className="flex justify-between text-sm"><span>Resolved</span><span className="font-bold">{resolved.length}</span></div>
+                  {fixed[0]?.proof ? (
+                    <BeforeAfterSlider beforeImage={fixed[0].proof.beforeImage} afterImage={fixed[0].proof.afterImage} aiVerified={fixed[0].proof.verifiedByAI} aiConfidence={fixed[0].proof.aiConfidence} />
+                  ) : (
+                    <div className="rounded-xl border border-dashed p-4 text-center text-xs text-slate-500">No fix proofs yet. When authorities fix issues, before/after slider appears here with AI verification.</div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        </ChartCard>
+      </div>
+
       {/* Map + top areas */}
       <div className="section-pad mt-5 grid gap-5 lg:grid-cols-3 [&>*]:min-w-0">
         <ChartCard
           title={isAmrita ? "Campus map" : "Live ward map"}
-          subtitle={isAmrita ? "Custom campus map · no Google Maps · 155 faculty · 163 rooms" : "Click a pin to inspect a report"}
+          subtitle={isAmrita ? "Campus map with buildings and floor plans" : "Click a pin to inspect a report"}
           className="lg:col-span-2"
         >
           <div className={isAmrita ? "h-[520px] min-h-[520px] w-full overflow-hidden rounded-xl border border-slate-200 dark:border-white/10" : "h-[420px] min-h-[420px] w-full overflow-hidden border-[4px] border-[#172b44] shadow-[5px_5px_0_#ef6b59]"}>

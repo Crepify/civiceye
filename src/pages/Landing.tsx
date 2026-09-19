@@ -4,6 +4,7 @@ import { Camera, MapPin, ShieldAlert, Sparkles, Users } from 'lucide-react';
 import { founderThemes, isComicSoundOn, setComicSoundOn } from '@/utils/comicSound';
 import { useReports } from '@/hooks/useReports';
 import { useBrand } from '@/hooks/useBrand';
+import { useAuth } from '@/hooks/useAuth';
 
 const steps = [
   ['01', 'Spot it', 'Notice a pothole, a dark street, or an open manhole.'],
@@ -35,6 +36,7 @@ const mission =
 export function Landing() {
   const { reports } = useReports();
   const { isAmrita } = useBrand();
+  const { user } = useAuth();
   const [promoOpen, setPromoOpen] = useState(false);
   const [certificateOpen, setCertificateOpen] = useState(false);
   const [certificateIssued, setCertificateIssued] = useState(false);
@@ -64,8 +66,16 @@ export function Landing() {
     };
   }, [reports, isAmrita]);
 
-  const missionProgress = 2;
+  const missionProgress = useMemo(() => {
+    if (!user) return 2; // demo shows 2/3 for visitors
+    const userReports = reports.filter((r) => r.userId === user.id || r.author === user.email || r.scope === (isAmrita ? 'campus' : 'city'));
+    const verifiedCount = userReports.filter((r) => r.verified).length;
+    const totalCount = userReports.length;
+    // Mission: 3 verified reports or 3 total reports with at least 1 verified
+    return Math.min(3, Math.max(verifiedCount, Math.min(totalCount, 2) + (verifiedCount > 0 ? 1 : 0)));
+  }, [reports, user, isAmrita]);
   const missionComplete = missionProgress >= 3;
+
 
   const sound = (notes: number[]) => {
     if (!soundOn) return;
@@ -268,6 +278,55 @@ export function Landing() {
                 <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-[#91dcc4]/70">{missionComplete ? 'Ready to claim!' : 'Complete 1 more report to unlock'}</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Leaderboard + Proof of Fix + SLA - comic style */}
+      <section className="section-pad pb-16">
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="border-[4px] border-[#172b44] bg-[#fff8e7] p-6 shadow-[6px_6px_0_#172b44]">
+            <p className="inline-block bg-[#ffd630] px-2 py-1 text-[11px] font-black tracking-widest">LEADERBOARD</p>
+            <h3 className="mt-3 font-serif text-2xl font-black uppercase">Top Civic Heroes</h3>
+            <div className="mt-4 space-y-2">
+              {reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city')).slice(0,5).reduce((acc: any[], r) => {
+                const existing = acc.find((a) => a.author === r.author);
+                if (existing) existing.count++;
+                else acc.push({ author: r.author, count: 1, verified: r.verified ? 1 : 0 });
+                return acc;
+              }, []).sort((a,b) => b.count - a.count).slice(0,3).map((leader: any, i: number) => (
+                <div key={leader.author} className="flex items-center gap-2 border-2 border-[#172b44] bg-white p-2 text-sm">
+                  <span className="flex h-6 w-6 items-center justify-center bg-[#172b44] text-xs font-black text-white">{i+1}</span>
+                  <span className="font-bold truncate">{leader.author}</span>
+                  <span className="ml-auto text-xs">{leader.count} reports</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs font-medium text-slate-600">Gamified — verified reports, badges, certificates. Report 3 issues → Street Guardian certificate.</p>
+          </div>
+          
+          <div className="border-[4px] border-[#172b44] bg-[#91dcc4] p-6 shadow-[6px_6px_0_#ef6b59]">
+            <p className="inline-block bg-[#172b44] px-2 py-1 text-[11px] font-black tracking-widest text-white">PROOF OF FIX</p>
+            <h3 className="mt-3 font-serif text-2xl font-black uppercase text-[#172b44]">Before / After</h3>
+            <div className="mt-4 rounded-xl border-2 border-[#172b44] bg-white p-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="aspect-[4/3] bg-slate-200 rounded-lg flex items-center justify-center text-[10px] font-bold">BEFORE</div>
+                <div className="aspect-[4/3] bg-emerald-100 rounded-lg flex items-center justify-center text-[10px] font-bold text-emerald-700">AFTER ✓</div>
+              </div>
+              <p className="mt-2 text-xs font-bold text-[#172b44]">Authorities upload after photo → AI verifies fix → Before/After slider with verification badge.</p>
+            </div>
+          </div>
+          
+          <div className="border-[4px] border-[#172b44] bg-[#ef6b59] p-6 shadow-[6px_6px_0_#ffd630]">
+            <p className="inline-block bg-[#fff8e7] px-2 py-1 text-[11px] font-black tracking-widest">SLA ESCALATION</p>
+            <h3 className="mt-3 font-serif text-2xl font-black uppercase text-white">Auto Escalation</h3>
+            <div className="mt-4 space-y-2 text-sm font-semibold text-white">
+              <div className="flex justify-between border-b border-white/20 pb-1"><span>Critical</span><span>24h</span></div>
+              <div className="flex justify-between border-b border-white/20 pb-1"><span>High</span><span>48h</span></div>
+              <div className="flex justify-between border-b border-white/20 pb-1"><span>Medium</span><span>7 days</span></div>
+              <div className="flex justify-between"><span>Low</span><span>14 days</span></div>
+            </div>
+            <p className="mt-3 text-xs font-bold text-white/80">Breached → auto-escalates to higher authority with email + Maps link + severity + report link + AI annotation.</p>
           </div>
         </div>
       </section>

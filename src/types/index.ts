@@ -63,6 +63,27 @@ export interface Report {
     imageQuality?: string | null;
     disclaimer?: string;
     annotatedImage?: string | null;
+    originalImage?: string | null;
+  } | null;
+  proof?: {
+    beforeImage: string;
+    afterImage: string;
+    fixedDate: string;
+    verifiedByAI?: boolean;
+    aiConfidence?: number;
+    description?: string;
+  } | null;
+  escalation?: {
+    level: number;
+    escalatedAt: string;
+    reason: string;
+    nextAuthority?: string;
+  } | null;
+  sla?: {
+    deadline: string;
+    status: 'on-track' | 'at-risk' | 'breached';
+    escalated: boolean;
+    createdAt: string;
   } | null;
 }
 
