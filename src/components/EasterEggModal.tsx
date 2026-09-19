@@ -62,7 +62,7 @@ const TEAM: TeamMember[] = [
     color: '#a78bfa',
     emoji: '📐',
     placeholder:
-      'Planner, Minimalistic UI/UX designer for the Amrita Eye and also project/ideas manager. Plans the product roadmap, designs the clean Apple HIG minimalist Amrita Eye experience, and manages project ideas from custom campus map (no Google Maps) to QR deep links and indoor routing.',
+      'Planner, Minimalistic UI/UX designer for Amrita Eye and project/ideas manager. Plans the product roadmap, designs the clean minimalist Amrita Eye experience, and manages ideas from campus map to indoor directions and campus reporting.',
     funFact: 'Planner and minimalist UI/UX for Amrita Eye. Campus issues only on custom map? His idea.',
   },
 ];

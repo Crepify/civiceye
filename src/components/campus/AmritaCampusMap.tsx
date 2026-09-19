@@ -102,7 +102,7 @@ function navDist(a: number, b: number) {
  const [x2, y2] = NAV_NODES[b];
  return Math.hypot(x1 - x2, y1 - y2);
 }
-function dijkstra(start: number, end: number): { path: number[]; dist: number } | null {
+function findCampusPath(start: number, end: number): { path: number[]; dist: number } | null {
  const dist: Record<number, number> = { [start]: 0 };
  const prev: Record<number, number> = {};
  const visited = new Set<number>();
@@ -264,7 +264,7 @@ export function AmritaCampusMap({
  (CAMPUS_GEO.buildings as unknown as any[]).forEach((b: any) => {
  items.push({
  kind: 'building',
- id: b.osm,
+ id: b.name,
  name: b.name,
  sub: `${b.kind}`,
  rank: 2,
@@ -536,7 +536,7 @@ export function AmritaCampusMap({
  const A = NAV_POIS.find((p) => p.id === navFrom);
  const B = NAV_POIS.find((p) => p.id === navTo);
  if (!A || !B) return;
- const res = dijkstra(A.node, B.node);
+ const res = findCampusPath(A.node, B.node);
  if (!res) {
  toast.error('No path found');
  return;
@@ -916,7 +916,7 @@ export function AmritaCampusMap({
  }
  // building / block / etc
  const raw = info.raw || {};
- const isMainAcademic = (raw.name || '').toLowerCase().includes('main academic') || (raw.osm === 'way/631815097') || (info.name || '').toLowerCase().includes('main academic');
+ const isMainAcademic = (raw.name || '').toLowerCase().includes('main academic') || (info.name || '').toLowerCase().includes('main academic');
  const isCafeteria = (raw.name || '').toLowerCase().includes('cafeteria') || (info.name || '').toLowerCase().includes('cafeteria');
  const isHostel = (raw.kind === 'hostel') || (raw.name || '').toLowerCase().includes('hostel') || (info.name || '').toLowerCase().includes('hostel');
  const isLibrary = (raw.name || '').toLowerCase().includes('library') || (info.name || '').toLowerCase().includes('library');
@@ -927,8 +927,8 @@ export function AmritaCampusMap({
  {isMainAcademic ? (
  <div className="space-y-2">
  <div className="grid grid-cols-2 gap-2">
- <img src="/amrita-main-block-fountain.jpg" alt="Main academic block with fountain - peach facade, 4 floors, balconies, Amma photo on top - " className="h-28 w-full rounded-xl object-cover" loading="lazy" />
- <img src="/amrita-main-entrance-white.jpg" alt="White ornate entrance with arch and columns, 5 floors side wing - " className="h-28 w-full rounded-xl object-cover" loading="lazy" />
+ <img src="/amrita-main-block-fountain.jpg" alt="Main academic block with fountain" className="h-28 w-full rounded-xl object-cover" loading="lazy" />
+ <img src="/amrita-main-entrance-white.jpg" alt="Main entrance" className="h-28 w-full rounded-xl object-cover" loading="lazy" />
  </div>
  <div className="grid grid-cols-3 gap-1.5">
  <img src="/amrita-vishwa-vidyapeetham-bengaluru-cam-5.jpg" alt="Academic building peach 4 floors balconies" className="h-16 w-full rounded-lg object-cover" loading="lazy" />
@@ -938,7 +938,7 @@ export function AmritaCampusMap({
  <div className="rounded-xl bg-slate-50 p-2.5 text-xs leading-relaxed text-slate-600 dark:bg-white/5 dark:text-slate-300">
  Main Academic Block with multiple wings and central facilities.
  </div>
- <img src="/amrita-block-e-floorplan.png" alt="Block E floor plan enhanced s" className="h-32 w-full rounded-xl object-cover" loading="lazy" />
+ <img src="/amrita-block-e-floorplan.png" alt="Block E floor plan" className="h-32 w-full rounded-xl object-cover" loading="lazy" />
  </div>
  ) : null}
  {isCafeteria ? (
@@ -977,7 +977,7 @@ export function AmritaCampusMap({
  </div>
  </div>
  ) : null}
- {raw.area_m2 ? <div className="text-sm"></div> : null}
+ 
  {raw.note ? <div className="rounded-xl bg-slate-50 p-3 text-sm leading-relaxed dark:bg-white/5">{raw.note}</div> : null}
  {raw.confidence ? (
  <div className="rounded-lg bg-amber-50 p-2.5 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
@@ -987,8 +987,8 @@ export function AmritaCampusMap({
  <div className="grid grid-cols-2 gap-2">
  <button
  onClick={() => {
- if (raw.osm && (CAMPUS_FLOORS.buildings as any)[raw.osm]) {
- setView({ mode: 'floor', buildingId: raw.osm, floorId: (CAMPUS_FLOORS.buildings as any)[raw.osm].floors[0].id });
+ if (raw.id && (CAMPUS_FLOORS.buildings as any)[raw.id]) {
+ setView({ mode: 'floor', buildingId: raw.id, floorId: (CAMPUS_FLOORS.buildings as any)[raw.id].floors[0].id });
  } else if (info.point) {
  focusPoint(info.point[0], info.point[1], 100);
  }
@@ -1125,7 +1125,7 @@ export function AmritaCampusMap({
  <h2 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
  <Building2 className="h-4 w-4 text-[#A51636]" /> Campus Explorer
  </h2>
- <p className="mt-1 text-xs text-slate-500">Kasavanahalli · 560035 · 50 acres official</p>
+ <p className="mt-1 text-xs text-slate-500">Kasavanahalli · 560035</p>
  </div>
  <button onClick={() => setSidebarOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-white/10 lg:hidden">
  <X className="h-4 w-4" />
@@ -1318,7 +1318,7 @@ export function AmritaCampusMap({
  <div className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-slate-500">Buildings</div>
  {(CAMPUS_GEO.buildings as unknown as any[]).map((b: any) => (
  <button
- key={b.osm}
+ key={b.name}
  onClick={() => {
  setView({ mode: 'campus' });
  focusPoint(b.c[0], b.c[1], 100);
@@ -1428,7 +1428,7 @@ export function AmritaCampusMap({
  ))}
  {/* Buildings */}
  {(CAMPUS_GEO.buildings as unknown as any[]).map((b: any) => (
- <g key={b.osm} className="campus-interactive cursor-pointer">
+ <g key={b.name} className="campus-interactive cursor-pointer">
  <path d={b.d} fill={KIND_COLOR[b.kind] || '#A51636'} fillOpacity={showSat ? 0.85 : 0.15} stroke={KIND_COLOR[b.kind] || '#A51636'} strokeWidth={1.5} onClick={() => { setInfo({ type: 'building', raw: b, name: b.name, sub: `${b.kind}`, point: b.c }); setInfoOpen(true); focusPoint(b.c[0], b.c[1], 100); }} />
  <text x={b.c[0]} y={b.c[1]} textAnchor="middle" fontSize={11 / cam.k} fontWeight={600} fill="#1e293b" style={{ paintOrder: 'stroke', stroke: 'white', strokeWidth: 3 / cam.k }}>
  {b.short}
