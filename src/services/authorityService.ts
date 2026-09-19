@@ -3,27 +3,13 @@ import { authorityForCategory, mailToLink, smsLink, whatsAppLinks } from '@/data
 import { supabase } from '@/lib/supabase';
 import emailjs from '@emailjs/browser';
 
-/**
- * Client-side email fallback via EmailJS (https://www.emailjs.com/) — a
- * third-party sender that needs no server at all. Configure with the
- * VITE_EMAILJS_* env vars (see ENVIRONMENT.md). The public key is safe for
- * the browser; restrict it to your domain in the EmailJS dashboard.
- */
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID?.trim() ?? '';
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID?.trim() ?? '';
 const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY?.trim() ?? '';
 
-export const isEmailJSConfigured = Boolean(
-  EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY,
-);
+export const isEmailJSConfigured = Boolean(EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY);
+export const newEscalationRef = (): string => `ESC-${Date.now().toString(36).toUpperCase()}`;
 
-export const newEscalationRef = (): string =>
-  `ESC-${Date.now().toString(36).toUpperCase()}`;
-
-/**
- * Send the escalation via EmailJS from the browser. Variable names here must
- * match the EmailJS template (documented in ENVIRONMENT.md).
- */
 export async function sendEscalationViaEmailJS(
   report: Report,
   authority: Authority,
@@ -33,6 +19,8 @@ export async function sendEscalationViaEmailJS(
 ): Promise<void> {
   const reportUrl = `${window.location.origin}/report/${report.id}`;
   const mapsUrl = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
+  const ai = (report as any).ai || {};
+  
   await emailjs.send(
     EMAILJS_SERVICE_ID,
     EMAILJS_TEMPLATE_ID,
@@ -51,6 +39,11 @@ export async function sendEscalationViaEmailJS(
       maps_url: mapsUrl,
       report_url: reportUrl,
       image_url: report.image,
+      annotated_image_url: ai.annotatedImage || report.image,
+      ai_confidence: ai.confidence ? `${Math.round(ai.confidence * 100)}%` : '—',
+      ai_description: ai.description || report.description,
+      ai_objects: (ai.objects || []).join(', ') || '—',
+      ai_model: ai.model || ai.engine || 'CivicEye AI',
       author: report.author,
       reporter_email: reporterEmail ?? '—',
       description: report.description,
@@ -61,7 +54,6 @@ export async function sendEscalationViaEmailJS(
   );
 }
 
-/** Payload sent to POST /api/report-authority. */
 export interface EscalationPayload {
   authorityId: string;
   message?: string;
@@ -75,6 +67,8 @@ export interface EscalationPayload {
     locationName?: string;
     coordinates?: { lat: number; lng: number } | null;
     image?: string;
+    annotatedImage?: string | null;
+    ai?: any;
     url?: string;
     author?: string;
     reporterEmail?: string;
@@ -89,13 +83,13 @@ export interface EscalationResult {
   authorityName?: string;
 }
 
-/** Build the escalation payload for a report + authority pair. */
 export function buildEscalationPayload(
   report: Report,
   authority: Authority,
   reporterEmail: string | null,
   message?: string,
 ): EscalationPayload {
+  const ai = (report as any).ai || null;
   return {
     authorityId: authority.id,
     message,
@@ -109,6 +103,8 @@ export function buildEscalationPayload(
       locationName: report.locationName,
       coordinates: report.coordinates,
       image: report.image,
+      annotatedImage: ai?.annotatedImage || null,
+      ai: ai,
       url: `${window.location.origin}/report/${report.id}`,
       author: report.author,
       reporterEmail: reporterEmail ?? undefined,
@@ -117,10 +113,6 @@ export function buildEscalationPayload(
   };
 }
 
-/**
- * Ask the server to email the report package to the authority.
- * Throws only on network errors; delivery problems come back as a result.
- */
 export async function sendEscalationEmail(payload: EscalationPayload): Promise<EscalationResult> {
   const res = await fetch('/api/report-authority', {
     method: 'POST',
@@ -130,12 +122,7 @@ export async function sendEscalationEmail(payload: EscalationPayload): Promise<E
 
   if (res.status === 503) {
     const data = await res.json().catch(() => ({}));
-    return {
-      status: 'not-configured',
-      ref: data.ref ?? '',
-      to: data.to,
-      authorityName: data.authority?.name,
-    };
+    return { status: 'not-configured', ref: data.ref ?? '', to: data.to, authorityName: data.authority?.name };
   }
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -145,10 +132,6 @@ export async function sendEscalationEmail(payload: EscalationPayload): Promise<E
   return { status: 'sent', ref: data.ref, to: data.to, authorityName: data.authority?.name };
 }
 
-/**
- * The pre-filled email body used for the mailto: fallback (and copied for
- * reference) when the SMTP gateway is not configured.
- */
 export function escalationEmailText(
   report: Report,
   authority: Authority,
@@ -156,57 +139,71 @@ export function escalationEmailText(
   message?: string,
 ): { subject: string; body: string } {
   const url = `${window.location.origin}/report/${report.id}`;
+  const mapsUrl = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
-  const subject = `[${appName}] ${report.title} — report ${report.code ?? report.id}`;
+  const ai = (report as any).ai || {};
+  const subject = `[${appName}] ${report.title} — ${report.severity.toUpperCase()} — report ${report.code ?? report.id}`;
+
   const body = [
     `To: ${authority.name} (${authority.department})`,
     ``,
     `Report: ${report.code ?? report.id}`,
     `Title: ${report.title}`,
     `Category: ${report.category}`,
-    `Severity: ${report.severity}`,
+    `Severity: ${report.severity.toUpperCase()}${ai.confidence ? ` (AI confidence ${Math.round(ai.confidence * 100)}%)` : ''}`,
     `Location: ${report.locationName} (${report.coordinates.lat}, ${report.coordinates.lng})`,
-    `Link: ${url}`,
-    `Evidence photo: ${report.image}`,
+    `Google Maps: ${mapsUrl}`,
+    `Report Link: ${url}`,
+    `Evidence Photo: ${report.image}`,
+    ai.annotatedImage ? `AI Annotated Photo: ${ai.annotatedImage.slice(0, 100)}... (attached)` : '',
+    ai.description ? `AI Description: ${ai.description}` : '',
+    ai.objects ? `AI Objects: ${(ai.objects || []).join(', ')}` : '',
+    ai.model ? `AI Model: ${ai.model} (${ai.engine || ''})` : '',
     `Reported by: ${report.author}${reporterEmail ? ` <${reporterEmail}>` : ''}`,
     ``,
     `Description:`,
     report.description,
-    message ? `\nNote:\n${message}` : '',
+    message ? `\nNote from citizen:\n${message}` : '',
     ``,
-    `— Sent from ${report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye'}`,
-  ].join('\n');
+    `— Sent from ${appName}`,
+    `This email includes attached picture with AI annotations, Google Maps coordinate link with severity, and link to report on website.`,
+    `For Amrita Eye, this is routed to Campus Estate & Civil Works / Facilities & Housekeeping / Security.`,
+    `For CivicEye, this is routed to BBMP / BWSSB / BESCOM / Traffic Police with zone-aware email.`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
   return { subject, body };
 }
 
-/** WhatsApp deep links for pinging the authority about a report (one per number). */
 export function escalationWhatsAppTargets(
   report: Report,
   authority: Authority,
 ): { number: string; url: string }[] {
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
+  const mapsUrl = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
   const text = [
     `${appName} report: ${report.title}`,
-    `Category: ${report.category} · Severity: ${report.severity}`,
-    `Location: ${report.locationName}`,
+    `Severity: ${report.severity.toUpperCase()} · Category: ${report.category}`,
+    `Location: ${report.locationName} — ${mapsUrl}`,
     `Details: ${window.location.origin}/report/${report.id}`,
+    `Photo: ${report.image}`,
   ].join('\n');
   return whatsAppLinks(authority, text);
 }
 
-/** The SMS deep link for texting the authority about a report. */
 export function escalationSmsUrl(report: Report, authority: Authority): string | undefined {
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
+  const mapsUrl = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
   const text = [
     `${appName} report: ${report.title}`,
-    `Category: ${report.category} · Severity: ${report.severity}`,
-    `Location: ${report.locationName} (${report.coordinates.lat}, ${report.coordinates.lng})`,
+    `Severity: ${report.severity.toUpperCase()} · ${report.category}`,
+    `Location: ${report.locationName} (${report.coordinates.lat}, ${report.coordinates.lng}) — ${mapsUrl}`,
     `Details: ${window.location.origin}/report/${report.id}`,
   ].join('\n');
   return smsLink(authority, text);
 }
 
-/** The mailto: fallback link for a report escalation. */
 export function escalationMailToUrl(
   report: Report,
   authority: Authority,
@@ -217,11 +214,6 @@ export function escalationMailToUrl(
   return mailToLink(authority, subject, body);
 }
 
-/**
- * Best-effort log of the escalation in Supabase (`authority_reports` table —
- * see supabase/authority-reports.sql). Never throws: the escalation itself
- * must succeed even before the migration is run.
- */
 export async function logEscalation(entry: {
   report: Report | null;
   authority: Authority;
@@ -248,7 +240,6 @@ export async function logEscalation(entry: {
   }
 }
 
-/** Which authority handles this report's category in its scope. */
 export function responsibleAuthority(report: Pick<Report, 'category' | 'scope'>): Authority {
   return authorityForCategory(report.category, report.scope);
 }

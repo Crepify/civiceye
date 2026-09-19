@@ -47,6 +47,17 @@ export interface Report {
   status: ReportStatus;
   /** Absolute URL, public path, or data-URL of the evidence photo. */
   image: string;
+  /** Optional AI annotation data */
+  ai?: {
+    confidence?: number;
+    severity?: Severity;
+    category?: CategoryId;
+    description?: string;
+    objects?: string[];
+    annotatedImage?: string | null;
+    model?: string;
+    engine?: string;
+  } | null;
   upvotes: number;
   downvotes: number;
   /** Net votes = upvotes - downvotes. */

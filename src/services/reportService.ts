@@ -50,6 +50,7 @@ export function mapRow(row: ReportRow): Report {
     status: row.status,
     scope: row.scope,
     image: row.photo_url ?? '',
+    ai: (row.ai as any) ?? null,
     upvotes: row.upvotes,
     downvotes: row.downvotes,
     votes: row.upvotes - row.downvotes,

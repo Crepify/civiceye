@@ -26,6 +26,9 @@ import { ReportCard } from '@/components/ReportCard';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { EmptyState } from '@/components/EmptyState';
 import { ReviewSection } from '@/components/ReviewSection';
+import { AIAnnotationViewer } from '@/components/AIAnnotationViewer';
+import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
+import { useBrand } from '@/hooks/useBrand';
 import { formatCoords, formatDateTime, timeAgo } from '@/utils/format';
 import { cn } from '@/utils/cn';
 
@@ -35,6 +38,7 @@ export function ReportDetails() {
   const navigate = useNavigate();
   const { reports, getById } = useReports();
   const toast = useToast();
+  const { isAmrita } = useBrand();
 
   const report = id ? getById(id) : undefined;
 
@@ -143,6 +147,8 @@ export function ReportDetails() {
                   {report.description}
                 </p>
 
+                <AIAnnotationViewer report={report} />
+
                 {/* Report meta */}
                 <div className="mt-7 grid gap-3 rounded-2xl bg-slate-50 p-5 text-sm sm:grid-cols-2 dark:bg-white/[0.04]">
                   <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-300">
@@ -226,17 +232,19 @@ export function ReportDetails() {
           >
             <div className="card overflow-hidden">
               <div className="h-56">
-                <iframe
-                  title="Report location"
-                  src={`https://maps.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}&z=15&output=embed`}
-                  className="h-full w-full border-0 grayscale-[0.2]"
-                  loading="lazy"
-                />
+                {report.scope === 'campus' || isAmrita ? (
+                  <AmritaCampusMap reports={[report]} selectedId={report.id} onSelect={() => {}} className="h-full w-full rounded-none border-0" />
+                ) : (
+                  <iframe
+                    title="Report location"
+                    src={`https://maps.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}&z=15&output=embed`}
+                    className="h-full w-full border-0 grayscale-[0.2]"
+                    loading="lazy"
+                  />
+                )}
               </div>
               <div className="flex items-center justify-between p-4">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  {report.locationName}
-                </p>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{report.locationName}</p>
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${report.coordinates.lat},${report.coordinates.lng}`}
                   target="_blank"
