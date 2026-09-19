@@ -1,14 +1,10 @@
 import { createContext, useCallback, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, X, XCircle, Sparkles } from 'lucide-react';
 import type { ToastItem } from '@/types';
 import { uid } from '@/utils/cn';
-
-/**
- * Toast notification system.
- * Usage: `const toast = useToast(); toast.success('Saved!')`
- */
+import { useBrand } from '@/hooks/useBrand';
 
 const TOAST_DURATION = 4200;
 const VISIBLE_MAX = 4;
@@ -32,16 +28,10 @@ const ICONS = {
   warning: AlertTriangle,
 } as const;
 
-const COLORS = {
-  success: 'text-emerald-500',
-  error: 'text-rose-500',
-  info: 'text-sky-500',
-  warning: 'text-amber-500',
-} as const;
-
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const timers = useRef<Map<string, number>>(new Map());
+  const { isAmrita } = useBrand();
 
   const dismiss = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -57,7 +47,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const id = uid('toast');
       setToasts((prev) => {
         const next = [...prev, { ...toast, id }];
-        // Keep the stack readable — drop the oldest beyond the cap.
         return next.slice(Math.max(0, next.length - VISIBLE_MAX));
       });
       timers.current.set(
@@ -86,50 +75,90 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={api}>
       {children}
 
-      {/* Toast viewport */}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 top-20 z-[90] flex flex-col items-center gap-2 px-4 sm:top-6 sm:items-end sm:px-6"
+        className="pointer-events-none fixed inset-x-0 top-[calc(var(--nav-height)+0.75rem)] z-[90] flex flex-col items-center gap-2.5 px-4 sm:top-6 sm:items-end sm:px-6"
       >
         <AnimatePresence>
           {toasts.map((toast) => {
             const Icon = ICONS[toast.type];
+            // Brand-aware colors matching your screenshots: dark toasts with yellow right bar for success, red for error
+            const accent =
+              toast.type === 'success'
+                ? isAmrita
+                  ? 'bg-[#A51636]'
+                  : 'bg-[#ffd630]'
+                : toast.type === 'error'
+                  ? 'bg-rose-500'
+                  : toast.type === 'warning'
+                    ? 'bg-amber-400'
+                    : isAmrita
+                      ? 'bg-[#A51636]'
+                      : 'bg-sky-500';
+
+            const iconColor =
+              toast.type === 'success'
+                ? 'text-emerald-400'
+                : toast.type === 'error'
+                  ? 'text-rose-400'
+                  : toast.type === 'warning'
+                    ? 'text-amber-300'
+                    : isAmrita
+                      ? 'text-[#E52B50]'
+                      : 'text-sky-400';
+
+            const borderColor = isAmrita ? 'border-white/10' : 'border-[#172b44]/10';
+
             return (
               <motion.div
                 key={toast.id}
                 layout
-                initial={{ opacity: 0, y: -16, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 40, scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-2xl border border-white/60 bg-white/90 shadow-glow backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90"
+                initial={{ opacity: 0, y: -18, scale: 0.94, rotate: isAmrita ? 0 : -1 }}
+                animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
+                exit={{ opacity: 0, x: 44, scale: 0.92, rotate: isAmrita ? 0 : 1 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+                className={
+                  isAmrita
+                    ? `pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-[16px] border ${borderColor} bg-[#1a0f14]/95 shadow-[0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl dark:bg-[#1a0f14]/95`
+                    : `pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-[14px] border-2 border-[#172b44] bg-[#0f1a2e]/95 shadow-[6px_6px_0_#172b44] backdrop-blur-xl`
+                }
               >
-                <div className="flex items-start gap-3 p-4">
-                  <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${COLORS[toast.type]}`} />
+                {/* Right accent bar — yellow in your screenshot for success */}
+                <div className={`absolute bottom-0 right-0 top-0 w-[5px] ${accent}`} />
+
+                {/* Left icon */}
+                <div className="flex items-start gap-3 p-4 pr-10">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${toast.type === 'success' ? 'border-emerald-500/30 bg-emerald-500/10' : toast.type === 'error' ? 'border-rose-500/30 bg-rose-500/10' : toast.type === 'warning' ? 'border-amber-500/30 bg-amber-500/10' : isAmrita ? 'border-[#A51636]/30 bg-[#A51636]/10' : 'border-sky-500/30 bg-sky-500/10'}`}>
+                    <Icon className={`h-5 w-5 ${iconColor}`} />
+                  </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                    <p className="flex items-center gap-1.5 text-[14px] font-bold leading-tight text-white">
                       {toast.title}
+                      {toast.type === 'success' ? <span>👋</span> : null}
+                      {toast.type === 'info' ? <Sparkles className="h-3.5 w-3.5 text-white/60" /> : null}
                     </p>
                     {toast.message ? (
-                      <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                      <p className="mt-1 text-[13px] leading-[1.45] text-slate-300/90 dark:text-slate-300/90">
                         {toast.message}
                       </p>
                     ) : null}
                   </div>
-                  <button
-                    onClick={() => dismiss(toast.id)}
-                    className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white"
-                    aria-label="Dismiss notification"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
                 </div>
-                {/* progress bar */}
+
+                <button
+                  onClick={() => dismiss(toast.id)}
+                  className="absolute right-[14px] top-3 rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                  aria-label="Dismiss notification"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+
+                {/* Progress bar at bottom — matches your screenshot yellow bottom border */}
                 <motion.div
                   initial={{ scaleX: 1 }}
                   animate={{ scaleX: 0 }}
                   transition={{ duration: TOAST_DURATION / 1000, ease: 'linear' }}
-                  className={`h-0.5 origin-left ${COLORS[toast.type]}`}
+                  className={`absolute bottom-0 left-0 h-[3px] origin-left ${accent}`}
                 />
               </motion.div>
             );
