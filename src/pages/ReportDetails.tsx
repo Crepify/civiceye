@@ -338,6 +338,44 @@ export function ReportDetails() {
               </Link>
             </div>
 
+            {/* Fixed Status Dashboard — nearby Report to Authority */}
+            <div className="card p-5">
+              <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">✓</span> Fix Status Dashboard
+              </h3>
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Current Status</span>
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${report.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' : report.status === 'in-progress' ? 'bg-amber-100 text-amber-700' : report.status === 'verified' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+                    {report.status === 'resolved' ? '✓ Fixed' : report.status === 'in-progress' ? '🔧 Fix in Progress' : report.status === 'verified' ? '✓ Verified' : '⏳ Pending'}
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+                  <div className={`h-full rounded-full transition-all ${report.status === 'resolved' ? 'bg-emerald-500 w-full' : report.status === 'in-progress' ? 'bg-amber-500 w-3/4' : report.status === 'verified' ? 'bg-blue-500 w-1/2' : 'bg-slate-400 w-1/4'}`} />
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-lg bg-slate-50 p-2 dark:bg-white/5">
+                    <div className="text-[11px] text-slate-500">Reported</div>
+                    <div className="font-bold">{new Date(report.date).toLocaleDateString()}</div>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 p-2 dark:bg-white/5">
+                    <div className="text-[11px] text-slate-500">{report.proof ? 'Fixed' : 'Est. Fix'}</div>
+                    <div className="font-bold">{report.proof ? new Date(report.proof.fixedDate).toLocaleDateString() : report.sla ? new Date(report.sla.deadline).toLocaleDateString() : '—'}</div>
+                  </div>
+                </div>
+                {report.proof ? (
+                  <div className="rounded-lg bg-emerald-50 p-2 text-xs dark:bg-emerald-500/10">
+                    <div className="font-bold text-emerald-800 dark:text-emerald-200">✓ Fix verified {report.proof.verifiedByAI ? `by AI ${report.proof.aiConfidence ? Math.round(report.proof.aiConfidence*100)+'%' : ''}` : ''}</div>
+                    <div className="mt-1 text-emerald-700/70 dark:text-emerald-300/70">{report.proof.description || 'Issue has been fixed and verified with before/after proof'}</div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg bg-amber-50 p-2 text-xs dark:bg-amber-500/10">
+                    <div className="font-medium text-amber-800 dark:text-amber-200">No fix proof yet — authorities can upload after photo to show before/after verification</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Responsible authority — public contact channels */}
             <AuthorityContactCard
               authority={responsibleAuthority(report)}

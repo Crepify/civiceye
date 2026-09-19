@@ -282,55 +282,6 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Leaderboard + Proof of Fix + SLA - comic style */}
-      <section className="section-pad pb-16">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="border-[4px] border-[#172b44] bg-[#fff8e7] p-6 shadow-[6px_6px_0_#172b44]">
-            <p className="inline-block bg-[#ffd630] px-2 py-1 text-[11px] font-black tracking-widest">LEADERBOARD</p>
-            <h3 className="mt-3 font-serif text-2xl font-black uppercase">Top Civic Heroes</h3>
-            <div className="mt-4 space-y-2">
-              {reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city')).slice(0,5).reduce((acc: any[], r) => {
-                const existing = acc.find((a) => a.author === r.author);
-                if (existing) existing.count++;
-                else acc.push({ author: r.author, count: 1, verified: r.verified ? 1 : 0 });
-                return acc;
-              }, []).sort((a,b) => b.count - a.count).slice(0,3).map((leader: any, i: number) => (
-                <div key={leader.author} className="flex items-center gap-2 border-2 border-[#172b44] bg-white p-2 text-sm">
-                  <span className="flex h-6 w-6 items-center justify-center bg-[#172b44] text-xs font-black text-white">{i+1}</span>
-                  <span className="font-bold truncate">{leader.author}</span>
-                  <span className="ml-auto text-xs">{leader.count} reports</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 text-xs font-medium text-slate-600">Gamified — verified reports, badges, certificates. Report 3 issues → Street Guardian certificate.</p>
-          </div>
-          
-          <div className="border-[4px] border-[#172b44] bg-[#91dcc4] p-6 shadow-[6px_6px_0_#ef6b59]">
-            <p className="inline-block bg-[#172b44] px-2 py-1 text-[11px] font-black tracking-widest text-white">PROOF OF FIX</p>
-            <h3 className="mt-3 font-serif text-2xl font-black uppercase text-[#172b44]">Before / After</h3>
-            <div className="mt-4 rounded-xl border-2 border-[#172b44] bg-white p-3">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="aspect-[4/3] bg-slate-200 rounded-lg flex items-center justify-center text-[10px] font-bold">BEFORE</div>
-                <div className="aspect-[4/3] bg-emerald-100 rounded-lg flex items-center justify-center text-[10px] font-bold text-emerald-700">AFTER ✓</div>
-              </div>
-              <p className="mt-2 text-xs font-bold text-[#172b44]">Authorities upload after photo → AI verifies fix → Before/After slider with verification badge.</p>
-            </div>
-          </div>
-          
-          <div className="border-[4px] border-[#172b44] bg-[#ef6b59] p-6 shadow-[6px_6px_0_#ffd630]">
-            <p className="inline-block bg-[#fff8e7] px-2 py-1 text-[11px] font-black tracking-widest">SLA ESCALATION</p>
-            <h3 className="mt-3 font-serif text-2xl font-black uppercase text-white">Auto Escalation</h3>
-            <div className="mt-4 space-y-2 text-sm font-semibold text-white">
-              <div className="flex justify-between border-b border-white/20 pb-1"><span>Critical</span><span>24h</span></div>
-              <div className="flex justify-between border-b border-white/20 pb-1"><span>High</span><span>48h</span></div>
-              <div className="flex justify-between border-b border-white/20 pb-1"><span>Medium</span><span>7 days</span></div>
-              <div className="flex justify-between"><span>Low</span><span>14 days</span></div>
-            </div>
-            <p className="mt-3 text-xs font-bold text-white/80">Breached → auto-escalates to higher authority with email + Maps link + severity + report link + AI annotation.</p>
-          </div>
-        </div>
-      </section>
-
       <button onClick={() => { const next = !soundOn; setSoundOn(next); setComicSoundOn(next); if (next) sound([523, 659, 784]); }} className={`fixed right-5 top-[calc(var(--nav-height)+1.6rem)] z-[60] border-3 border-[#172b44] px-3 py-2 text-xs font-black shadow-[4px_4px_0_#172b44] ${soundOn ? 'bg-[#91dcc4]' : 'bg-[#ffd630]'}`} aria-pressed={soundOn}>♬ SOUND: {soundOn ? 'ON' : 'OFF'}</button>
       <button onClick={() => { setPromoOpen(true); sound([196, 392, 784]); }} className="fixed bottom-5 left-5 z-40 border-[3px] border-[#172b44] bg-[#ef6b59] px-4 py-3 text-xs font-black shadow-[5px_5px_0_#172b44]">▶ WATCH THE CIVICEYE STORY</button>
       {certificateOpen ? <div role="dialog" aria-label="Civic Hero certificate" className="fixed inset-0 z-[70] grid place-items-center bg-[#172b44]/90 p-5" onClick={() => setCertificateOpen(false)}>

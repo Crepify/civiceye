@@ -1,6 +1,6 @@
 import type { AnalysisResult, CategoryId, Coordinates, Severity } from '@/types';
 import { CATEGORIES, categoryById } from '@/data/categories';
-import { compressImageForAI } from '@/utils/image';
+import { compressImageForAI, generateMockAnnotatedImage } from '@/utils/image';
 import { analyzePhotoWithRoboflow, hasRoboflowKey, roboflowStatus } from './roboflowService';
 import { analyzeOnDevice, onDeviceEnabled } from './onDeviceService';
 import { analyzeWithHuggingFace, hasHuggingFaceKey } from './huggingfaceService';
@@ -191,7 +191,17 @@ export async function runImageAnalysis(
   if (onDeviceEnabled) {
     try {
       const { confident, result } = await analyzeOnDevice(aiPhoto, coordinates);
-      if (confident) return { ...result, photo };
+      if (confident) {
+        let annotatedImage: string | null = (result as any).annotatedImage || null;
+        if (!annotatedImage) {
+          try {
+            annotatedImage = await generateMockAnnotatedImage(photo, result.category, result.confidence, result.objects);
+          } catch {
+            annotatedImage = null;
+          }
+        }
+        return { ...result, photo, annotatedImage };
+      }
       console.warn('[CivicEye] on-device AI not confident — using cloud engines.');
     } catch (err) {
       console.warn('[CivicEye] on-device AI unavailable:', err);
@@ -202,11 +212,25 @@ export async function runImageAnalysis(
   if (hasHuggingFaceKey) {
     try {
       const real = await analyzeWithHuggingFace(aiPhoto, coordinates);
-      return { ...real, photo };
+      let annotatedImage: string | null = (real as any).annotatedImage || null;
+      if (!annotatedImage) {
+        try {
+          annotatedImage = await generateMockAnnotatedImage(photo, real.category, real.confidence, real.objects);
+        } catch {
+          annotatedImage = null;
+        }
+      }
+      return { ...real, photo, annotatedImage };
     } catch (err) {
       console.warn('[CivicEye] Hugging Face unavailable:', err);
     }
   }
   const mock = analyzePhoto({ photo, coordinates });
-  return { ...mock, engine: 'mock' as const };
+  let annotatedImage: string | null = null;
+  try {
+    annotatedImage = await generateMockAnnotatedImage(photo, mock.category, mock.confidence, mock.objects);
+  } catch {
+    annotatedImage = null;
+  }
+  return { ...mock, engine: 'mock' as const, annotatedImage };
 }
