@@ -160,83 +160,52 @@ export async function sendEscalationEmail(payload: EscalationPayload): Promise<E
  */
 export function escalationEmailText(
   report: Report,
-  authority: Authority,
-  reporterEmail: string | null,
+  _authority: Authority,
+  _reporterEmail: string | null,
   message?: string,
 ): { subject: string; body: string } {
   const url = `${window.location.origin}/report/${report.id}`;
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const mapsLink = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
-  const mapsDirLink = `https://www.google.com/maps/dir/?api=1&destination=${report.coordinates.lat},${report.coordinates.lng}`;
-  const subject = `[${appName}] ${report.title} — ${report.severity.toUpperCase()} — report ${report.code ?? report.id}`;
-  
+  const severityUpper = report.severity.toUpperCase();
+  const subject = `[${appName}] ${severityUpper} — ${report.title} — ${report.code ?? report.id}`;
   const ai = report.ai;
-  const aiSection = ai
-    ? [
-        ``,
-        `AI Analysis:`,
-        `  Model: ${ai.model ?? '—'}`,
-        `  Confidence: ${ai.confidence ? Math.round(ai.confidence * 100) + '%' : '—'}`,
-        `  Detected: ${(ai.objects || []).join(', ') || '—'}`,
-        `  Summary: ${ai.summary ?? '—'}`,
-        `  Image Quality: ${ai.imageQuality ?? '—'}`,
-        `  Annotated Image: ${ai.annotatedImage ? 'Attached / included as link below (AI annotations with bounding boxes)' : 'Not available — see original photo'}`,
-        ai.annotatedImage ? `  Annotated Image URL: ${ai.annotatedImage.slice(0, 120)}... (full data URL in report)` : '',
-      ].join('\n')
-    : '';
 
   const body = [
-    `To: ${authority.name} (${authority.department})`,
-    ``,
-    `This is an auto-generated report from ${appName}. Please find attached evidence photo with AI annotations.`,
-    ``,
-    `Report: ${report.code ?? report.id}`,
-    `Title: ${report.title}`,
-    `Category: ${report.category}`,
-    `Severity: ${report.severity.toUpperCase()} — ${report.severity === 'critical' ? 'Immediate action required' : report.severity === 'high' ? 'High priority' : report.severity === 'medium' ? 'Medium priority' : 'Low priority'}`,
-    `Status: ${report.status}`,
-    `Location: ${report.locationName}`,
-    `Coordinates: ${report.coordinates.lat}, ${report.coordinates.lng}`,
-    `Google Maps: ${mapsLink}`,
-    `Directions: ${mapsDirLink}`,
-    `Report Link: ${url}`,
-    `Evidence Photo (Original): ${report.image}`,
-    ai?.annotatedImage ? `Evidence Photo (AI Annotated with bounding boxes): ${ai.annotatedImage ? 'See attached / report page' : ''}` : '',
-    `Reported by: ${report.author}${reporterEmail ? ` <${reporterEmail}>` : ''}`,
-    `Date: ${report.date}`,
-    `Scope: ${report.scope === 'campus' ? 'Campus (Amrita Eye) — Estate Office' : 'City (CivicEye) — BBMP'}`,
-    aiSection,
-    ``,
-    `Description:`,
-    report.description,
-    message ? `\nReporter Note:\n${message}` : '',
-    ``,
-    `---`,
-    `How to use:`,
-    `  • Original photo shows the issue as captured by citizen`,
-    ai?.annotatedImage ? `  • Annotated photo shows AI detection with bounding boxes around ${report.category} (confidence ${ai.confidence ? Math.round(ai.confidence*100)+'%' : ''})` : '',
-    `  • Google Maps link shows exact location — tap to open in Maps`,
-    `  • Severity ${report.severity.toUpperCase()} helps prioritize — ${report.severity === 'critical' ? 'critical means safety risk, please act within 24h' : 'please review within 7 days'}`,
-    `  • Report link ${url} shows full details, votes, confirms, and community reviews`,
-    ``,
-    `— Sent from ${appName} — Making cities and campuses better, one report at a time.`,
-    `— ${window.location.origin}`,
-  ].join('\n');
+    `${appName} — ${severityUpper} — ${report.code ?? report.id} — ${report.title}`,
+    `Category: ${report.category} · Severity: ${severityUpper}`,
+    `Location: ${report.locationName} (${report.coordinates.lat}, ${report.coordinates.lng})`,
+    `Maps: ${mapsLink}`,
+    `Report: ${url}`,
+    `Original: ${report.image}`,
+    ai?.annotatedImage ? `Annotated: ${ai.annotatedImage}` : '',
+    `Description: ${report.description}`,
+    message ? `Note: ${message}` : '',
+    ai?.summary ? `AI: ${ai.summary} ${ai.confidence ? Math.round(ai.confidence*100)+'%' : ''} ${ai.model ?? ''}` : '',
+  ].filter(Boolean).join('\n');
   return { subject, body };
 }
 
-/** WhatsApp deep links for pinging the authority about a report (one per number). */
+/** WhatsApp deep links — includes both original and AI annotated links + Google Maps + severity + report link */
 export function escalationWhatsAppTargets(
   report: Report,
   authority: Authority,
 ): { number: string; url: string }[] {
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
+  const mapsLink = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
+  const reportUrl = `${window.location.origin}/report/${report.id}`;
+  const ai = report.ai;
   const text = [
-    `${appName} report: ${report.title}`,
-    `Category: ${report.category} · Severity: ${report.severity}`,
+    `${appName} — ${report.severity.toUpperCase()} — ${report.title}`,
+    `Code: ${report.code ?? report.id}`,
+    `Category: ${report.category} · Severity: ${report.severity.toUpperCase()}`,
     `Location: ${report.locationName}`,
-    `Details: ${window.location.origin}/report/${report.id}`,
-  ].join('\n');
+    `Maps: ${mapsLink}`,
+    `Report: ${reportUrl}`,
+    `Original Photo: ${report.image}`,
+    ai?.annotatedImage ? `AI Annotated: ${ai.annotatedImage}` : '',
+    ai?.summary ? `AI: ${ai.summary} (${ai.confidence ? Math.round(ai.confidence*100)+'%' : ''})` : '',
+  ].filter(Boolean).join('\n');
   return whatsAppLinks(authority, text);
 }
 

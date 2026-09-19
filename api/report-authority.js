@@ -117,78 +117,40 @@ function buildEmail({ authority, report, message, ref }) {
     .join('');
 
   const html = `<!doctype html>
-<html><body style="margin:0;padding:24px;background:#f8fafc;font-family:Inter,Segoe UI,Arial,sans-serif;">
-  <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
-    <div style="background:${isCampus ? 'linear-gradient(135deg,#A51636,#E52B50)' : 'linear-gradient(135deg,#6366f1,#8b5cf6)'};padding:20px 24px;">
-      <p style="margin:0;color:#e0e7ff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;">${esc(appName)} · ${severityUpper} · ${esc(ref)}</p>
-      <h1 style="margin:6px 0 0;color:#ffffff;font-size:20px;">New ${isCampus ? 'campus' : 'civic'} issue reported — ${esc(severityUpper)}</h1>
-      <p style="margin:6px 0 0;color:#e0e7ff;font-size:13px;">Routed to: ${esc(authority.name)} (${esc(authority.department)}) — ${esc(severityNote)}</p>
+<html><body style="margin:0;padding:20px;background:#f8fafc;font-family:Inter,Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+    <div style="background:${isCampus ? '#A51636' : '#4f46e5'};padding:16px 20px;">
+      <p style="margin:0;color:#ffffff;font-size:13px;font-weight:700;">${esc(appName)} — ${esc(severityUpper)} — ${esc(ref)}</p>
+      <h1 style="margin:4px 0 0;color:#ffffff;font-size:18px;">${esc(report.title)}</h1>
     </div>
-    <div style="padding:16px 24px;">
-      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">${tableRows}</table>
-      
-      <div style="margin:16px 0;padding:14px 16px;background:#f1f5f9;border-radius:12px;">
-        <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;">Description</p>
-        <p style="margin:0;font-size:14px;line-height:1.6;color:#1e293b;white-space:pre-wrap;">${esc(report.description)}</p>
+    <div style="padding:16px 20px;">
+      <table style="width:100%;border-collapse:collapse;">${tableRows}</table>
+      <div style="margin:14px 0;padding:12px;background:#f8fafc;border-radius:8px;">
+        <p style="margin:0;font-size:14px;line-height:1.5;white-space:pre-wrap;">${esc(report.description)}</p>
       </div>
-
-      ${hasAnnotated ? `
-      <div style="margin:16px 0;padding:14px 16px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;">
-        <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.08em;">AI Analysis — Annotated Image with Bounding Boxes</p>
-        <p style="margin:0 0 8px;font-size:13px;color:#065f46;">Model: ${esc(ai.model)} · Confidence: ${ai.confidence ? Math.round(ai.confidence*100)+'%' : '—'} · Detected: ${esc((ai.objects||[]).join(', '))}</p>
-        <p style="margin:0;font-size:13px;color:#065f46;">Summary: ${esc(ai.summary)}</p>
-        <p style="margin:8px 0 0;font-size:12px;color:#047857;">Annotated image is attached to this email and also visible on the report page. Original photo is also attached.</p>
-      </div>` : `
-      <div style="margin:16px 0;padding:14px 16px;background:#fef3c7;border:1px solid #fcd34d;border-radius:12px;">
-        <p style="margin:0;font-size:12px;color:#92400e;">AI annotated image not available for this report — original evidence photo is attached. View full report for AI details if available.</p>
-      </div>`}
-
-      ${
-        message
-          ? `<div style="margin:16px 0;padding:14px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;">
-        <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:.08em;">Note from the citizen</p>
-        <p style="margin:0;font-size:14px;line-height:1.6;color:#7c2d12;white-space:pre-wrap;">${esc(message)}</p>
-      </div>`
-          : ''
-      }
-
-      <div style="margin:20px 0 8px;">
-        ${reportUrl ? `<a href="${esc(reportUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:10px 18px;background:${isCampus ? '#A51636' : '#4f46e5'};color:#ffffff;text-decoration:none;border-radius:10px;font-size:14px;font-weight:700;">View full report & AI annotation on website</a>` : ''}
-        ${mapsUrl ? `<a href="${esc(mapsUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:10px 18px;background:#0f172a;color:#ffffff;text-decoration:none;border-radius:10px;font-size:14px;font-weight:700;">Open location in Google Maps — ${esc(severityUpper)}</a>` : ''}
-        ${mapsDirUrl ? `<a href="${esc(mapsDirUrl)}" style="display:inline-block;margin:0 8px 8px 0;padding:10px 18px;background:#ffffff;color:#0f172a;border:1px solid #e2e8f0;text-decoration:none;border-radius:10px;font-size:14px;font-weight:700;">Get directions</a>` : ''}
+      ${hasAnnotated ? `<div style="margin:14px 0;padding:12px;background:#ecfdf5;border-radius:8px;"><p style="margin:0;font-size:13px;color:#065f46;">AI: ${esc(ai.summary)} — ${ai.confidence ? Math.round(ai.confidence*100)+'%' : ''} — ${esc((ai.objects||[]).join(', '))}</p></div>` : ''}
+      ${message ? `<div style="margin:14px 0;padding:12px;background:#fff7ed;border-radius:8px;"><p style="margin:0;font-size:13px;white-space:pre-wrap;">Note: ${esc(message)}</p></div>` : ''}
+      <div style="margin:16px 0;">
+        ${reportUrl ? `<a href="${esc(reportUrl)}" style="display:inline-block;margin:0 6px 6px 0;padding:8px 14px;background:${isCampus ? '#A51636' : '#4f46e5'};color:#ffffff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">View Report</a>` : ''}
+        ${mapsUrl ? `<a href="${esc(mapsUrl)}" style="display:inline-block;margin:0 6px 6px 0;padding:8px 14px;background:#0f172a;color:#ffffff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">Google Maps — ${esc(severityUpper)}</a>` : ''}
       </div>
-
-      <p style="font-size:12px;color:#94a3b8;line-height:1.6;">
-        This escalation was auto-generated when a citizen pressed “Report to authority” in ${esc(appName)}.
-        ${isCampus ? 'Estate Office will review within SLA.' : 'BBMP will acknowledge within SLA.'} 
-        Evidence photos (original + AI annotated with bounding boxes) are attached to this email.
-        ${report.image ? `Original: ${esc(report.image)}` : ''}
-      </p>
+      <p style="font-size:11px;color:#94a3b8;">Original: ${esc(report.image)} ${hasAnnotated ? '· Annotated: attached' : ''}</p>
     </div>
   </div>
 </body></html>`;
 
   const text = [
-    `${appName} — ${severityUpper} — Citizen escalation ${ref}`,
-    `Routed to: ${authority.name} (${authority.department}) — ${severityNote}`,
-    '',
-    ...rows.map(([k, v]) => `${k}: ${v}`),
-    '',
-    ai.summary ? `AI Summary: ${ai.summary}` : '',
-    ai.objects ? `AI Detected: ${(ai.objects||[]).join(', ')}` : '',
-    ai.confidence ? `AI Confidence: ${Math.round(ai.confidence*100)}%` : '',
-    hasAnnotated ? `AI Annotated Image: Attached to this email (bounding boxes around ${report.category})` : '',
-    '',
-    `Description:\n${report.description}`,
-    message ? `\nNote from the citizen:\n${message}` : '',
-    reportUrl ? `\nFull report & AI annotation on website: ${reportUrl}` : '',
-    mapsUrl ? `\nGoogle Maps (Severity ${severityUpper}): ${mapsUrl}` : '',
-    mapsDirUrl ? `\nDirections: ${mapsDirUrl}` : '',
-    report.image ? `\nOriginal Evidence Photo: ${report.image}` : '',
-    hasAnnotated ? `\nAnnotated Evidence Photo (AI with bounding boxes): Attached` : '',
-  ]
-    .filter((l) => l !== '')
-    .join('\n');
+    `${appName} — ${severityUpper} — ${report.code || report.id} — ${report.title}`,
+    `Category: ${report.category} · Severity: ${severityUpper}`,
+    `Location: ${report.locationName} (${lat}, ${lng})`,
+    `Maps: ${mapsUrl}`,
+    `Report: ${reportUrl}`,
+    `Original: ${report.image}`,
+    hasAnnotated ? `Annotated: ${ai.annotatedImage}` : '',
+    `Description: ${report.description}`,
+    message ? `Note: ${message}` : '',
+    ai.summary ? `AI: ${ai.summary} ${ai.confidence ? Math.round(ai.confidence*100)+'%' : ''}` : '',
+  ].filter(Boolean).join('\n');
 
   return {
     subject: `[${appName}] ${severityUpper} — ${report.title} — escalation ${ref}`.slice(0, 160),

@@ -42,7 +42,7 @@ import { roboflowStatus } from '@/services/roboflowService';
 import { requestLocation } from '@/services/geoService';
 import { mockReverseGeocode } from '@/services/geocodeService';
 import { publishPhoto } from '@/services/syncService';
-import { uploadReportPhoto } from '@/lib/storage';
+import { uploadReportPhoto, uploadAnnotatedPhoto } from '@/lib/storage';
 import { displayName } from '@/services/reportService';
 import { CAMPUS_CONFIG, isInsideCampus } from '@/data/campus';
 import { formatCoords } from '@/utils/format';
@@ -223,8 +223,16 @@ function ReportWizard() {
     }
     setUploading(true);
     try {
-      // Upload the photo to Supabase Storage, then save the report row.
+      // Upload both original and AI annotated photos to Supabase Storage (two instances per your request)
       const photoUrl = await uploadReportPhoto(draft.photo, user.id);
+      let annotatedUrl: string | null = null;
+      if (draft.analysis?.annotatedImage) {
+        try {
+          annotatedUrl = await uploadAnnotatedPhoto(draft.analysis.annotatedImage, user.id);
+        } catch {
+          annotatedUrl = draft.analysis.annotatedImage;
+        }
+      }
       const report = await addReport({
         title: draft.title.trim(),
         description: draft.description.trim(),
@@ -251,7 +259,8 @@ function ReportWizard() {
           imageQuality: draft.analysis.imageQuality ?? null,
           disclaimer:
             'AI confidence is an estimate and may be inaccurate. Verify the issue before acting.',
-          annotatedImage: draft.analysis.annotatedImage ?? null,
+          annotatedImage: annotatedUrl || draft.analysis.annotatedImage || null,
+          originalImage: photoUrl,
         },
       });
       setCreatedId(report.id);

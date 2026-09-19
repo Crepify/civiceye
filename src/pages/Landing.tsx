@@ -242,23 +242,31 @@ export function Landing() {
       </section>
 
       <section className="section-pad pb-16 sm:pb-24">
-        <div className="border-[5px] border-[#172b44] bg-[#172b44] p-6 text-[#fff8e7] shadow-[10px_10px_0_#ffd630] sm:p-10">
-          <p className="inline-block border-2 border-[#172b44] bg-[#ffd630] px-3 py-1 text-xs font-black tracking-[.14em] text-[#172b44]">CIVIC HERO MISSIONS</p>
-          <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_.9fr]">
-            <div>
-              <h2 className="font-serif text-4xl font-black uppercase leading-[.9] sm:text-5xl">Your next<br />city mission.</h2>
-              <p className="mt-4 max-w-xl font-semibold leading-relaxed text-[#fff8e7]/90">Confirm three neighbourhood reports and help a real civic issue become impossible to ignore.</p>
-              <div className="mt-6 border-3 border-[#fff8e7] bg-[#ef6b59] p-4 text-[#172b44] shadow-[4px_4px_0_#fff8e7]">
-                <p className="text-xs font-black tracking-[.14em]">MISSION #004 — LIGHT UP THE BLOCK</p>
-                <p className="mt-2 font-serif text-2xl font-black">PROGRESS: {missionProgress} / 3</p>
-                <div className="mt-3 h-4 border-2 border-[#172b44] bg-[#fff8e7] p-[2px]"><div className="h-full bg-[#ffd630]" style={{ width: `${(missionProgress / 3) * 100}%` }} /></div>
+        <div className="relative overflow-hidden border-[5px] border-[#172b44] bg-[#172b44] p-6 text-[#fff8e7] shadow-[10px_10px_0_#ffd630] sm:p-10">
+          <div className="pointer-events-none absolute inset-0 opacity-20 [background:repeating-linear-gradient(135deg,transparent_0_24px,rgba(255,214,48,.3)_25px_28px,transparent_29px_48px)]" />
+          <div className="relative z-10">
+            <p className="inline-block border-[3px] border-[#172b44] bg-[#ffd630] px-3 py-1.5 text-xs font-black tracking-[.14em] text-[#172b44] shadow-[3px_3px_0_#fff8e7]">CIVIC HERO MISSIONS</p>
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
+              <div>
+                <h2 className="font-serif text-4xl font-black uppercase leading-[.85] tracking-[-.02em] [text-shadow:3px_3px_0_#ef6b59] sm:text-5xl">Your next<br />city mission.</h2>
+                <p className="mt-4 max-w-xl text-[15px] font-semibold leading-relaxed text-[#fff8e7]/90">Confirm three neighbourhood reports and help a real civic issue become impossible to ignore.</p>
+                <div className="mt-6 border-[3px] border-[#172b44] bg-[#ef6b59] p-4 text-white shadow-[4px_4px_0_#ffd630]">
+                  <p className="text-[11px] font-black uppercase tracking-[.14em] text-[#172b44]">Mission #004 — Light up the block</p>
+                  <p className="mt-2 font-serif text-2xl font-black uppercase tracking-tight text-[#172b44]">Progress: {missionProgress} / 3</p>
+                  <div className="mt-3 h-5 border-[3px] border-[#172b44] bg-[#fff8e7] p-[3px] shadow-[2px_2px_0_#172b44]"><div className="h-full bg-[#ffd630]" style={{ width: `${(missionProgress / 3) * 100}%` }} /></div>
+                  <p className="mt-2 text-xs font-bold text-[#172b44]/70">{missionProgress} of 3 confirmed — keep going!</p>
+                </div>
               </div>
-            </div>
-            <div className="border-4 border-[#172b44] bg-[#91dcc4] p-6 text-[#172b44] shadow-[5px_5px_0_#ef6b59]">
-              <p className="text-xs font-black tracking-[.14em]">REWARD UNLOCKED AT 3 / 3</p>
-              <h3 className="mt-3 font-serif text-3xl font-black uppercase leading-none">Street<br />Guardian</h3>
-              <p className="mt-4 text-sm font-semibold">Earn a CivicEye badge and an appreciation certificate for verified community action.</p>
-              <button disabled={!missionComplete} onClick={() => { setCertificateOpen(true); setCertificateIssued(false); sound([523, 659, 784, 1046]); }} className="mt-6 border-3 border-[#172b44] bg-[#ffd630] px-4 py-3 text-sm font-black shadow-[4px_4px_0_#172b44] disabled:cursor-not-allowed disabled:bg-[#d9d3bd] disabled:text-[#59626a] disabled:shadow-none">{missionComplete ? 'VIEW CITY HERO REWARDS ✦' : `LOCKED — COMPLETE ${3 - missionProgress} MORE REPORT`}</button>
+              <div className="border-[4px] border-[#172b44] bg-[#0f2e3d] p-6 text-[#fff8e7] shadow-[6px_6px_0_#ef6b59] sm:shadow-[8px_8px_0_#ef6b59]">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-[#ffd630]" />
+                  <p className="text-[11px] font-black uppercase tracking-[.14em] text-[#91dcc4]">Reward unlocked at 3 / 3</p>
+                </div>
+                <h3 className="mt-3 font-serif text-3xl font-black uppercase leading-[.9] tracking-[-.01em] text-[#fff8e7] [text-shadow:2px_2px_0_#ef6b59]">Street<br />Guardian</h3>
+                <p className="mt-4 text-sm font-medium leading-relaxed text-[#fff8e7]/80">Earn a CivicEye badge and an appreciation certificate for verified community action.</p>
+                <button disabled={!missionComplete} onClick={() => { setCertificateOpen(true); setCertificateIssued(false); sound([523, 659, 784, 1046]); }} className="mt-6 w-full border-[3px] border-[#172b44] bg-[#ffd630] px-4 py-3 text-sm font-black uppercase tracking-wide text-[#172b44] shadow-[4px_4px_0_#fff8e7] transition-all hover:-translate-y-0.5 hover:shadow-[5px_5px_0_#fff8e7] disabled:cursor-not-allowed disabled:translate-y-0 disabled:bg-[#2a3a4a] disabled:text-[#5a6a7a] disabled:shadow-none">{missionComplete ? 'View City Hero Rewards ✦' : `Locked — Complete ${3 - missionProgress} More`}</button>
+                <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-[#91dcc4]/70">{missionComplete ? 'Ready to claim!' : 'Complete 1 more report to unlock'}</p>
+              </div>
             </div>
           </div>
         </div>

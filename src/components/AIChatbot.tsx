@@ -77,8 +77,8 @@ export function AIChatbot() {
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#A51636] text-white shadow-[0_8px_24px_rgba(165,22,54,0.3)] transition-transform hover:scale-105 active:scale-95 sm:bottom-6 sm:right-6"
-        title="AI Chatbot — in progress"
+        className="fixed bottom-20 left-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#A51636] text-white shadow-[0_8px_24px_rgba(165,22,54,0.3)] transition-transform hover:scale-105 active:scale-95 sm:bottom-6 sm:left-6 sm:bottom-6 sm:left-6"
+        title="AI Chatbot — tap to ask about BBMP, Estate Office, maps, AI"
       >
         <Bot className="h-7 w-7" />
       </button>
@@ -90,7 +90,7 @@ export function AIChatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.94 }}
             transition={{ type: 'spring', stiffness: 320, damping: 26 }}
-            className="fixed bottom-28 right-4 z-50 flex h-[480px] w-[90vw] max-w-sm flex-col overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_16px_48px_rgba(0,0,0,0.2)] dark:border-white/10 dark:bg-[#1a0f14] sm:bottom-24 sm:right-6 sm:h-[520px]"
+            className="fixed bottom-28 left-4 z-50 flex h-[480px] w-[90vw] max-w-sm flex-col overflow-hidden rounded-[20px] border border-slate-200 bg-white shadow-[0_16px_48px_rgba(0,0,0,0.2)] dark:border-white/10 dark:bg-[#1a0f14] sm:bottom-24 sm:left-6 sm:h-[520px]"
           >
             <div className="flex items-center gap-3 border-b border-slate-200 bg-[#FFF5F7] p-4 dark:border-white/10 dark:bg-[#1a0f14]">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#A51636] text-white">
