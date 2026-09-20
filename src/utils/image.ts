@@ -161,3 +161,132 @@ export async function generateMockAnnotatedImage(dataUrl: string, category: stri
     img.src = dataUrl;
   });
 }
+
+/**
+ * Generate annotated image from Roboflow predictions with real bounding boxes
+ * Falls back to mock if predictions missing coordinates
+ */
+export async function generateAnnotatedFromPredictions(
+  dataUrl: string,
+  predictions: Array<{ class: string; confidence: number; x?: number; y?: number; width?: number; height?: number }>,
+  category: string,
+  confidence: number
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas unavailable');
+        ctx.drawImage(img, 0, 0);
+
+        const colors: Record<string, string> = {
+          pothole: '#ef4444',
+          'broken-road': '#f97316',
+          garbage: '#22c55e',
+          sidewalk: '#3b82f6',
+          manhole: '#a855f7',
+          'fallen-tree': '#16a34a',
+          'street-light': '#eab308',
+          'water-leakage': '#06b6d4',
+          sewage: '#84cc16',
+          'illegal-dumping': '#f59e0b',
+          'traffic-signal': '#ef4444',
+          other: '#6b7280',
+        };
+        const color = colors[category] || '#ef4444';
+
+        // If predictions have valid boxes, draw them, otherwise mock
+        const validBoxes = predictions.filter((p) => 
+          typeof p.x === 'number' && typeof p.y === 'number' && 
+          typeof p.width === 'number' && typeof p.height === 'number' &&
+          p.width > 0 && p.height > 0
+        );
+
+        const boxesToDraw = validBoxes.length > 0 ? validBoxes : predictions.slice(0, 3);
+
+        boxesToDraw.forEach((pred) => {
+          let px: number, py: number, pw: number, ph: number;
+          
+          if (typeof pred.x === 'number' && typeof pred.y === 'number' && typeof pred.width === 'number' && typeof pred.height === 'number') {
+            // Roboflow returns center x,y and width,height - could be in pixels or normalized
+            // Heuristic: if values < 1, they're normalized, else pixels
+            const isNormalized = pred.x <= 1 && pred.y <= 1 && pred.width <= 1 && pred.height <= 1;
+            if (isNormalized) {
+              px = (pred.x - pred.width / 2) * canvas.width;
+              py = (pred.y - pred.height / 2) * canvas.height;
+              pw = pred.width * canvas.width;
+              ph = pred.height * canvas.height;
+            } else {
+              // Assume pixels, but scale if image size differs from detection size (640)
+              // For simplicity, treat as pixels in original image space if close, else scale
+              const scaleX = canvas.width / 640;
+              const scaleY = canvas.height / 640;
+              // If x,y are large (close to canvas size), use as is, else scale
+              if (pred.x > canvas.width || pred.y > canvas.height) {
+                px = (pred.x - pred.width / 2) * scaleX;
+                py = (pred.y - pred.height / 2) * scaleY;
+                pw = pred.width * scaleX;
+                ph = pred.height * scaleY;
+              } else {
+                px = pred.x - pred.width / 2;
+                py = pred.y - pred.height / 2;
+                pw = pred.width;
+                ph = pred.height;
+              }
+            }
+          } else {
+            // Mock fallback
+            const x = Math.random() * 0.5 + 0.1;
+            const y = Math.random() * 0.5 + 0.1;
+            const w = Math.random() * 0.3 + 0.2;
+            const h = Math.random() * 0.3 + 0.2;
+            px = x * canvas.width;
+            py = y * canvas.height;
+            pw = w * canvas.width;
+            ph = h * canvas.height;
+          }
+
+          // Clamp
+          px = Math.max(0, Math.min(canvas.width - 10, px));
+          py = Math.max(0, Math.min(canvas.height - 10, py));
+          pw = Math.max(10, Math.min(canvas.width - px, pw));
+          ph = Math.max(10, Math.min(canvas.height - py, ph));
+
+          // Box
+          ctx.strokeStyle = color;
+          ctx.lineWidth = Math.max(3, canvas.width * 0.006);
+          ctx.strokeRect(px, py, pw, ph);
+
+          // Label
+          const label = `${pred.class} ${Math.round(pred.confidence * 100)}%`;
+          ctx.font = `bold ${Math.max(13, canvas.width * 0.022)}px Arial`;
+          const metrics = ctx.measureText(label);
+          const lh = Math.max(20, canvas.width * 0.035);
+          // Ensure label visible
+          const labelY = py - lh >= 0 ? py - lh : py + ph;
+          ctx.fillStyle = color;
+          ctx.fillRect(px, labelY, metrics.width + 14, lh);
+          ctx.fillStyle = 'white';
+          ctx.fillText(label, px + 7, labelY + lh * 0.7);
+        });
+
+        // Watermark
+        ctx.fillStyle = 'rgba(0,0,0,0.65)';
+        ctx.fillRect(8, canvas.height - 32, 200, 24);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 12px Arial';
+        ctx.fillText(`AI: ${category} ${Math.round(confidence*100)}% • ${predictions.length} detections`, 12, canvas.height - 16);
+
+        resolve(canvas.toDataURL('image/jpeg', 0.9));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    img.onerror = () => reject(new Error('Could not load image'));
+    img.src = dataUrl;
+  });
+}

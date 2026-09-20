@@ -178,7 +178,26 @@ export async function runImageAnalysis(
   if (hasRoboflowKey) {
     try {
       const real = await analyzePhotoWithRoboflow(aiPhoto, coordinates);
-      return { ...real, photo };
+      let annotatedImage: string | null = (real as any).annotatedImage || null;
+      const predictions = (real as any).predictions || [];
+      if (!annotatedImage) {
+        try {
+          const { generateAnnotatedFromPredictions } = await import('@/utils/image');
+          if (predictions.length > 0) {
+            annotatedImage = await generateAnnotatedFromPredictions(photo, predictions, real.category, real.confidence);
+          } else {
+            annotatedImage = await generateMockAnnotatedImage(photo, real.category, real.confidence, real.objects);
+          }
+        } catch (e) {
+          console.warn('Failed to generate annotated from predictions', e);
+          try {
+            annotatedImage = await generateMockAnnotatedImage(photo, real.category, real.confidence, real.objects);
+          } catch {
+            annotatedImage = null;
+          }
+        }
+      }
+      return { ...real, photo, annotatedImage };
     } catch (err) {
       console.warn('[CivicEye] Roboflow unavailable:', err);
     }
