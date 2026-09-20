@@ -938,7 +938,7 @@ export function AmritaCampusMap({
  <div className="rounded-xl bg-slate-50 p-2.5 text-xs leading-relaxed text-slate-600 dark:bg-white/5 dark:text-slate-300">
  Main Academic Block with multiple wings and central facilities.
  </div>
- <img src="/amrita-block-e-floorplan.png" alt="Block E floor plan" className="h-32 w-full rounded-xl object-cover" loading="lazy" />
+ 
  </div>
  ) : null}
  {isCafeteria ? (

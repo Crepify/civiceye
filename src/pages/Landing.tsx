@@ -282,6 +282,67 @@ export function Landing() {
         </div>
       </section>
 
+      {/* Live Stats — Fixed, Pending, Escalated, Leaderboard */}
+      <section className="section-pad pb-16">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {/* Fixed Issues */}
+          <div className="border-[4px] border-[#172b44] bg-[#d1fae5] p-5 shadow-[5px_5px_0_#172b44]">
+            <p className="text-[11px] font-black tracking-widest">FIXED ISSUES</p>
+            <p className="mt-2 font-serif text-4xl font-black">{stats.resolved}</p>
+            <p className="mt-1 text-xs font-bold text-slate-700">✓ Resolved & verified with before/after proof</p>
+            <div className="mt-3 h-2 w-full bg-white border-2 border-[#172b44]"><div className="h-full bg-emerald-500" style={{ width: `${Math.min(100, (stats.resolved / Math.max(1, stats.total)) * 100)}%` }} /></div>
+            <p className="mt-2 text-[11px] font-medium">Proof of fix with AI verification</p>
+          </div>
+          
+          {/* Pending Issues */}
+          <div className="border-[4px] border-[#172b44] bg-[#fef3c7] p-5 shadow-[5px_5px_0_#172b44]">
+            <p className="text-[11px] font-black tracking-widest">PENDING ISSUES</p>
+            <p className="mt-2 font-serif text-4xl font-black">{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length}</p>
+            <p className="mt-1 text-xs font-bold text-slate-700">⏳ Awaiting community verification</p>
+            <div className="mt-3 h-2 w-full bg-white border-2 border-[#172b44]"><div className="h-full bg-amber-400" style={{ width: `${Math.min(100, (reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length / Math.max(1, stats.total)) * 100)}%` }} /></div>
+            <p className="mt-2 text-[11px] font-medium">Needs 3 confirms to verify</p>
+          </div>
+          
+          {/* Escalated Issues */}
+          <div className="border-[4px] border-[#172b44] bg-[#fecdd3] p-5 shadow-[5px_5px_0_#172b44]">
+            <p className="text-[11px] font-black tracking-widest">ESCALATED</p>
+            <p className="mt-2 font-serif text-4xl font-black">{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.escalation && r.escalation.level > 0).length}</p>
+            <p className="mt-1 text-xs font-bold text-slate-700">⚠️ SLA breached → auto-escalated</p>
+            <div className="mt-3 space-y-1 text-[11px] font-bold">
+              <div className="flex justify-between"><span>Critical</span><span>24h</span></div>
+              <div className="flex justify-between"><span>High</span><span>48h</span></div>
+              <div className="flex justify-between"><span>Medium</span><span>7d</span></div>
+            </div>
+          </div>
+          
+          {/* Leaderboard */}
+          <div className="border-[4px] border-[#172b44] bg-[#fff8e7] p-5 shadow-[5px_5px_0_#ffd630]">
+            <p className="inline-block bg-[#ffd630] px-2 py-1 text-[11px] font-black tracking-widest">LEADERBOARD</p>
+            <h3 className="mt-2 font-serif text-xl font-black uppercase">Top Heroes</h3>
+            <div className="mt-3 space-y-2">
+              {reports
+                .filter((r) => r.scope === (isAmrita ? 'campus' : 'city'))
+                .reduce((acc: any[], r) => {
+                  const ex = acc.find((a) => a.author === r.author);
+                  if (ex) { ex.count++; if (r.verified) ex.verified++; }
+                  else acc.push({ author: r.author, count: 1, verified: r.verified ? 1 : 0 });
+                  return acc;
+                }, [])
+                .sort((a, b) => b.verified - a.verified || b.count - a.count)
+                .slice(0, 3)
+                .map((leader: any, i: number) => (
+                  <div key={leader.author} className="flex items-center gap-2 border-2 border-[#172b44] bg-white p-2 text-xs">
+                    <span className="flex h-5 w-5 items-center justify-center bg-[#172b44] text-[11px] font-black text-white">{i + 1}</span>
+                    <span className="font-bold truncate flex-1">{leader.author}</span>
+                    <span className="text-[11px]">{leader.count} reports</span>
+                  </div>
+                ))}
+            </div>
+            <p className="mt-3 text-[11px] font-medium">Report 3 issues → Street Guardian certificate</p>
+          </div>
+        </div>
+      </section>
+
       <button onClick={() => { const next = !soundOn; setSoundOn(next); setComicSoundOn(next); if (next) sound([523, 659, 784]); }} className={`fixed right-5 top-[calc(var(--nav-height)+1.6rem)] z-[60] border-3 border-[#172b44] px-3 py-2 text-xs font-black shadow-[4px_4px_0_#172b44] ${soundOn ? 'bg-[#91dcc4]' : 'bg-[#ffd630]'}`} aria-pressed={soundOn}>♬ SOUND: {soundOn ? 'ON' : 'OFF'}</button>
       <button onClick={() => { setPromoOpen(true); sound([196, 392, 784]); }} className="fixed bottom-5 left-5 z-40 border-[3px] border-[#172b44] bg-[#ef6b59] px-4 py-3 text-xs font-black shadow-[5px_5px_0_#172b44]">▶ WATCH THE CIVICEYE STORY</button>
       {certificateOpen ? <div role="dialog" aria-label="Civic Hero certificate" className="fixed inset-0 z-[70] grid place-items-center bg-[#172b44]/90 p-5" onClick={() => setCertificateOpen(false)}>
