@@ -13,21 +13,16 @@ import { Badge } from '@/components/Badge';
 import { PageHeader } from '@/components/PageHeader';
 import { timeAgo } from '@/utils/format';
 
-function imageUrlToDataUrl(url: string): Promise<string> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // If already data URL, return
-      if (url.startsWith('data:')) return resolve(url);
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`Fetch failed ${res.status}`);
-      const blob = await res.blob();
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('FileReader failed'));
-      reader.readAsDataURL(blob);
-    } catch (e) {
-      reject(e);
-    }
+async function imageUrlToDataUrl(url: string): Promise<string> {
+  if (url.startsWith('data:')) return url;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Fetch failed ${res.status}`);
+  const blob = await res.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error('FileReader failed'));
+    reader.readAsDataURL(blob);
   });
 }
 
