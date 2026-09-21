@@ -20,5 +20,15 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.CivicEyeChatConfig = {
+        theme: "auto",
+        title: "CivicEye Assistant",
+        subtitle: "Ask about reporting an issue",
+        placeholder: "Ask about reporting, BBMP, Estate Office, maps...",
+        endpoint: "/api/chat"
+      };
+    </script>
+    <script src="/civiceye-chat.js" defer></script>
   </body>
 </html>

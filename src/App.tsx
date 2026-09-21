@@ -7,7 +7,6 @@ import { Footer } from '@/components/Footer';
 import { NavbarAmrita } from '@/components/NavbarAmrita';
 import { FooterAmrita } from '@/components/FooterAmrita';
 import { SOSButton } from '@/components/SOSButton';
-import { AIChatbot } from '@/components/AIChatbot';
 import { RequireAuth } from '@/components/RequireAuth';
 import { Landing } from '@/pages/Landing';
 import { AmritaEye } from '@/pages/AmritaEye';
@@ -118,7 +117,6 @@ export default function App() {
       {!isAuthPage ? (amritaChrome ? <NavbarAmrita /> : <Navbar />) : null}
       {/* Global one-tap SOS (only shows for signed-in users). */}
       {!isAuthPage ? <SOSButton /> : null}
-      {!isAuthPage ? <AIChatbot /> : null}
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}

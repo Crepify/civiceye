@@ -287,38 +287,38 @@ export function Landing() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Fixed Issues */}
           <div className="border-[4px] border-[#172b44] bg-[#d1fae5] p-5 shadow-[5px_5px_0_#172b44]">
-            <p className="text-[11px] font-black tracking-widest">FIXED ISSUES</p>
-            <p className="mt-2 font-serif text-4xl font-black">{stats.resolved}</p>
-            <p className="mt-1 text-xs font-bold text-slate-700">✓ Resolved & verified with before/after proof</p>
+            <p className="text-[11px] font-black tracking-widest text-[#172b44]">FIXED ISSUES</p>
+            <p className="mt-2 font-serif text-4xl font-black text-[#172b44]">{stats.resolved}</p>
+            <p className="mt-1 text-xs font-bold text-[#172b44]">✓ Resolved & verified with before/after proof</p>
             <div className="mt-3 h-2 w-full bg-white border-2 border-[#172b44]"><div className="h-full bg-emerald-500" style={{ width: `${Math.min(100, (stats.resolved / Math.max(1, stats.total)) * 100)}%` }} /></div>
-            <p className="mt-2 text-[11px] font-medium">Proof of fix with AI verification</p>
+            <p className="mt-2 text-[11px] font-bold text-[#172b44]/80">Proof of fix with AI verification</p>
           </div>
           
           {/* Pending Issues */}
           <div className="border-[4px] border-[#172b44] bg-[#fef3c7] p-5 shadow-[5px_5px_0_#172b44]">
-            <p className="text-[11px] font-black tracking-widest">PENDING ISSUES</p>
-            <p className="mt-2 font-serif text-4xl font-black">{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length}</p>
-            <p className="mt-1 text-xs font-bold text-slate-700">⏳ Awaiting community verification</p>
+            <p className="text-[11px] font-black tracking-widest text-[#172b44]">PENDING ISSUES</p>
+            <p className="mt-2 font-serif text-4xl font-black text-[#172b44]">{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length}</p>
+            <p className="mt-1 text-xs font-bold text-[#172b44]">⏳ Awaiting community verification</p>
             <div className="mt-3 h-2 w-full bg-white border-2 border-[#172b44]"><div className="h-full bg-amber-400" style={{ width: `${Math.min(100, (reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length / Math.max(1, stats.total)) * 100)}%` }} /></div>
-            <p className="mt-2 text-[11px] font-medium">Needs 3 confirms to verify</p>
+            <p className="mt-2 text-[11px] font-bold text-[#172b44]/80">Needs 3 confirms to verify</p>
           </div>
           
           {/* Escalated Issues */}
           <div className="border-[4px] border-[#172b44] bg-[#fecdd3] p-5 shadow-[5px_5px_0_#172b44]">
-            <p className="text-[11px] font-black tracking-widest">ESCALATED</p>
-            <p className="mt-2 font-serif text-4xl font-black">{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.escalation && r.escalation.level > 0).length}</p>
-            <p className="mt-1 text-xs font-bold text-slate-700">⚠️ SLA breached → auto-escalated</p>
-            <div className="mt-3 space-y-1 text-[11px] font-bold">
-              <div className="flex justify-between"><span>Critical</span><span>24h</span></div>
-              <div className="flex justify-between"><span>High</span><span>48h</span></div>
+            <p className="text-[11px] font-black tracking-widest text-[#172b44]">ESCALATED</p>
+            <p className="mt-2 font-serif text-4xl font-black text-[#172b44]">{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.escalation && r.escalation.level > 0).length}</p>
+            <p className="mt-1 text-xs font-bold text-[#172b44]">⚠️ SLA breached → auto-escalated</p>
+            <div className="mt-3 space-y-1 text-[11px] font-bold text-[#172b44]">
+              <div className="flex justify-between border-b border-[#172b44]/10 pb-1"><span>Critical</span><span>24h</span></div>
+              <div className="flex justify-between border-b border-[#172b44]/10 pb-1"><span>High</span><span>48h</span></div>
               <div className="flex justify-between"><span>Medium</span><span>7d</span></div>
             </div>
           </div>
           
           {/* Leaderboard */}
-          <div className="border-[4px] border-[#172b44] bg-[#fff8e7] p-5 shadow-[5px_5px_0_#ffd630]">
-            <p className="inline-block bg-[#ffd630] px-2 py-1 text-[11px] font-black tracking-widest">LEADERBOARD</p>
-            <h3 className="mt-2 font-serif text-xl font-black uppercase">Top Heroes</h3>
+          <div className="border-[4px] border-[#172b44] bg-[#172b44] p-5 shadow-[5px_5px_0_#ffd630]">
+            <p className="inline-block bg-[#ffd630] px-2 py-1 text-[11px] font-black tracking-widest text-[#172b44]">LEADERBOARD</p>
+            <h3 className="mt-2 font-serif text-xl font-black uppercase text-[#fff8e7]">Top Heroes</h3>
             <div className="mt-3 space-y-2">
               {reports
                 .filter((r) => r.scope === (isAmrita ? 'campus' : 'city'))
@@ -331,14 +331,14 @@ export function Landing() {
                 .sort((a, b) => b.verified - a.verified || b.count - a.count)
                 .slice(0, 3)
                 .map((leader: any, i: number) => (
-                  <div key={leader.author} className="flex items-center gap-2 border-2 border-[#172b44] bg-white p-2 text-xs">
+                  <div key={leader.author} className="flex items-center gap-2 border-2 border-[#172b44] bg-[#fff8e7] p-2 text-xs">
                     <span className="flex h-5 w-5 items-center justify-center bg-[#172b44] text-[11px] font-black text-white">{i + 1}</span>
-                    <span className="font-bold truncate flex-1">{leader.author}</span>
-                    <span className="text-[11px]">{leader.count} reports</span>
+                    <span className="font-bold truncate flex-1 text-[#172b44]">{leader.author}</span>
+                    <span className="text-[11px] font-bold text-[#172b44]">{leader.count} reports</span>
                   </div>
                 ))}
             </div>
-            <p className="mt-3 text-[11px] font-medium">Report 3 issues → Street Guardian certificate</p>
+            <p className="mt-3 text-[11px] font-bold text-[#fff8e7]/80">Report 3 issues → Street Guardian certificate</p>
           </div>
         </div>
       </section>
