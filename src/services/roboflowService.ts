@@ -71,9 +71,13 @@ export function roboflowStatus(): { ok: boolean; reason: string } {
   };
 }
 
-const REQUEST_TIMEOUT_MS = 45_000;
+// Roboflow workflows on the free tier (esp. SAM-style segmenters) can take
+// 30–70 s for a 768px JPEG. Give each attempt a generous budget; we cap
+// retries at 3 so worst-case is still under 4 minutes. Backfill uses the
+// compressed photo to keep upload fast.
+const REQUEST_TIMEOUT_MS = 90_000;
 const MAX_ATTEMPTS = 3;
-const BACKOFF_BASE_MS = 500;
+const BACKOFF_BASE_MS = 800;
 
 /** Typed error for all Roboflow failures. */
 export class RoboflowError extends Error {
@@ -94,32 +98,44 @@ export class RoboflowError extends Error {
 async function postJsonWithRetry(
   url: string,
   body: string,
-  signal: AbortSignal | undefined,
+  timeoutMs: number,
   attempt = 0,
 ): Promise<Response> {
+  // Each retry gets its OWN AbortController — otherwise firing the timeout
+  // on attempt 0 would abort attempts 1 and 2 before they even start.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   let res: Response;
   try {
     res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
-      signal,
+      signal: controller.signal,
     });
   } catch (err) {
+    clearTimeout(timer);
+    const isAbort = err instanceof DOMException && err.name === 'AbortError';
     if (attempt + 1 < MAX_ATTEMPTS) {
       await sleep(BACKOFF_BASE_MS * 2 ** attempt);
-      return postJsonWithRetry(url, body, signal, attempt + 1);
+      return postJsonWithRetry(url, body, timeoutMs, attempt + 1);
     }
     throw new RoboflowError(
-      err instanceof Error ? `Roboflow network error: ${err.message}` : 'Roboflow network error.',
+      isAbort
+        ? `Roboflow request timed out after ${Math.round(timeoutMs / 1000)}s.`
+        : err instanceof Error
+          ? `Roboflow network error: ${err.message}`
+          : 'Roboflow network error.',
       undefined,
-      'network',
+      isAbort ? 'timeout' : 'network',
     );
   }
 
+  clearTimeout(timer);
+
   if ((res.status === 429 || res.status >= 500) && attempt + 1 < MAX_ATTEMPTS) {
     await sleep(BACKOFF_BASE_MS * 2 ** attempt);
-    return postJsonWithRetry(url, body, signal, attempt + 1);
+    return postJsonWithRetry(url, body, timeoutMs, attempt + 1);
   }
 
   return res;
@@ -365,13 +381,14 @@ async function callProxy(body: { image: string; api_key?: string; model?: string
       'config',
     );
   }
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  // postJsonWithRetry manages its own per-attempt AbortController (so retries
+  // aren't killed by the first attempt's timeout). We still enforce a global
+  // cap of REQUEST_TIMEOUT_MS * MAX_ATTEMPTS here as a safety net.
   let res: Response;
   try {
-    res = await postJsonWithRetry(PROXY_TARGET, JSON.stringify(body), controller.signal);
-  } finally {
-    clearTimeout(timer);
+    res = await postJsonWithRetry(PROXY_TARGET, JSON.stringify(body), REQUEST_TIMEOUT_MS);
+  } catch (err) {
+    throw err;
   }
 
   if (!res.ok) {

@@ -113,15 +113,44 @@ export interface EscalationResult {
   authorityName?: string;
 }
 
+/**
+ * If a data: URL is too big to send inline via JSON, downscale + re-encode it
+ * as a smaller JPEG. Returns a Promise resolving to a (possibly smaller)
+ * data URL. http(s) URLs pass through unchanged.
+ */
+async function shrinkForTransport(url: string | null | undefined, maxBytes = 900_000): Promise<string | undefined> {
+  if (!url || typeof url !== 'string') return undefined;
+  if (!url.startsWith('data:')) return url; // leave http(s) URLs alone
+  if (url.length <= maxBytes) return url;
+
+  try {
+    const { compressImageForAI } = await import('@/utils/image');
+    const compressed = await compressImageForAI(url);
+    // If compression still didn't shrink enough, bail out — send as link only.
+    if (compressed.length > maxBytes * 1.4) return undefined;
+    return compressed;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Build the escalation payload for a report + authority pair. */
-export function buildEscalationPayload(
+export async function buildEscalationPayload(
   report: Report,
   authority: Authority,
   reporterEmail: string | null,
   message?: string,
   opts: { slaBreach?: boolean; level?: number } = {},
-): EscalationPayload {
+): Promise<EscalationPayload> {
   const ai = report.ai;
+  // Compress large inline data URLs before sending so we don't blow the
+  // Vercel 4.5 MB body limit with base64-encoded phone photos. HTTP URLs
+  // (Supabase storage) are passed through as links — the server will
+  // attach them as links rather than embedding.
+  const image = await shrinkForTransport(report.image);
+  const annotatedImage = ai?.annotatedImage
+    ? await shrinkForTransport(ai.annotatedImage as string)
+    : undefined;
   return {
     authorityId: authority.id,
     message,
@@ -134,14 +163,14 @@ export function buildEscalationPayload(
       severity: report.severity,
       locationName: report.locationName,
       coordinates: report.coordinates,
-      image: report.image,
+      image: image ?? report.image, // fall back to original ref (URL) if too big
       url: `${window.location.origin}/report/${report.id}`,
       author: report.author,
       reporterEmail: reporterEmail ?? undefined,
       scope: report.scope,
       ai: ai
         ? {
-            annotatedImage: ai.annotatedImage ?? undefined,
+            annotatedImage,
             confidence: ai.confidence,
             summary: ai.summary,
             model: ai.model,

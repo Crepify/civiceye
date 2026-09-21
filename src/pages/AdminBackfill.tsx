@@ -8,7 +8,7 @@ import { useReports } from '@/hooks/useReports';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { uploadAnnotatedPhoto } from '@/lib/storage';
-import { generateMockAnnotatedImage, generateAnnotatedFromPredictions } from '@/utils/image';
+import { compressImageForAI, generateMockAnnotatedImage, generateAnnotatedFromPredictions } from '@/utils/image';
 import { analyzePhotoWithRoboflow, hasRoboflowKey, roboflowConfig } from '@/services/roboflowService';
 import { Badge } from '@/components/Badge';
 import { PageHeader } from '@/components/PageHeader';
@@ -59,7 +59,10 @@ export function AdminBackfill() {
     if (!report || !user) return;
     setProcessing(reportId);
     try {
-      const dataUrl = await imageUrlToDataUrl(report.image);
+      const rawDataUrl = await imageUrlToDataUrl(report.image);
+      // Compress to Roboflow-friendly size (~768px JPEG 0.72) to avoid
+      // tripping the 90s timeout with multi-MB phone photos.
+      const dataUrl = await compressImageForAI(rawDataUrl);
       const ai = report.ai as any;
       const existingCategory = report.category;
       const existingConfidence = ai?.confidence || 0.85;

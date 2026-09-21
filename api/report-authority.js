@@ -72,7 +72,14 @@ const DIRECTORY = {
   'amrita-vc': { name: 'Vice Chancellor Office', department: 'Level 2 escalation', email: 'civiceyeoffcial@gmail.com' },
 };
 
-const MAX_BODY_CHARS = 20_000;
+// Max overall JSON payload (after parsing) — ~9 MB. After base64 overhead this
+// fits a compressed photo (~1 MB JPEG ≈ 1.4 MB base64) plus the annotated
+// version plus all metadata without blowing Vercel's 4.5 MB default (we
+// already raised bodyParser.sizeLimit to 10 MB above).
+const MAX_BODY_CHARS = 9_000_000;
+// Max per-image (original or annotated) as base64: ~4 MB ≈ 3 MB JPEG.
+// Anything bigger is stripped and sent as a link instead of an attachment.
+const MAX_IMG_BASE64_CHARS = 4_000_000;
 
 const esc = (s) =>
   String(s ?? '')
@@ -173,6 +180,7 @@ function buildEmail({ authority, report, message, ref }) {
         ${reportUrl ? `<a href="${esc(reportUrl)}" style="display:inline-block;margin:0 6px 6px 0;padding:8px 14px;background:${isCampus ? '#A51636' : '#4f46e5'};color:#ffffff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">View Report</a>` : ''}
         ${mapsUrl ? `<a href="${esc(mapsUrl)}" style="display:inline-block;margin:0 6px 6px 0;padding:8px 14px;background:#0f172a;color:#ffffff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">Google Maps — ${esc(severityUpper)}</a>` : ''}
       </div>
+      ${strippedNote}
       <p style="font-size:11px;color:#94a3b8;">Original: ${esc(report.image)} ${hasAnnotated ? '· Annotated: attached' : ''}</p>
     </div>
   </div>
@@ -198,7 +206,10 @@ function buildEmail({ authority, report, message, ref }) {
   };
 }
 
-export const config = { api: { bodyParser: { sizeLimit: '2mb' } } };
+// Allow ~10 MB so base64-encoded phone photos (4–8 MB) don't trip the 4.5 MB
+// Vercel default before they even reach our own size check. The API is still
+// protected by MAX_BODY_CHARS below and only serves allow-listed recipients.
+export const config = { api: { bodyParser: { sizeLimit: '10mb' } } };
 
 export default async function handler(req, res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -248,11 +259,18 @@ export default async function handler(req, res) {
     const transport = nodemailer.createTransport(smtp);
     const mail = buildEmail({ authority, report, message, ref });
 
-    // Attach original + AI annotated pictures if they are data URLs or http URLs
+    // Attach original + AI annotated pictures as data URLs only if they are
+    // not too large (SMTP relays and Vercel response buffering hate multi-MB
+    // attachments). Oversize images are still linked in the email body.
     const attachments = [];
+    const strippedImages = [];
     const addAttachmentFromDataUrl = (dataUrl, filename) => {
       if (!dataUrl || typeof dataUrl !== 'string') return;
       if (dataUrl.startsWith('data:')) {
+        if (dataUrl.length > MAX_IMG_BASE64_CHARS) {
+          strippedImages.push(filename);
+          return;
+        }
         const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
         if (match) {
           const contentType = match[1];
@@ -272,6 +290,12 @@ export default async function handler(req, res) {
     if (report.ai?.annotatedImage) {
       addAttachmentFromDataUrl(report.ai.annotatedImage, `ai-annotated-${ref}.jpg`);
     }
+
+    // If we stripped oversized images, add a note so the recipient knows to
+    // click the Report URL for full-resolution evidence.
+    const strippedNote = strippedImages.length
+      ? `<p style="font-size:11px;color:#94a3b8;">Note: ${strippedImages.join(' + ')} exceeded email attachment size limits — open the Report link above to view full-resolution evidence.</p>`
+      : '';
 
     // If image is http URL (not data URL), we cannot attach directly without fetching, but we include link in email
     // For data URLs we attach, for http we leave as link (to avoid fetching in serverless)

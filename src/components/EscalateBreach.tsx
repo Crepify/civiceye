@@ -143,7 +143,7 @@ export function EscalateBreach({ report, className }: EscalateBreachProps) {
     }, 520);
 
     try {
-      const payload = buildEscalationPayload(report, target, reporterEmail, composedMessage, {
+      const payload = await buildEscalationPayload(report, target, reporterEmail, composedMessage, {
         slaBreach: true,
         level: currentLevel + 1,
       });
