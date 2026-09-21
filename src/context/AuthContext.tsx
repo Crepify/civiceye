@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import type { Profile } from '@/types';
@@ -41,6 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState<boolean>(isSupabaseConfigured);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  // Resolvers for the next SIGNED_IN / TOKEN_REFRESHED event — used by
+  // signInWithPassword/signUp/magic-link so the caller can await until the
+  // session+profile are actually reflected in React state (prevents the
+  // "RequireAuth bounces me right back to /login" race on the first click).
+  const nextAuthResolversRef = useRef<{
+    resolve: () => void;
+    reject: (err: unknown) => void;
+  } | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
@@ -56,15 +64,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return;
       setSession(nextSession);
       setLoading(false);
+      // Resolve anyone awaiting sign-in completion (see signInWithPassword).
+      const resolvers = nextAuthResolversRef.current;
+      if (resolvers && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && nextSession) {
+        nextAuthResolversRef.current = null;
+        resolvers.resolve();
+      }
     });
 
     return () => {
       mounted = false;
       sub.subscription.unsubscribe();
+      // If unmounted while a sign-in was pending, release it.
+      const resolvers = nextAuthResolversRef.current;
+      if (resolvers) {
+        nextAuthResolversRef.current = null;
+        resolvers.reject(new Error('Auth unmounted during sign-in.'));
+      }
     };
   }, []);
 
@@ -107,12 +127,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     if (!supabase) throw new Error('Supabase is not configured.');
+    // Register a resolver BEFORE calling signIn so we catch the SIGNED_IN
+    // event fired by the response itself (for ~instant logins the event
+    // sometimes fires before the promise resolves).
+    const waiter = new Promise<void>((resolve, reject) => {
+      nextAuthResolversRef.current?.reject(new Error('Superseded by a newer sign-in.'));
+      nextAuthResolversRef.current = { resolve, reject };
+      // Safety: if for any reason the SIGNED_IN event never arrives (SDK
+      // quirk, pre-warmed session, etc.), don't hang the UI forever. After
+      // 10s release the waiter — the session will be set via getSession
+      // immediately after the signInWithPassword promise resolves anyway.
+      window.setTimeout(() => {
+        if (nextAuthResolversRef.current?.resolve === resolve) {
+          nextAuthResolversRef.current = null;
+          resolve();
+        }
+      }, 10_000);
+    });
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    if (error) {
+      nextAuthResolversRef.current = null;
+      throw error;
+    }
+    // Wait for onAuthStateChange to actually apply the session (and thus
+    // for RequireAuth to see user != null) before returning.
+    await waiter;
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     if (!supabase) throw new Error('Supabase is not configured.');
+    const waiter = new Promise<void>((resolve, reject) => {
+      nextAuthResolversRef.current?.reject(new Error('Superseded by a newer sign-in.'));
+      nextAuthResolversRef.current = { resolve, reject };
+      window.setTimeout(() => {
+        if (nextAuthResolversRef.current?.resolve === resolve) {
+          nextAuthResolversRef.current = null;
+          resolve();
+        }
+      }, 10_000);
+    });
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -124,9 +177,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-    if (error) throw error;
-    // When "Confirm email" is off, Supabase returns a session immediately.
-    return { session: data.session ?? null };
+    if (error) {
+      nextAuthResolversRef.current = null;
+      throw error;
+    }
+    if (data.session) {
+      // Email confirmation is off — we'll get SIGNED_IN immediately.
+      await waiter.catch(() => {});
+      return { session: data.session };
+    }
+    // Email confirmation required — no session yet.
+    nextAuthResolversRef.current = null;
+    return { session: null };
   }, []);
 
   const signInWithMagicLink = useCallback(async (email: string) => {
@@ -138,6 +200,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
     if (error) throw error;
+    // Magic links don't produce a session here — user clicks the link in
+    // their email, which lands on /auth/callback. Nothing to wait for.
   }, []);
 
   const resendConfirmation = useCallback(async (email: string) => {
@@ -165,6 +229,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   }, []);
 
+  // Derive isAmrita from the session email the instant a session lands
+  // (faster than waiting for the profiles-table fetch, so the brand swaps
+  // on the first render after sign-in — no CivicEye flash for Amrita users).
+  const isAmrita = Boolean(
+    profile?.is_amrita ?? (session?.user?.email ? isAmritaEmail(session.user.email) : false),
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       configured: isSupabaseConfigured,
@@ -172,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       profile,
-      isAmrita: Boolean(profile?.is_amrita),
+      isAmrita,
       signInWithPassword,
       signUp,
       signInWithMagicLink,

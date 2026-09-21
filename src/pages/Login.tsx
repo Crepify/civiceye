@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { z } from 'zod';
 import {
+  CheckCircle2,
   KeyRound,
   Loader2,
   LogIn,
   Mail,
   MailCheck,
   MailWarning,
+  PartyPopper,
   ShieldCheck,
   Sparkles,
   UserPlus,
@@ -16,6 +18,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { useBrand } from '@/hooks/useBrand';
+import { isAmritaEmail } from '@/utils/auth';
 import { Logo } from '@/components/Logo';
 
 const emailSchema = z.string().email('Enter a valid email (e.g. name@gmail.com).');
@@ -23,16 +26,20 @@ const emailSchema = z.string().email('Enter a valid email (e.g. name@gmail.com).
 const emailValid = (v: string) => emailSchema.safeParse(v).success;
 
 type Mode = 'signin' | 'signup' | 'magic';
+type Stage = 'idle' | 'submitting' | 'redirecting';
 
 /**
  * Login / sign up / magic-link screen.
  * - Any valid email is accepted (@gmail.com, @…amrita.edu, …).
- * - Logging in with an @…amrita.edu email activates the Amrita Eye brand.
+ * - Typing an @…amrita.edu address previews the Amrita Eye brand INSTANTLY
+ *   (colors + favicon + title), so the post-login brand swap never flashes
+ *   CivicEye for campus users.
+ * - Sign-in waits for the auth state to settle before navigating — one press.
  */
 export function Login() {
-  const { configured, loading, signInWithPassword, signUp, signInWithMagicLink, resendConfirmation, resetPassword } =
+  const { configured, loading, user, signInWithPassword, signUp, signInWithMagicLink, resendConfirmation, resetPassword } =
     useAuth();
-  const { isAmrita } = useBrand();
+  const { isAmrita, setPreviewBrand } = useBrand();
   const toast = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -43,10 +50,61 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [stage, setStage] = useState<Stage>('idle');
   const [sentMagic, setSentMagic] = useState(false);
   const [sentReset, setSentReset] = useState(false);
   const [confirmSent, setConfirmSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [justSignedInAs, setJustSignedInAs] = useState<{
+    email: string;
+    brand: 'civiceye' | 'amrita';
+  } | null>(null);
+
+  /* --- Remember the last-used email (for the "Continue as…" chip) ---- */
+  const [rememberedEmail, setRememberedEmail] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('civiceye:lastEmail');
+      if (saved && emailValid(saved)) setRememberedEmail(saved);
+    } catch {
+      // sessionStorage may be unavailable (private mode / file://) — ignore.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const rememberEmail = (value: string) => {
+    try {
+      if (emailValid(value)) sessionStorage.setItem('civiceye:lastEmail', value);
+      else sessionStorage.removeItem('civiceye:lastEmail');
+    } catch {
+      // ignore
+    }
+  };
+
+  /* --- Auto-redirect if already signed in ---------------------------- */
+  const redirectedRef = useRef(false);
+  useEffect(() => {
+    if (configured && !loading && user && !redirectedRef.current) {
+      redirectedRef.current = true;
+      navigate(next, { replace: true });
+    }
+  }, [configured, loading, user, navigate, next]);
+
+  /* --- Instant brand preview while the user types -------------------- */
+  useEffect(() => {
+    // Don't override while showing the post-signin welcome (it's already right).
+    if (justSignedInAs) return;
+    const trimmed = email.trim();
+    if (trimmed && emailValid(trimmed)) {
+      setPreviewBrand(isAmritaEmail(trimmed) ? 'amrita' : 'civiceye');
+    } else {
+      // No valid email typed yet — let route/auth decide.
+      setPreviewBrand(null);
+    }
+  }, [email, justSignedInAs, setPreviewBrand]);
+
+  // Clear the preview when unmounting so we don't leave a stale override.
+  useEffect(() => () => setPreviewBrand(null), [setPreviewBrand]);
 
   const validate = () => {
     if (!emailValid(email)) {
@@ -71,36 +129,56 @@ export function Login() {
     return true;
   };
 
+  const redirectTo = (target: string, brand: 'civiceye' | 'amrita') => {
+    setStage('redirecting');
+    setJustSignedInAs({ email, brand });
+    // A small, friendly "taking you in…" pause so the brand + welcome card
+    // are visible and the page doesn't feel like it jumped.
+    window.setTimeout(() => {
+      setPreviewBrand(null);
+      navigate(target, { replace: true });
+    }, 650);
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy || !validate()) return;
+    rememberEmail(email.trim());
     setBusy(true);
+    setStage('submitting');
+    toast.info('Signing you in…', 'Hang tight.');
+    const brand: 'civiceye' | 'amrita' = isAmritaEmail(email) ? 'amrita' : 'civiceye';
     try {
       if (mode === 'signin') {
         await signInWithPassword(email, password);
         toast.success('Welcome back! 👋', 'You are signed in.');
-        navigate(next);
+        redirectTo(next, brand);
       } else if (mode === 'signup') {
         const { session } = await signUp(email, password, fullName);
         if (session) {
-          // "Confirm email" is off in this project — straight in.
           toast.success('Account created! 🎉', 'You are signed in.');
-          navigate(next);
+          redirectTo(next, brand);
         } else {
           setConfirmSent(true);
           setMode('signin');
           setPassword('');
+          setBusy(false);
+          setStage('idle');
         }
       } else {
         await signInWithMagicLink(email);
         setSentMagic(true);
+        setBusy(false);
+        setStage('idle');
       }
     } catch (err) {
       console.error('[CivicEye] auth error:', err);
       setError(prettyAuthError(err));
-    } finally {
       setBusy(false);
+      setStage('idle');
     }
+    // Note: we do NOT reset busy/stage in finally for the signin/signup-
+    // success path — the redirect handler owns that transition.
   };
 
   const handleResend = async () => {
@@ -195,13 +273,80 @@ export function Login() {
           </p>
         </div>
 
-        <div className="card overflow-hidden p-6 sm:p-8">
+        <div className="card relative overflow-hidden p-6 sm:p-8">
+          {/* POST-SIGNIN WELCOME OVERLAY -------------------------------- */}
+          <AnimatePresence>
+            {justSignedInAs ? (
+              <motion.div
+                key="welcome"
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/95 px-8 text-center backdrop-blur dark:bg-slate-900/95"
+              >
+                <motion.div
+                  initial={{ rotate: -12, scale: 0.6 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.05 }}
+                  className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500"
+                >
+                  <PartyPopper className="h-8 w-8" />
+                </motion.div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                    Welcome{fullName ? `, ${fullName.split(' ')[0]}` : ''} 👋
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Signed in as <span className="font-semibold text-slate-700 dark:text-slate-200">{justSignedInAs.email}</span>
+                  </p>
+                </div>
+                <div
+                  className={
+                    'flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold ' +
+                    (justSignedInAs.brand === 'amrita'
+                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300'
+                      : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-300')
+                  }
+                >
+                  <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-current" />
+                  Loading {justSignedInAs.brand === 'amrita' ? 'Amrita Eye' : 'CivicEye'}…
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-primary-600" />
             </div>
           ) : (
             <>
+              {/* Remembered email "Continue as …" chip */}
+              <AnimatePresence>
+                {rememberedEmail && rememberedEmail !== email.trim() ? (
+                  <motion.button
+                    key="continue-chip"
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    type="button"
+                    onClick={() => {
+                      setEmail(rememberedEmail);
+                      setError(null);
+                      // Focus the password field for a fast follow-up Enter.
+                      setTimeout(() => {
+                        document.getElementById('password')?.focus();
+                      }, 0);
+                    }}
+                    className="mb-5 flex w-full items-center justify-center gap-2 rounded-xl border border-primary-500/20 bg-primary-500/5 px-4 py-2.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-500/10 dark:text-primary-300"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    Continue as <span className="underline">{rememberedEmail}</span>
+                  </motion.button>
+                ) : null}
+              </AnimatePresence>
+
               {/* Mode tabs */}
               <div className="mb-6 grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/10">
                 {(
@@ -335,23 +480,43 @@ export function Login() {
                     </div>
                   ) : null}
 
-                  <button type="submit" disabled={busy} className="btn-primary w-full">
-                    {busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : mode === 'signin' ? (
-                      <LogIn className="h-4 w-4" />
-                    ) : mode === 'signup' ? (
-                      <UserPlus className="h-4 w-4" />
-                    ) : (
-                      <Mail className="h-4 w-4" />
-                    )}
-                    {busy
-                      ? 'Please wait…'
-                      : mode === 'signin'
-                        ? 'Sign in'
-                        : mode === 'signup'
-                          ? 'Create account'
-                          : 'Email me a magic link'}
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="btn-primary w-full relative overflow-hidden"
+                  >
+                    {/* Animated progress wash across the button while signing in */}
+                    {stage !== 'idle' ? (
+                      <motion.span
+                        aria-hidden
+                        initial={{ x: '-100%' }}
+                        animate={{ x: '100%' }}
+                        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                      />
+                    ) : null}
+                    <span className="relative flex items-center justify-center gap-2">
+                      {stage === 'redirecting' ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : busy ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : mode === 'signin' ? (
+                        <LogIn className="h-4 w-4" />
+                      ) : mode === 'signup' ? (
+                        <UserPlus className="h-4 w-4" />
+                      ) : (
+                        <Mail className="h-4 w-4" />
+                      )}
+                      {stage === 'redirecting'
+                        ? 'Signed in! Taking you in…'
+                        : busy
+                          ? 'Signing you in…'
+                          : mode === 'signin'
+                            ? 'Sign in'
+                            : mode === 'signup'
+                              ? 'Create account'
+                              : 'Email me a magic link'}
+                    </span>
                   </button>
 
                   {mode === 'signin' ? (
