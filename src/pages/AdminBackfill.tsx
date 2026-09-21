@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ScanLine, Upload, CheckCircle2, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { ScanLine, Upload, CheckCircle2, AlertTriangle, RefreshCcw, ShieldCheck } from 'lucide-react';
+import { useBrand } from '@/hooks/useBrand';
+import { isAdminEmail } from '@/data/admins';
 import { useReports } from '@/hooks/useReports';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
@@ -31,6 +34,8 @@ function imageUrlToDataUrl(url: string): Promise<string> {
 export function AdminBackfill() {
   const { reports, refresh } = useReports();
   const { user } = useAuth();
+  const { brand } = useBrand();
+  const isAdmin = isAdminEmail(user?.email, brand);
   const [processing, setProcessing] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, string>>({});
   const [bulkRunning, setBulkRunning] = useState(false);
@@ -127,6 +132,19 @@ export function AdminBackfill() {
     }
     setBulkRunning(false);
   };
+
+  if (!isAdmin) {
+    return (
+      <div className="section-pad py-24 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500">
+          <ShieldCheck className="h-8 w-8" />
+        </div>
+        <h1 className="mt-4 text-xl font-extrabold">Staff only</h1>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">Backfill page is for admins. Sign in with admin account to regenerate AI annotations with exact outline.</p>
+        <Link to="/login" className="btn-primary mt-6">Sign in as staff</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-20 pt-[calc(var(--nav-height)+2.5rem)]">

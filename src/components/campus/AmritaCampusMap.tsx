@@ -1194,7 +1194,7 @@ export function AmritaCampusMap({
  {navSteps.map((s, i) => (
  <div key={i} className="flex gap-2 border-b border-slate-100 px-3 py-2 text-sm last:border-0 dark:border-white/5">
  <span className="w-5 text-center text-[#A51636]">{s.icon}</span>
- <span dangerouslySetInnerHTML={{ __html: s.text }} />
+ <span>{s.text}</span>
  </div>
  ))}
  </div>

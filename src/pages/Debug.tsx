@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ShieldCheck } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useBrand } from '@/hooks/useBrand';
+import { isAdminEmail } from '@/data/admins';
 import { PageHeader } from '@/components/PageHeader';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
@@ -12,6 +17,9 @@ type LogRow = Record<string, unknown> & {
 };
 
 export function Debug() {
+  const { user } = useAuth();
+  const { brand } = useBrand();
+  const isAdmin = isAdminEmail(user?.email, brand);
   const [unlocked, setUnlocked] = useState(false);
   const [requiresKey, setRequiresKey] = useState<boolean | null>(null);
   const [status, setStatus] = useState<{ hasApiKey?: boolean; supabaseConfigured?: boolean; mockMode?: boolean; provider?: string; model?: string }>({});
@@ -156,6 +164,19 @@ export function Debug() {
     { label: 'Roboflow 403', text: 'Roboflow proxy error 403: {"error":"FreeTierError","message":"OpenCode\'s free tier can only be used from within OpenCode"}' },
     { label: 'Vercel timeout', text: 'Vercel function timeout after 10s on /api/roboflow — payload 2MB image' },
   ];
+
+  if (!isAdmin) {
+    return (
+      <div className="section-pad py-24 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500">
+          <ShieldCheck className="h-8 w-8" />
+        </div>
+        <h1 className="mt-4 text-xl font-extrabold">Developer only</h1>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">This debug console is for verified staff. Sign in with admin account. Backend chatbot uses OpenRouter DeepSeek with real replies when OPENROUTER_API_KEY set.</p>
+        <Link to="/login" className="btn-primary mt-6">Sign in as developer</Link>
+      </div>
+    );
+  }
 
   if (requiresKey && !unlocked) {
     return (

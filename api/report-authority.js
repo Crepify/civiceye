@@ -30,6 +30,27 @@
 
 import nodemailer from 'nodemailer';
 
+const rateMap = new Map();
+function rateLimit(ip, max, windowMs) {
+  const now = Date.now();
+  const entry = rateMap.get(ip);
+  if (!entry || now - entry.start > windowMs) {
+    rateMap.set(ip, { count: 1, start: now });
+    return true;
+  }
+  if (entry.count >= max) return false;
+  entry.count++;
+  return true;
+}
+function getClientIp(req) {
+  return (req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || 'unknown');
+}
+function sanitizeString(input, maxLen = 5000) {
+  if (typeof input !== 'string') return '';
+  let cleaned = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').replace(/javascript\s*:/gi, '').slice(0, maxLen);
+  return cleaned.trim();
+}
+
 /* Built-in authority directory (id → { name, department, email }).
  * Keep in sync with src/data/authorities.ts. Env vars always win. */
 const DIRECTORY = {
@@ -162,6 +183,9 @@ function buildEmail({ authority, report, message, ref }) {
 export const config = { api: { bodyParser: { sizeLimit: '2mb' } } };
 
 export default async function handler(req, res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed. Use POST.' });
     return;
@@ -186,7 +210,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const message = String(raw.message || '').slice(0, 2000);
+  const message = sanitizeString(String(raw.message || ''), 2000);
   const ref = `ESC-${Date.now().toString(36).toUpperCase()}`;
   const to = emailFor(authorityId);
 

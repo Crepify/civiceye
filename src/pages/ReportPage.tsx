@@ -43,6 +43,7 @@ import { requestLocation } from '@/services/geoService';
 import { mockReverseGeocode } from '@/services/geocodeService';
 import { publishPhoto } from '@/services/syncService';
 import { uploadReportPhoto, uploadAnnotatedPhoto } from '@/lib/storage';
+import { sanitizeInput, validateImageDataUrl, checkRateLimit, containsSuspiciousContent, logAudit } from '@/lib/security';
 import { displayName } from '@/services/reportService';
 import { CAMPUS_CONFIG, isInsideCampus } from '@/data/campus';
 import { formatCoords } from '@/utils/format';
@@ -221,6 +222,35 @@ function ReportWizard() {
       navigate('/login?next=/report');
       return;
     }
+    // Security: rate limiting - 5 reports per 10 minutes
+    if (!checkRateLimit(`report:${user.id}`, 5, 10 * 60 * 1000)) {
+      toast.error('Too many reports', 'Please wait 10 minutes before submitting another report. Rate limit for security.');
+      return;
+    }
+    // Security: validate image
+    if (draft.photo) {
+      const imgCheck = validateImageDataUrl(draft.photo);
+      if (!imgCheck.valid) {
+        toast.error('Invalid image', imgCheck.error || 'Please upload a valid JPEG/PNG/WebP image under 10MB.');
+        return;
+      }
+    }
+    // Security: sanitize and check suspicious
+    const sanitizedTitle = sanitizeInput(draft.title);
+    const sanitizedDesc = sanitizeInput(draft.description);
+    if (containsSuspiciousContent(draft.title) || containsSuspiciousContent(draft.description)) {
+      toast.error('Invalid content', 'Your report contains suspicious content that was blocked for security.');
+      logAudit('blocked_suspicious_report', { userId: user.id, details: `Title: ${draft.title.slice(0,100)}` });
+      return;
+    }
+    if (!sanitizedTitle || sanitizedTitle.length < 5) {
+      toast.error('Title too short', 'Please provide a more descriptive title (min 5 chars).');
+      return;
+    }
+    if (!sanitizedDesc || sanitizedDesc.length < 10) {
+      toast.error('Description too short', 'Please provide more details (min 10 chars).');
+      return;
+    }
     setUploading(true);
     try {
       // Upload both original and AI annotated photos to Supabase Storage (two instances per your request)
@@ -234,8 +264,8 @@ function ReportWizard() {
         }
       }
       const report = await addReport({
-        title: draft.title.trim(),
-        description: draft.description.trim(),
+        title: sanitizedTitle,
+        description: sanitizedDesc,
         coordinates: draft.coordinates,
         locationName: draft.locationName || mockReverseGeocode(draft.coordinates),
         category: draft.category,
@@ -263,6 +293,7 @@ function ReportWizard() {
           originalImage: photoUrl,
         },
       });
+      logAudit('report_created', { userId: user.id, reportId: report.id, details: `${sanitizedTitle} - ${report.category}` });
       setCreatedId(report.id);
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
