@@ -46,7 +46,7 @@ export function AdminBackfill() {
     });
   }, [reports]);
 
-  const generateForReport = async (reportId: string) => {
+  const generateForReport = async (reportId: string, _forceRedo = false) => {
     const report = reports.find((r) => r.id === reportId);
     if (!report || !user) return;
     setProcessing(reportId);
@@ -106,12 +106,24 @@ export function AdminBackfill() {
     }
   };
 
-  const bulkBackfill = async () => {
+  const bulkBackfill = async (forceRedo = false) => {
     if (bulkRunning) return;
     setBulkRunning(true);
-    for (const r of oldReports.slice(0, 20)) { // limit 20 per run to avoid rate limits
-      await generateForReport(r.id);
-      await new Promise((res) => setTimeout(res, 800)); // small delay
+    const list = forceRedo ? reports.slice(0, 20) : oldReports.slice(0, 20);
+    for (const r of list) {
+      await generateForReport(r.id, forceRedo);
+      await new Promise((res) => setTimeout(res, 800));
+    }
+    setBulkRunning(false);
+  };
+
+  const redoAllWithExactOutline = async () => {
+    if (bulkRunning) return;
+    if (!confirm(`Redo ALL ${reports.length} reports with exact outline? This will regenerate all annotations with exact outline tracing, not bounding boxes.`)) return;
+    setBulkRunning(true);
+    for (const r of reports.slice(0, 50)) {
+      await generateForReport(r.id, true);
+      await new Promise((res) => setTimeout(res, 600));
     }
     setBulkRunning(false);
   };
@@ -135,16 +147,23 @@ export function AdminBackfill() {
                 These reports have no annotated image or annotated == original. Click Generate to create exact outline.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button onClick={() => void refresh()} className="btn-ghost">
                 <RefreshCcw className="h-4 w-4" /> Refresh
               </button>
               <button 
-                onClick={() => void bulkBackfill()} 
+                onClick={() => void bulkBackfill(false)} 
                 disabled={bulkRunning || oldReports.length === 0}
-                className="btn-primary disabled:opacity-50"
+                className="btn-secondary disabled:opacity-50"
               >
                 {bulkRunning ? 'Running...' : `Bulk fix 20 oldest`}
+              </button>
+              <button 
+                onClick={() => void redoAllWithExactOutline()} 
+                disabled={bulkRunning}
+                className="btn-primary disabled:opacity-50 bg-[#A51636] hover:bg-[#8a1230]"
+              >
+                {bulkRunning ? 'Running...' : `Redo ALL 50 with exact outline`}
               </button>
             </div>
           </div>
