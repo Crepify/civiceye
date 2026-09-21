@@ -282,44 +282,44 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Live Stats — Fixed, Pending, Escalated, Leaderboard */}
-      <section className="section-pad pb-16">
+            {/* Live Stats — Fixed, Pending, Escalated, Leaderboard — HIGH CONTRAST FIXED */}
+      <section className="section-pad bg-[#0f1a2e] py-12 sm:py-16">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Fixed Issues */}
-          <div className="border-[4px] border-[#172b44] bg-[#d1fae5] p-5 shadow-[5px_5px_0_#172b44]">
-            <p className="text-[11px] font-black tracking-widest text-[#172b44]">FIXED ISSUES</p>
-            <p className="mt-2 font-serif text-4xl font-black text-[#172b44]">{stats.resolved}</p>
-            <p className="mt-1 text-xs font-bold text-[#172b44]">✓ Resolved & verified with before/after proof</p>
-            <div className="mt-3 h-2 w-full bg-white border-2 border-[#172b44]"><div className="h-full bg-emerald-500" style={{ width: `${Math.min(100, (stats.resolved / Math.max(1, stats.total)) * 100)}%` }} /></div>
-            <p className="mt-2 text-[11px] font-bold text-[#172b44]/80">Proof of fix with AI verification</p>
+          <div className="relative border-[4px] border-[#172b44] bg-[#d1fae5] p-5 shadow-[6px_6px_0_#172b44]">
+            <div className="absolute -top-3 left-4 bg-[#172b44] px-3 py-1 text-[11px] font-black tracking-widest text-white">FIXED ISSUES</div>
+            <p className="mt-4 font-serif text-5xl font-black leading-none" style={{ color: '#172b44' }}>{stats.resolved}</p>
+            <p className="mt-2 text-[13px] font-black leading-tight" style={{ color: '#172b44' }}>✓ Resolved & verified with before/after proof</p>
+            <div className="mt-4 h-3 w-full bg-white border-[3px] border-[#172b44] p-[2px]"><div className="h-full bg-emerald-500" style={{ width: `${Math.min(100, (stats.resolved / Math.max(1, stats.total)) * 100)}%` }} /></div>
+            <p className="mt-3 rounded bg-[#172b44] px-2 py-1 text-[11px] font-bold text-white">Proof of fix with AI verification</p>
           </div>
           
           {/* Pending Issues */}
-          <div className="border-[4px] border-[#172b44] bg-[#fef3c7] p-5 shadow-[5px_5px_0_#172b44]">
-            <p className="text-[11px] font-black tracking-widest text-[#172b44]">PENDING ISSUES</p>
-            <p className="mt-2 font-serif text-4xl font-black text-[#172b44]">{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length}</p>
-            <p className="mt-1 text-xs font-bold text-[#172b44]">⏳ Awaiting community verification</p>
-            <div className="mt-3 h-2 w-full bg-white border-2 border-[#172b44]"><div className="h-full bg-amber-400" style={{ width: `${Math.min(100, (reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length / Math.max(1, stats.total)) * 100)}%` }} /></div>
-            <p className="mt-2 text-[11px] font-bold text-[#172b44]/80">Needs 3 confirms to verify</p>
+          <div className="relative border-[4px] border-[#172b44] bg-[#fef3c7] p-5 shadow-[6px_6px_0_#172b44]">
+            <div className="absolute -top-3 left-4 bg-[#172b44] px-3 py-1 text-[11px] font-black tracking-widest text-white">PENDING ISSUES</div>
+            <p className="mt-4 font-serif text-5xl font-black leading-none" style={{ color: '#172b44' }}>{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length}</p>
+            <p className="mt-2 text-[13px] font-black leading-tight" style={{ color: '#172b44' }}>⏳ Awaiting community verification</p>
+            <div className="mt-4 h-3 w-full bg-white border-[3px] border-[#172b44] p-[2px]"><div className="h-full bg-amber-400" style={{ width: `${Math.min(100, (reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.status === 'pending').length / Math.max(1, stats.total)) * 100)}%` }} /></div>
+            <p className="mt-3 rounded bg-[#172b44] px-2 py-1 text-[11px] font-bold text-white">Needs 3 confirms to verify</p>
           </div>
           
           {/* Escalated Issues */}
-          <div className="border-[4px] border-[#172b44] bg-[#fecdd3] p-5 shadow-[5px_5px_0_#172b44]">
-            <p className="text-[11px] font-black tracking-widest text-[#172b44]">ESCALATED</p>
-            <p className="mt-2 font-serif text-4xl font-black text-[#172b44]">{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.escalation && r.escalation.level > 0).length}</p>
-            <p className="mt-1 text-xs font-bold text-[#172b44]">⚠️ SLA breached → auto-escalated</p>
-            <div className="mt-3 space-y-1 text-[11px] font-bold text-[#172b44]">
-              <div className="flex justify-between border-b border-[#172b44]/10 pb-1"><span>Critical</span><span>24h</span></div>
-              <div className="flex justify-between border-b border-[#172b44]/10 pb-1"><span>High</span><span>48h</span></div>
-              <div className="flex justify-between"><span>Medium</span><span>7d</span></div>
+          <div className="relative border-[4px] border-[#172b44] bg-[#fecdd3] p-5 shadow-[6px_6px_0_#172b44]">
+            <div className="absolute -top-3 left-4 bg-[#ef6b59] px-3 py-1 text-[11px] font-black tracking-widest text-white">ESCALATED</div>
+            <p className="mt-4 font-serif text-5xl font-black leading-none" style={{ color: '#172b44' }}>{reports.filter((r) => r.scope === (isAmrita ? 'campus' : 'city') && r.escalation && r.escalation.level > 0).length}</p>
+            <p className="mt-2 text-[13px] font-black leading-tight" style={{ color: '#172b44' }}>⚠️ SLA breached → auto-escalated</p>
+            <div className="mt-4 space-y-1.5 rounded border-2 border-[#172b44] bg-white p-2 text-[12px] font-black" style={{ color: '#172b44' }}>
+              <div className="flex justify-between border-b border-[#172b44]/10 pb-1"><span>Critical</span><span className="bg-rose-500 text-white px-2 rounded">24h</span></div>
+              <div className="flex justify-between border-b border-[#172b44]/10 pb-1"><span>High</span><span className="bg-orange-500 text-white px-2 rounded">48h</span></div>
+              <div className="flex justify-between"><span>Medium</span><span className="bg-amber-500 text-white px-2 rounded">7d</span></div>
             </div>
           </div>
           
           {/* Leaderboard */}
-          <div className="border-[4px] border-[#172b44] bg-[#172b44] p-5 shadow-[5px_5px_0_#ffd630]">
-            <p className="inline-block bg-[#ffd630] px-2 py-1 text-[11px] font-black tracking-widest text-[#172b44]">LEADERBOARD</p>
-            <h3 className="mt-2 font-serif text-xl font-black uppercase text-[#fff8e7]">Top Heroes</h3>
-            <div className="mt-3 space-y-2">
+          <div className="relative border-[4px] border-[#172b44] bg-[#172b44] p-5 shadow-[6px_6px_0_#ffd630]">
+            <div className="absolute -top-3 left-4 bg-[#ffd630] px-3 py-1 text-[11px] font-black tracking-widest" style={{ color: '#172b44' }}>LEADERBOARD</div>
+            <h3 className="mt-4 font-serif text-2xl font-black uppercase leading-none" style={{ color: '#fff8e7' }}>Top Heroes</h3>
+            <div className="mt-4 space-y-2">
               {reports
                 .filter((r) => r.scope === (isAmrita ? 'campus' : 'city'))
                 .reduce((acc: any[], r) => {
@@ -331,14 +331,14 @@ export function Landing() {
                 .sort((a, b) => b.verified - a.verified || b.count - a.count)
                 .slice(0, 3)
                 .map((leader: any, i: number) => (
-                  <div key={leader.author} className="flex items-center gap-2 border-2 border-[#172b44] bg-[#fff8e7] p-2 text-xs">
-                    <span className="flex h-5 w-5 items-center justify-center bg-[#172b44] text-[11px] font-black text-white">{i + 1}</span>
-                    <span className="font-bold truncate flex-1 text-[#172b44]">{leader.author}</span>
-                    <span className="text-[11px] font-bold text-[#172b44]">{leader.count} reports</span>
+                  <div key={leader.author} className="flex items-center gap-2 border-[3px] border-[#172b44] bg-[#fff8e7] p-2.5 shadow-[3px_3px_0_#ffd630]">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center bg-[#172b44] text-[12px] font-black text-white">{i + 1}</span>
+                    <span className="font-black truncate flex-1 text-[13px]" style={{ color: '#172b44' }}>{leader.author}</span>
+                    <span className="rounded bg-[#172b44] px-2 py-1 text-[11px] font-black text-white">{leader.count} reports</span>
                   </div>
                 ))}
             </div>
-            <p className="mt-3 text-[11px] font-bold text-[#fff8e7]/80">Report 3 issues → Street Guardian certificate</p>
+            <p className="mt-4 rounded bg-[#ffd630] px-2 py-1.5 text-[11px] font-black" style={{ color: '#172b44' }}>Report 3 issues → Street Guardian certificate</p>
           </div>
         </div>
       </section>
