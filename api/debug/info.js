@@ -17,6 +17,6 @@ export default async function handler(req, res) {
     hasApiKey,
     provider: process.env.OPENCODE_API_KEY ? 'opencode' : process.env.OPENROUTER_API_KEY ? 'openrouter' : process.env.DEEPSEEK_API_KEY ? 'deepseek' : 'none',
     mockMode: process.env.MOCK_LLM === '1',
-    model: process.env.LLM_DEBUG_MODEL || process.env.LLM_MODEL || 'big-pickle',
+    model: process.env.LLM_DEBUG_MODEL || process.env.LLM_MODEL || 'deepseek/deepseek-chat:free',
   });
 }

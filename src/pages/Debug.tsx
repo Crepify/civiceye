@@ -286,7 +286,7 @@ export function Debug() {
             )}
           </div>
           <div className="border-b border-[#1f2937] p-3 text-xs text-white/40 min-h-[20px]">
-            {logsMeta || (logsSource === 'vercel' ? 'Vercel logs appear only if Log Drain pointed at /api/debug/drain' : 'Requires SUPABASE_ACCESS_TOKEN + SUPABASE_PROJECT_REF')}
+            {logsMeta || (logsSource === 'vercel' ? 'Vercel logs: On Hobby plan, copy from Vercel Dashboard → Logs tab and paste into chat. Log Drains are Pro only.' : 'Supabase logs: Needs Management API PAT (sbp_...) from supabase.com/dashboard/account/tokens — NOT sb_publishable_... anon key. Project → API Keys shows publishable/secret (new) and anon/service_role (legacy) — those are for DB, not Management API. If you only see sb_publishable_... and JWT keys, go to Account → Access Tokens → Create token (sbp_...). If analytics is Pro only on your plan, just paste logs manually.')}
           </div>
           <div className="flex-1 overflow-auto p-2 space-y-1.5 font-mono text-[11px]">
             {logs.length === 0 ? <div className="p-4 text-white/30">No logs yet</div> : logs.map((l, i) => {

@@ -21,7 +21,7 @@ function getLlmConfig() {
       provider: 'custom',
       baseUrl: genericBase.replace(/\/+$/, ''),
       apiKey: getEnv('LLM_API_KEY') || getEnv('DEEPSEEK_API_KEY') || getEnv('OPENCODE_API_KEY') || getEnv('OPENROUTER_API_KEY') || getEnv('OMNIROUTER_API_KEY'),
-      model: getEnv('LLM_MODEL') || 'big-pickle',
+      model: getEnv('LLM_MODEL') || 'deepseek/deepseek-chat:free',
       fallbacks: [],
       extraHeaders: {},
     };
@@ -31,8 +31,8 @@ function getLlmConfig() {
       provider: 'opencode',
       baseUrl: 'https://opencode.ai/zen/v1',
       apiKey: getEnv('OPENCODE_API_KEY'),
-      model: getEnv('LLM_MODEL') || 'big-pickle',
-      fallbacks: ['mimo-v2.5-free'],
+      model: getEnv('LLM_MODEL') || 'deepseek/deepseek-chat:free',
+      fallbacks: ['meta-llama/llama-3.1-8b-instruct:free'],
       extraHeaders: {},
     };
   }
@@ -41,7 +41,7 @@ function getLlmConfig() {
       provider: 'openrouter',
       baseUrl: 'https://openrouter.ai/api/v1',
       apiKey: getEnv('OPENROUTER_API_KEY'),
-      model: getEnv('LLM_MODEL') || 'deepseek/deepseek-v4-flash',
+      model: getEnv('LLM_MODEL') || 'deepseek/deepseek-chat:free',
       fallbacks: [],
       extraHeaders: {
         'HTTP-Referer': getEnv('LLM_HTTP_REFERER') || 'https://civiceye-pied.vercel.app',
@@ -54,7 +54,7 @@ function getLlmConfig() {
       provider: 'omnirouter',
       baseUrl: 'https://api.omnirouter.li/v1',
       apiKey: getEnv('OMNIROUTER_API_KEY'),
-      model: getEnv('LLM_MODEL') || 'deepseek-v4-flash',
+      model: getEnv('LLM_MODEL') || 'deepseek/deepseek-chat:free',
       fallbacks: [],
       extraHeaders: {},
     };
@@ -63,7 +63,7 @@ function getLlmConfig() {
     provider: 'deepseek',
     baseUrl: 'https://api.deepseek.com',
     apiKey: getEnv('DEEPSEEK_API_KEY'),
-    model: getEnv('DEEPSEEK_MODEL') || 'deepseek-v4-flash',
+    model: getEnv('DEEPSEEK_MODEL') || 'deepseek/deepseek-chat:free',
     fallbacks: [],
     extraHeaders: {},
   };
