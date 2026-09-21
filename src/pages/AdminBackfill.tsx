@@ -88,7 +88,7 @@ export function AdminBackfill() {
               originalImage: ai?.originalImage || report.image,
               model: ai?.model || 'roboflow-detector',
               confidence: ai?.confidence || confidence,
-              summary: ai?.summary || `AI detected ${category} with bounding boxes`,
+              summary: ai?.summary || `AI detected ${category} with exact outline`,
               objects: ai?.objects || objects,
             }
           })
@@ -121,7 +121,7 @@ export function AdminBackfill() {
       <PageHeader
         eyebrow="Admin"
         title="Backfill AI Annotations"
-        description="Old reports without AI bounding boxes can be fixed here. Generates annotated images with boxes and saves to storage + database. New reports already get annotations automatically."
+        description="Old reports without AI exact outline can be fixed here. Generates annotated images with boxes and saves to storage + database. New reports already get annotations automatically."
       />
 
       <div className="section-pad py-10">
@@ -132,7 +132,7 @@ export function AdminBackfill() {
                 <ScanLine className="h-5 w-5 text-[#A51636]" /> {oldReports.length} reports need annotation
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                These reports have no annotated image or annotated == original. Click Generate to create bounding boxes.
+                These reports have no annotated image or annotated == original. Click Generate to create exact outline.
               </p>
             </div>
             <div className="flex gap-2">
@@ -153,7 +153,7 @@ export function AdminBackfill() {
             <div className="mt-8 rounded-2xl border border-dashed border-emerald-300 bg-emerald-50 p-8 text-center dark:bg-emerald-500/10">
               <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500" />
               <p className="mt-3 font-bold text-emerald-800 dark:text-emerald-200">All reports have AI annotations! ✓</p>
-              <p className="mt-1 text-sm text-emerald-700/70">New reports will automatically get annotated images with bounding boxes saved to storage.</p>
+              <p className="mt-1 text-sm text-emerald-700/70">New reports will automatically get annotated images with exact outline saved to storage.</p>
             </div>
           ) : (
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -222,7 +222,7 @@ export function AdminBackfill() {
           </h4>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-xs leading-relaxed text-slate-300">
             <li>Fetches original image URL → converts to data URL</li>
-            <li>Generates annotated image with bounding boxes using <code>generateAnnotatedFromPredictions</code> (real Roboflow boxes) or <code>generateMockAnnotatedImage</code> fallback</li>
+            <li>Generates annotated image with exact outline using <code>generateAnnotatedFromPredictions</code> (real Roboflow boxes) or <code>generateMockAnnotatedImage</code> fallback</li>
             <li>Uploads annotated to Supabase Storage <code>report-photos/{`{userId}`}/annotated/</code> → public URL</li>
             <li>Updates <code>reports.ai.annotatedImage</code> in database — now shows different image with boxes in Community & Report Details</li>
             <li>New reports already do this automatically in ReportPage — old reports need this backfill</li>

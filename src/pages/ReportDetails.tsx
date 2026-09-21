@@ -146,7 +146,7 @@ export function ReportDetails() {
                     <img src={report.image} alt="Original" className="h-32 w-full rounded-xl object-cover" />
                   </div>
                   <div className="space-y-2">
-                    <div className="text-xs font-bold uppercase tracking-widest text-emerald-600">AI Annotated with bounding boxes</div>
+                    <div className="text-xs font-bold uppercase tracking-widest text-emerald-600">AI Annotated with exact outline</div>
                     <img src={report.ai.annotatedImage || report.image} alt="AI Annotated" className="h-32 w-full rounded-xl object-cover border border-emerald-300" />
                     <div className="text-xs text-slate-500">Model: {report.ai.model} · Confidence: {report.ai.confidence ? Math.round(report.ai.confidence*100)+'%' : '—'} · Detected: {(report.ai.objects||[]).join(', ')}</div>
                   </div>

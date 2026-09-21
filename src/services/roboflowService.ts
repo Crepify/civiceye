@@ -262,6 +262,10 @@ export interface RoboflowPrediction {
   y?: number;
   width?: number;
   height?: number;
+  /** Segmentation polygon points for exact outline */
+  points?: Array<{ x: number; y: number }>;
+  /** Alternative: segmentation as flat array or object */
+  segmentation?: unknown;
 }
 
 type Prediction = RoboflowPrediction;
@@ -281,6 +285,29 @@ export function extractPredictions(node: unknown, out: RoboflowPrediction[] = []
         const parsed = typeof value === 'number' ? value : Number(value);
         return Number.isFinite(parsed) ? parsed : undefined;
       };
+      // Extract polygon points for exact outline
+      let points: Array<{ x: number; y: number }> | undefined;
+      const rawPoints = obj.points as any;
+      const rawSegmentation = obj.segmentation as any;
+      if (Array.isArray(rawPoints) && rawPoints.length > 0) {
+        // Could be [{x,y}] or [[x,y]] or flat
+        if (typeof rawPoints[0] === 'object' && rawPoints[0] !== null && 'x' in rawPoints[0]) {
+          points = rawPoints.map((p: any) => ({ x: Number(p.x), y: Number(p.y) })).filter((p: any) => Number.isFinite(p.x) && Number.isFinite(p.y));
+        } else if (Array.isArray(rawPoints[0])) {
+          points = rawPoints.map((p: any) => ({ x: Number(p[0]), y: Number(p[1]) })).filter((p: any) => Number.isFinite(p.x) && Number.isFinite(p.y));
+        }
+      } else if (rawSegmentation) {
+        // Handle various segmentation formats
+        if (Array.isArray(rawSegmentation) && rawSegmentation.length > 0) {
+          if (Array.isArray(rawSegmentation[0])) {
+            // [[x,y], [x,y], ...] or [[[x,y]]]
+            const flat = Array.isArray(rawSegmentation[0][0]) ? rawSegmentation[0] : rawSegmentation;
+            if (Array.isArray(flat[0])) {
+              points = flat.map((p: any) => ({ x: Number(p[0]), y: Number(p[1]) })).filter((p: any) => Number.isFinite(p.x) && Number.isFinite(p.y));
+            }
+          }
+        }
+      }
       out.push({
         class: obj.class,
         confidence,
@@ -288,6 +315,8 @@ export function extractPredictions(node: unknown, out: RoboflowPrediction[] = []
         y: numeric('y'),
         width: numeric('width'),
         height: numeric('height'),
+        points,
+        segmentation: obj.segmentation,
       });
     }
     for (const key of Object.keys(obj)) extractPredictions(obj[key], out);

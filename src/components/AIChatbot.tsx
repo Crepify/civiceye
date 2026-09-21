@@ -18,7 +18,7 @@ const KNOWLEDGE = {
     { q: 'how to report', a: 'Go to Report → Pick category → Add photo (AI will auto-detect) → Pin location on map → Add details → Submit. Your report gets a code like CE-XXXX and goes live for verification.' },
     { q: 'bbmp', a: 'BBMP handles roads, potholes, garbage, etc. CivicEye routes your report to comm@bbmp.gov.in + zone emails based on location. Helpline 1533 / 080-2266 0000, WhatsApp 9480685700 (grievance) + 9448197197 (waste). Portal: bbmp.gov.in' },
     { q: 'email', a: 'When you click Report to Authority, CivicEye creates an email with original photo + AI annotated image, Maps link, severity, and link to report on website. For city it goes to BBMP, for campus to Estate Office.' },
-    { q: 'ai', a: 'CivicEye uses smart AI to auto-detect category, confidence, severity, and produces annotated image with bounding boxes. You can view AI annotation in Community tab via View AI button.' },
+    { q: 'ai', a: 'CivicEye uses smart AI to auto-detect category, confidence, severity, and produces annotated image with exact outline tracing the issue. You can view AI annotation in Community tab via View AI button.' },
     { q: 'community', a: 'Community tab shows reports. Each card has View AI button to toggle between original and AI annotated image. You can upvote, confirm, and review.' },
   ],
   amrita: [
