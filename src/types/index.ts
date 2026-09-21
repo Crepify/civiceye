@@ -147,6 +147,17 @@ export interface AnalysisResult {
   engine?: 'ondevice' | 'roboflow' | 'huggingface' | 'mock';
   /** Annotated (drawn-on) image from a Roboflow workflow, as a data URL. */
   annotatedImage?: string | null;
+  /** Raw Roboflow predictions (class + confidence + bbox/polygon), used for
+   *  drawing exact outlines server-side and for the admin backfill tool. */
+  predictions?: Array<{
+    class: string;
+    confidence: number;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    points?: Array<{ x: number; y: number }>;
+  }>;
 }
 
 /** A toast notification shown by the ToastProvider. */
