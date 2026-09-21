@@ -27,6 +27,7 @@ import { Login } from '@/pages/Login';
 import { AuthCallback } from '@/pages/AuthCallback';
 import { ResetPassword } from '@/pages/ResetPassword';
 import { AdminPanel } from '@/pages/AdminPanel';
+import { AdminBackfill } from '@/pages/AdminBackfill';
 import { NotFound } from '@/pages/NotFound';
 
 /**
@@ -96,6 +97,7 @@ export default function App() {
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/admin" element={<AdminPanel />} />
+      <Route path="/admin/backfill" element={<AdminBackfill />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
