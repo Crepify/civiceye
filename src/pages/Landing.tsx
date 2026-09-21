@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Camera, MapPin, ShieldAlert, Sparkles, Users } from 'lucide-react';
-import { founderThemes, isComicSoundOn, setComicSoundOn } from '@/utils/comicSound';
+import { founderThemes, isComicSoundOn, playBlip, setComicSoundOn } from '@/utils/comicSound';
 import { useReports } from '@/hooks/useReports';
 import { useBrand } from '@/hooks/useBrand';
 import { useAuth } from '@/hooks/useAuth';
@@ -44,7 +44,6 @@ export function Landing() {
   const [certificatePlace, setCertificatePlace] = useState('');
   const [certificateImage, setCertificateImage] = useState('');
   const [soundOn, setSoundOn] = useState(isComicSoundOn);
-  const audioRef = useRef<AudioContext | null>(null);
   // Shows the sticky "ABOUT US" prompt once a visitor has left the hero, so it
   // stays in front of them for the rest of the page.
   const [pastHero, setPastHero] = useState(false);
@@ -77,24 +76,13 @@ export function Landing() {
   const missionComplete = missionProgress >= 3;
 
 
+  /** Route all UI blips through the gesture-gated shared engine so we never
+   *  construct an AudioContext before the user has interacted with the page
+   *  (which would otherwise spam the "AudioContext prevented from starting
+   *  automatically" console warning on every mouseenter). */
   const sound = (notes: number[]) => {
     if (!soundOn) return;
-    const Ctx = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const context = audioRef.current || new Ctx();
-    audioRef.current = context;
-    void context.resume();
-    notes.forEach((frequency, i) => {
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = frequency;
-      gain.gain.setValueAtTime(0, context.currentTime + i * 0.07);
-      gain.gain.linearRampToValueAtTime(0.13, context.currentTime + i * 0.07 + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + i * 0.07 + 0.18);
-      osc.connect(gain); gain.connect(context.destination);
-      osc.start(context.currentTime + i * 0.07); osc.stop(context.currentTime + i * 0.07 + 0.2);
-    });
+    playBlip(notes);
   };
 
   const downloadCertificate = () => {
