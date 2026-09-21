@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { uploadAnnotatedPhoto } from '@/lib/storage';
 import { generateMockAnnotatedImage, generateAnnotatedFromPredictions } from '@/utils/image';
+import { analyzePhotoWithRoboflow, hasRoboflowKey, roboflowConfig } from '@/services/roboflowService';
 import { Badge } from '@/components/Badge';
 import { PageHeader } from '@/components/PageHeader';
 import { timeAgo } from '@/utils/format';
@@ -53,20 +54,56 @@ export function AdminBackfill() {
     try {
       const dataUrl = await imageUrlToDataUrl(report.image);
       const ai = report.ai as any;
-      const category = report.category;
-      const confidence = ai?.confidence || 0.85;
-      const objects = ai?.objects || [category];
-      const predictions = ai?.predictions || objects.map((o: string) => ({ class: o.split(' ')[0], confidence: 0.85 }));
+      const existingCategory = report.category;
+      const existingConfidence = ai?.confidence || 0.85;
+      const existingObjects = ai?.objects || [existingCategory];
+      const existingPredictions = ai?.predictions;
 
-      let annotated: string;
-      if (predictions.length > 0 && predictions[0].x !== undefined) {
+      let category = existingCategory;
+      let confidence = existingConfidence;
+      let objects: string[] = existingObjects;
+      let predictions: any[] = existingPredictions || [];
+      let annotated: string | null = null;
+      let engine: 'roboflow' | 'local' = 'local';
+      let engineNote = '';
+
+      // ── PRIMARY: call the real Roboflow API (Cloudflare Worker proxy) ──
+      // This runs the CivicEye Pothole Reporting Starter workflow server-side
+      // and returns real predictions + a workflow-annotated image. Using the
+      // cloud API means backfill produces the same-quality annotations as
+      // new reports, instead of re-using stale/cached local annotations.
+      if (hasRoboflowKey) {
         try {
-          annotated = await generateAnnotatedFromPredictions(dataUrl, predictions, category, confidence);
-        } catch {
-          annotated = await generateMockAnnotatedImage(dataUrl, category, confidence, objects);
+          const rf = await analyzePhotoWithRoboflow(dataUrl, null);
+          if (rf.annotatedImage) annotated = rf.annotatedImage;
+          if (rf.predictions && rf.predictions.length > 0) predictions = rf.predictions;
+          category = rf.category || existingCategory;
+          confidence = rf.confidence || existingConfidence;
+          objects = rf.objects?.length ? rf.objects : existingObjects;
+          engine = 'roboflow';
+        } catch (rfErr) {
+          console.warn('[backfill] Roboflow call failed, falling back to local:', rfErr);
+          engineNote = `Roboflow failed (${rfErr instanceof Error ? rfErr.message : 'network'}), used local boxes.`;
         }
       } else {
-        annotated = await generateMockAnnotatedImage(dataUrl, category, confidence, objects);
+        engineNote =
+          'Roboflow not configured (VITE_ROBOFLOW_API_KEY missing on the server that built this bundle); used local boxes. ' +
+          `proxy=${roboflowConfig.proxyUrl || '/api/roboflow'}`;
+      }
+
+      // ── FALLBACK / overlay: if Roboflow didn't return an annotated image,
+      // draw boxes locally from its predictions; if no predictions either,
+      // fall back to the old mock-annotation path.
+      if (!annotated) {
+        if (predictions.length > 0 && predictions[0]?.x !== undefined) {
+          try {
+            annotated = await generateAnnotatedFromPredictions(dataUrl, predictions, category, confidence);
+          } catch {
+            annotated = await generateMockAnnotatedImage(dataUrl, category, confidence, objects);
+          }
+        } else {
+          annotated = await generateMockAnnotatedImage(dataUrl, category, confidence, objects);
+        }
       }
 
       // Upload to storage
@@ -77,7 +114,8 @@ export function AdminBackfill() {
         console.warn('Upload failed, using data URL', e);
       }
 
-      // Update in Supabase
+      // Update in Supabase — persist the real Roboflow predictions too so
+      // future re-runs can re-draw without re-calling the API.
       if (supabase) {
         const { error } = await supabase
           .from('reports')
@@ -86,17 +124,29 @@ export function AdminBackfill() {
               ...(ai || {}),
               annotatedImage: publicUrl,
               originalImage: ai?.originalImage || report.image,
-              model: ai?.model || 'roboflow-detector',
-              confidence: ai?.confidence || confidence,
-              summary: ai?.summary || `AI detected ${category} with exact outline`,
-              objects: ai?.objects || objects,
+              engine: ai?.engine || engine,
+              model: ai?.model || (engine === 'roboflow' ? 'roboflow-workflow' : 'local-backfill'),
+              category,
+              confidence,
+              objects,
+              predictions,
+              summary:
+                ai?.summary ||
+                (engine === 'roboflow'
+                  ? `Roboflow AI detected ${category} (${Math.round(confidence * 100)}% confidence) with exact outline.`
+                  : `Local-fallback annotation for ${category}. ${engineNote}`),
+              backfilledAt: new Date().toISOString(),
+              backfillEngineNote: engineNote || null,
             }
           })
           .eq('id', reportId);
         if (error) throw error;
       }
 
-      setResults((prev) => ({ ...prev, [reportId]: 'success' }));
+      setResults((prev) => ({
+        ...prev,
+        [reportId]: engine === 'roboflow' ? 'success (roboflow)' : `success (local) — ${engineNote || 'no roboflow predictions'}`,
+      }));
       await refresh();
     } catch (err) {
       console.error(err);
@@ -146,7 +196,7 @@ export function AdminBackfill() {
       <PageHeader
         eyebrow="Admin"
         title="Backfill AI Annotations"
-        description="Old reports without AI exact outline can be fixed here. Generates annotated images with boxes and saves to storage + database. New reports already get annotations automatically."
+        description="Old reports without AI exact outline can be fixed here. Calls the real Roboflow workflow API (same as new reports) to produce annotated images with boxes/outlines, uploads them to storage, and saves predictions to the database."
       />
 
       <div className="section-pad py-10">
@@ -206,7 +256,7 @@ export function AdminBackfill() {
                     <p className="mt-1 line-clamp-2 text-xs text-slate-500">{report.description}</p>
                     
                     {results[report.id] ? (
-                      <div className={`mt-3 rounded-lg p-2 text-xs ${results[report.id] === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                      <div className={`mt-3 rounded-lg p-2 text-xs ${results[report.id].startsWith('success') ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
                         {results[report.id]}
                       </div>
                     ) : null}
@@ -254,10 +304,12 @@ export function AdminBackfill() {
           </h4>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-xs leading-relaxed text-slate-300">
             <li>Fetches original image URL → converts to data URL</li>
-            <li>Generates annotated image with exact outline using <code>generateAnnotatedFromPredictions</code> (real Roboflow boxes) or <code>generateMockAnnotatedImage</code> fallback</li>
-            <li>Uploads annotated to Supabase Storage <code>report-photos/{`{userId}`}/annotated/</code> → public URL</li>
-            <li>Updates <code>reports.ai.annotatedImage</code> in database — now shows different image with boxes in Community & Report Details</li>
-            <li>New reports already do this automatically in ReportPage — old reports need this backfill</li>
+            <li><b>PRIMARY:</b> posts the image to the real Roboflow workflow API (via the Cloudflare Worker / <code>/api/roboflow</code> proxy) — same engine used for freshly-submitted reports. Gets back real predictions + the workflow-annotated image.</li>
+            <li><b>FALLBACK:</b> if Roboflow is unreachable/unconfigured, draws boxes locally with <code>generateAnnotatedFromPredictions</code>; if no predictions exist, falls back to <code>generateMockAnnotatedImage</code>.</li>
+            <li>Uploads the annotated image to Supabase Storage <code>report-photos/{`{userId}`}/annotated/</code> → public URL.</li>
+            <li>Persists <code>ai.engine</code>, <code>ai.predictions</code>, <code>ai.confidence</code>, <code>ai.summary</code>, and <code>ai.backfilledAt</code> in the database — Community + Report Details then show the real boxes.</li>
+            <li>Status badge shows <span className="text-emerald-300">success (roboflow)</span> when the cloud API answered, <span className="text-amber-300">success (local)</span> when the fallback was used.</li>
+            <li>Rate-limited to ~1 request/sec to stay under Roboflow free-tier and Worker limits.</li>
           </ul>
         </div>
       </div>
