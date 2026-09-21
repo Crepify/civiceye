@@ -40,7 +40,19 @@ export function Login() {
   const toast = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const next = params.get('next') ?? '/';
+  // Sanitise `next` so we never end up in a /login → /login?next=/login loop
+  // (happens if RequireAuth fires from /login itself or if someone bookmarks
+  // a stale URL). Auth pages, external URLs and empty strings all go to /.
+  const rawNext = params.get('next') ?? '/';
+  const blocked = ['/login', '/auth/callback', '/reset', '/auth'];
+  const next =
+    !rawNext ||
+    rawNext.startsWith('//') ||
+    rawNext.startsWith('http:') ||
+    rawNext.startsWith('https:') ||
+    blocked.some((p) => rawNext === p || rawNext.startsWith(p + '/') || rawNext.startsWith(p + '?'))
+      ? '/'
+      : rawNext;
 
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');

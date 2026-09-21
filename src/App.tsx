@@ -29,6 +29,8 @@ import { AdminPanel } from '@/pages/AdminPanel';
 import { AdminBackfill } from '@/pages/AdminBackfill';
 import { Debug } from '@/pages/Debug';
 import { NotFound } from '@/pages/NotFound';
+import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
+import { TermsOfService } from '@/pages/TermsOfService';
 
 /**
  * CivicEye / Amrita Eye application shell.
@@ -58,11 +60,15 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [location.pathname, location.hash]);
 
-  // Auth pages are full-screen and skip the site chrome.
+  // Auth + legal pages render without site chrome; legal pages are NOT
+  // gated behind sign-in (Google's OAuth consent screen crawls them, and
+  // users need to be able to read them before creating an account).
   const isAuthPage =
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/auth/callback') ||
     location.pathname.startsWith('/reset');
+  const isLegalPage =
+    location.pathname === '/privacy' || location.pathname === '/terms';
 
   // DEMO MODE (VITE_DEMO_MODE=true): bypass the login gate so pages render
   // without a Supabase session — used for screenshots & live demos.
@@ -96,6 +102,8 @@ export default function App() {
       <Route path="/community" element={<Community />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
       <Route path="/admin" element={<AdminPanel />} />
       <Route path="/admin/backfill" element={<AdminBackfill />} />
       <Route path="/debug" element={<Debug />} />
@@ -108,6 +116,8 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/reset" element={<ResetPassword />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -115,7 +125,8 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Brand-aware chrome: Amrita Eye users get the Amrita Eye top bar +
-          footer (the koushikkkkkkkkkk.github.io/civiceye design). */}
+          footer (the koushikkkkkkkkkk.github.io/civiceye design). Legal pages
+          always keep chrome so users can navigate away. */}
       {!isAuthPage ? (amritaChrome ? <NavbarAmrita /> : <Navbar />) : null}
       {/* Global one-tap SOS (only shows for signed-in users). */}
       {!isAuthPage ? <SOSButton /> : null}
@@ -128,7 +139,13 @@ export default function App() {
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           className={cn('flex flex-1 flex-col', needsNavPad && 'has-top-nav')}
         >
-          {isAuthPage ? authRoutes : demoMode ? gatedRoutes : <RequireAuth>{gatedRoutes}</RequireAuth>}
+          {isAuthPage
+            ? authRoutes
+            : isLegalPage
+              ? gatedRoutes
+              : demoMode
+                ? gatedRoutes
+                : <RequireAuth>{gatedRoutes}</RequireAuth>}
         </motion.main>
       </AnimatePresence>
       {!isAuthPage ? (amritaChrome ? <FooterAmrita /> : <Footer />) : null}

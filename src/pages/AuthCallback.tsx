@@ -27,7 +27,16 @@ export function AuthCallback() {
       return;
     }
     const sb = supabase; // local const so TS narrows across async awaits
-    const next = params.get('next') ?? '/';
+    const rawNext = params.get('next') ?? '/';
+    const blocked = ['/login', '/auth/callback', '/reset', '/auth'];
+    const next =
+      !rawNext ||
+      rawNext.startsWith('//') ||
+      rawNext.startsWith('http:') ||
+      rawNext.startsWith('https:') ||
+      blocked.some((p) => rawNext === p || rawNext.startsWith(p + '/') || rawNext.startsWith(p + '?'))
+        ? '/'
+        : rawNext;
     const code = params.get('code');
     let cancelled = false;
     let sub: { subscription: { unsubscribe: () => void } } | null = null;

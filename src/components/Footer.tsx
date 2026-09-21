@@ -123,13 +123,13 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-5 text-xs text-slate-400 dark:text-slate-500">
             <Link
-              to="/about"
+              to="/privacy"
               className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"
             >
               Privacy
             </Link>
             <Link
-              to="/about"
+              to="/terms"
               className="transition-colors hover:text-primary-600 dark:hover:text-primary-400"
             >
               Terms

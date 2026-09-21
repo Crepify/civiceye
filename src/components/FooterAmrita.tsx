@@ -127,13 +127,13 @@ export function FooterAmrita() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-medium text-neutral-500 dark:text-neutral-400">
             <Link
-              to="/about"
+              to="/privacy"
               className="transition-colors hover:text-neutral-900 dark:text-white"
             >
               Privacy Policy
             </Link>
             <Link
-              to="/about"
+              to="/terms"
               className="transition-colors hover:text-neutral-900 dark:text-white"
             >
               Terms of Service
