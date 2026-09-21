@@ -4,9 +4,10 @@ import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 /**
- * Handles magic-link / recovery redirects.
- * Supabase sends users here (?code=…&next=…) after clicking an email
- * link; we exchange the code for a session and route them on.
+ * Handles OAuth + magic-link + recovery redirects via PKCE code exchange.
+ * Uses window.location.replace for the post-signin redirect so the app
+ * re-mounts cleanly from the persisted session cookie (no React state
+ * races).
  */
 export function AuthCallback() {
   const navigate = useNavigate();
@@ -18,12 +19,27 @@ export function AuthCallback() {
       setStatus('error');
       return;
     }
-    supabase.auth
-      .exchangeCodeForSession(params.get('code') ?? '')
-      .then(() => {
-        navigate(params.get('next') ?? '/', { replace: true });
-      })
-      .catch(() => setStatus('error'));
+    const code = params.get('code') ?? '';
+    const next = params.get('next') ?? '/';
+    // Supabase PKCE: ?code= is present after Google/magic-link return.
+    if (code) {
+      supabase.auth
+        .exchangeCodeForSession(code)
+        .then(({ error }) => {
+          if (error) {
+            setStatus('error');
+            return;
+          }
+          // Hard reload so App/RequireAuth re-mount from the new cookie.
+          window.location.replace(next);
+        })
+        .catch(() => setStatus('error'));
+    } else {
+      // No code — maybe an access_token fragment or just returning from
+      // OAuth via implicit flow. Supabase's detectSessionInUrl handles it;
+      // give it a beat then go home.
+      window.setTimeout(() => window.location.replace(next), 300);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
