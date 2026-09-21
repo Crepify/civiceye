@@ -129,16 +129,39 @@ export function Login() {
     return true;
   };
 
-  const redirectTo = (target: string, brand: 'civiceye' | 'amrita') => {
+  const redirectTo = (brand: 'civiceye' | 'amrita') => {
     setStage('redirecting');
     setJustSignedInAs({ email, brand });
-    // A small, friendly "taking you in…" pause so the brand + welcome card
-    // are visible and the page doesn't feel like it jumped.
-    window.setTimeout(() => {
-      setPreviewBrand(null);
-      navigate(target, { replace: true });
-    }, 650);
+    // Do NOT call navigate() here. After state flushes, a useEffect (below)
+    // waits for both the welcome animation (~650ms) AND the user to be
+    // present in React state before navigating, so RequireAuth is
+    // guaranteed to see user !== null on the first render of the target page.
+    const startedAt = Date.now();
+    redirectTimerRef.current = { startedAt, target: next };
   };
+
+  // Perform the actual navigation once the welcome card has had time to
+  // animate AND the signed-in user is present in React state.
+  const redirectTimerRef = useRef<{ startedAt: number; target: string } | null>(null);
+  useEffect(() => {
+    const pending = redirectTimerRef.current;
+    if (!pending || !justSignedInAs || !user) return;
+    const elapsed = Date.now() - pending.startedAt;
+    const waitMs = Math.max(0, 650 - elapsed);
+    const t = window.setTimeout(() => {
+      redirectTimerRef.current = null;
+      setPreviewBrand(null);
+      setJustSignedInAs(null);
+      navigate(pending.target, { replace: true });
+    }, waitMs);
+    return () => window.clearTimeout(t);
+  }, [justSignedInAs, user, navigate, setPreviewBrand]);
+
+  // Clean up any pending timer if the component unmounts mid-redirect.
+  useEffect(() => () => {
+    redirectTimerRef.current = null;
+    setPreviewBrand(null);
+  }, [setPreviewBrand]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,12 +175,12 @@ export function Login() {
       if (mode === 'signin') {
         await signInWithPassword(email, password);
         toast.success('Welcome back! 👋', 'You are signed in.');
-        redirectTo(next, brand);
+        redirectTo(brand);
       } else if (mode === 'signup') {
         const { session } = await signUp(email, password, fullName);
         if (session) {
           toast.success('Account created! 🎉', 'You are signed in.');
-          redirectTo(next, brand);
+          redirectTo(brand);
         } else {
           setConfirmSent(true);
           setMode('signin');

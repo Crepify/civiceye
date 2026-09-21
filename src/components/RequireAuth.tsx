@@ -26,23 +26,20 @@ export function RequireAuth({ children }: React.PropsWithChildren<RequireAuthPro
     return <>{children}</>;
   }
 
-  if (loading || !user) {
-    // Keep a spinner while the session is being restored, rather than
-    // immediately redirecting — that redirect race is exactly what caused
-    // the "press Sign in twice" bug.
+  // If Supabase is still hydrating the initial session, show a spinner —
+  // never redirect mid-restore.
+  if (loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3">
         <Loader2 className="h-7 w-7 animate-spin text-primary-600" />
-        <p className="text-xs font-semibold tracking-wide text-slate-400">
-          {loading ? 'Checking your session…' : 'Sign in required'}
-        </p>
-        {!loading && !user && (
-          // Emit the redirect AFTER rendering once so the user isn't
-          // flashed back to /login on a fast sign-in.
-          <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace />
-        )}
+        <p className="text-xs font-semibold tracking-wide text-slate-400">Checking your session…</p>
       </div>
     );
+  }
+
+  // Session restore is done and there's still no user — bounce to /login.
+  if (!user) {
+    return <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
   return <>{children}</>;
