@@ -1,9 +1,5 @@
 /**
  * Vercel serverless function — Roboflow proxy with security patches
- * - Rate limiting: 20 req/min per IP
- * - Origin check via CIVICEYE_ORIGIN
- * - Input validation: base64 image, max size
- * - Security headers: nosniff, DENY, no-store
  */
 
 const rateMap = new Map();
@@ -24,8 +20,9 @@ function getClientIp(req) {
 function allowedOrigin(origin) {
   const cfg = (process.env.CIVICEYE_ORIGIN || '*').trim();
   if (cfg === '*') return '*';
+  if (!origin) return '*';
   const allowed = cfg.split(',').map((s) => s.trim()).filter(Boolean);
-  if (origin && allowed.includes(origin)) return origin;
+  if (allowed.includes(origin)) return origin;
   return null;
 }
 function securityHeaders(origin) {
@@ -42,12 +39,17 @@ function securityHeaders(origin) {
 function isValidBase64Image(str) {
   if (typeof str !== 'string') return false;
   if (str.length > 15 * 1024 * 1024) return false;
-  return /^[A-Za-z0-9+/=]+$/.test(str.slice(0, 100)) || str.startsWith('data:image/');
+  if (str.startsWith('data:image/')) return true;
+  const sample = str.slice(0, 200).replace(/\s/g, '');
+  return /^[A-Za-z0-9+/=]+$/.test(sample) && sample.length > 100;
 }
 
 const WORKFLOW_BASE = 'https://serverless.roboflow.com';
 const DETECT_BASE = 'https://detect.roboflow.com';
 const MAX_IMAGE_CHARS = 15 * 1024 * 1024;
+
+export const config = { api: { bodyParser: { sizeLimit: "10mb" } } };
+export const maxDuration = 60;
 
 export default async function handler(req, res) {
   const origin = req.headers.origin || null;
@@ -64,7 +66,7 @@ export default async function handler(req, res) {
   }
   if (allowedOrigin(origin) === null) {
     res.writeHead(403, securityHeaders(origin));
-    res.end('Forbidden origin');
+    res.end(JSON.stringify({ error: 'Forbidden origin', origin }));
     return;
   }
   const ip = getClientIp(req);
@@ -80,6 +82,11 @@ export default async function handler(req, res) {
     return;
   }
   const apiKey = process.env.ROBOFLOW_API_KEY || process.env.VITE_ROBOFLOW_API_KEY || req.body?.api_key || '';
+  if (!apiKey) {
+    res.writeHead(400, { 'Content-Type': 'application/json', ...securityHeaders(origin) });
+    res.end(JSON.stringify({ error: 'Roboflow API key not configured. Set ROBOFLOW_API_KEY in Vercel env.' }));
+    return;
+  }
   const workspace = process.env.ROBOFLOW_WORKSPACE || process.env.VITE_ROBOFLOW_WORKSPACE || 'aswathram-kumar';
   const workflowId = process.env.ROBOFLOW_WORKFLOW_ID || process.env.VITE_ROBOFLOW_WORKFLOW_ID || 'civiceye-pothole-reporting-starter-1786336062967';
   const model = req.body?.model?.trim() || '';
@@ -109,12 +116,17 @@ export default async function handler(req, res) {
     payload = JSON.stringify({ api_key: apiKey, inputs: { image: { type: 'base64', value: image } } });
   }
   try {
-    const rf = await fetch(target, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 40000);
+    const rf = await fetch(target, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, signal: controller.signal });
+    clearTimeout(timeout);
     const text = await rf.text();
     res.writeHead(rf.status, { 'Content-Type': 'application/json', ...securityHeaders(origin) });
     res.end(text);
   } catch (err) {
-    res.writeHead(502, { 'Content-Type': 'application/json', ...securityHeaders(origin) });
-    res.end(JSON.stringify({ error: `Roboflow proxy failed: ${err?.message ?? err}` }));
+    const isAbort = err.name === 'AbortError';
+    console.error('[roboflow proxy] error:', err);
+    res.writeHead(isAbort ? 504 : 502, { 'Content-Type': 'application/json', ...securityHeaders(origin) });
+    res.end(JSON.stringify({ error: `Roboflow proxy failed: ${err?.message ?? err}`, hint: isAbort ? 'Timeout after 40s' : 'Check ROBOFLOW_API_KEY/WORKSPACE/WORKFLOW_ID' }));
   }
 }
