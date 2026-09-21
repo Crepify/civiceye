@@ -63,6 +63,13 @@ const DIRECTORY = {
   'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: 'civiceyeoffcial@gmail.com' },
   'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: 'civiceyeoffcial@gmail.com' },
   'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: 'civiceyeoffcial@gmail.com' },
+  /* SLA-breach higher authorities (city) */
+  'bbmp-commissioner': { name: 'BBMP Commissioner', department: 'Office of the Commissioner · Level 1 escalation', email: 'comm@bbmp.gov.in' },
+  'bbmp-chief-mayor': { name: 'BBMP Chief Commissioner + Mayor', department: 'Level 2 escalation', email: 'comm@bbmp.gov.in' },
+  'ka-udd': { name: 'Karnataka Urban Development Dept', department: 'Principal Secretary UDD · Level 3 escalation', email: 'secyudd@karnataka.gov.in' },
+  /* SLA-breach higher authorities (campus) */
+  'amrita-dean': { name: 'Dean / Director Office', department: 'Level 1 escalation — Campus Administration', email: 'civiceyeoffcial@gmail.com' },
+  'amrita-vc': { name: 'Vice Chancellor Office', department: 'Level 2 escalation', email: 'civiceyeoffcial@gmail.com' },
 };
 
 const MAX_BODY_CHARS = 20_000;
@@ -103,7 +110,12 @@ function buildEmail({ authority, report, message, ref }) {
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const isCampus = report.scope === 'campus';
   const severityUpper = String(report.severity || '').toUpperCase();
-  const severityNote = report.severity === 'critical' ? 'Immediate action required — safety risk' : report.severity === 'high' ? 'High priority — please act within 24h' : report.severity === 'medium' ? 'Medium priority — 7 days' : 'Low priority — review when possible';
+  const isBreach = Boolean(report.slaBreach);
+  const breachLevel = Number(report.escalationLevel) || 1;
+  const breachTag = isBreach ? `[SLA BREACH · L${breachLevel}] ` : '';
+  const severityNote = isBreach
+    ? `⚠️ SLA DEADLINE BREACHED — escalation Level ${breachLevel}. This report has exceeded its response window. Please intervene urgently.`
+    : report.severity === 'critical' ? 'Immediate action required — safety risk' : report.severity === 'high' ? 'High priority — please act within 24h' : report.severity === 'medium' ? 'Medium priority — 7 days' : 'Low priority — review when possible';
 
   const ai = report.ai || {};
   const hasAnnotated = Boolean(ai.annotatedImage);
@@ -137,11 +149,17 @@ function buildEmail({ authority, report, message, ref }) {
     )
     .join('');
 
+  const bannerColor = isBreach ? '#b91c1c' : (isCampus ? '#A51636' : '#4f46e5');
+  const breachBanner = isBreach
+    ? `<div style="background:#fef2f2;border-bottom:1px solid #fecaca;padding:10px 20px;color:#991b1b;font-size:12px;font-weight:700;">⚠️ SLA BREACH ESCALATION — Level ${breachLevel} — This report exceeded its response deadline and has been escalated to your office by a citizen.</div>`
+    : '';
+
   const html = `<!doctype html>
 <html><body style="margin:0;padding:20px;background:#f8fafc;font-family:Inter,Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
-    <div style="background:${isCampus ? '#A51636' : '#4f46e5'};padding:16px 20px;">
-      <p style="margin:0;color:#ffffff;font-size:13px;font-weight:700;">${esc(appName)} — ${esc(severityUpper)} — ${esc(ref)}</p>
+    ${breachBanner}
+    <div style="background:${bannerColor};padding:16px 20px;">
+      <p style="margin:0;color:#ffffff;font-size:13px;font-weight:700;">${esc(breachTag)}${esc(appName)} — ${esc(severityUpper)} — ${esc(ref)}</p>
       <h1 style="margin:4px 0 0;color:#ffffff;font-size:18px;">${esc(report.title)}</h1>
     </div>
     <div style="padding:16px 20px;">
@@ -174,9 +192,9 @@ function buildEmail({ authority, report, message, ref }) {
   ].filter(Boolean).join('\n');
 
   return {
-    subject: `[${appName}] ${severityUpper} — ${report.title} — escalation ${ref}`.slice(0, 160),
+    subject: `${breachTag}[${appName}] ${severityUpper} — ${report.title} — escalation ${ref}`.slice(0, 160),
     html,
-    text,
+    text: (isBreach ? `⚠️ SLA BREACH L${breachLevel} — ` : '') + text,
   };
 }
 

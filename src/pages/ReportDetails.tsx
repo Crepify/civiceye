@@ -25,6 +25,7 @@ import { Badge } from '@/components/Badge';
 import { VoteButtons } from '@/components/VoteButtons';
 import { ReportCard } from '@/components/ReportCard';
 import { ReportToAuthority } from '@/components/ReportToAuthority';
+import { EscalateBreach } from '@/components/EscalateBreach';
 import { BeforeAfterSlider, ProofOfFixUploader } from '@/components/BeforeAfterSlider';
 import { getSLAStatus, formatSLATime, getEscalationTarget } from '@/services/slaService';
 import { EmptyState } from '@/components/EmptyState';
@@ -237,6 +238,33 @@ export function ReportDetails() {
                         <div className="flex justify-between"><span className="text-slate-500">Time left</span><span className={`font-bold ${sla.status === 'breached' ? 'text-rose-600' : sla.status === 'at-risk' ? 'text-amber-600' : 'text-emerald-600'}`}>{formatSLATime(sla.hoursLeft)}</span></div>
                         <div className="flex justify-between"><span className="text-slate-500">Status</span><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${sla.status === 'breached' ? 'bg-rose-100 text-rose-700' : sla.status === 'at-risk' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{sla.status.toUpperCase()}</span></div>
                         {report.escalation ? <div className="flex justify-between"><span className="text-slate-500">Escalated to</span><span className="font-medium">{getEscalationTarget(report)} L{report.escalation.level}</span></div> : null}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Escalate-to-higher button — only when SLA is breached AND report not resolved/rejected */}
+                  {(() => {
+                    const s = getSLAStatus(report);
+                    const canEscalate = s.status === 'breached' && report.status !== 'resolved' && report.status !== 'rejected';
+                    if (!canEscalate) return null;
+                    // Cap at top of chain: city → 3, campus → 2.
+                    const atTop = (report.scope === 'campus' && (report.escalation?.level || 0) >= 2) ||
+                                  (report.scope !== 'campus' && (report.escalation?.level || 0) >= 3);
+                    if (atTop) {
+                      return (
+                        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-800">
+                          This report has already been escalated to the highest level ({getEscalationTarget(report)}).
+                          Please follow up directly with the office via the contact details above.
+                        </p>
+                      );
+                    }
+                    return (
+                      <div className="mt-4">
+                        <EscalateBreach report={report} />
+                        <p className="mt-2 text-center text-[11px] leading-relaxed text-rose-600/80">
+                          This sends an immediate SLA-breach notice via email (with SMS / WhatsApp / call fallback)
+                          to the next office in the chain.
+                        </p>
                       </div>
                     );
                   })()}
