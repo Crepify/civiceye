@@ -1,7 +1,6 @@
 /**
- * Vercel serverless function — Roboflow proxy
- * Original working version before polygon patches
- * Forwards to Roboflow server-side to avoid CORS
+ * Vercel serverless function — Roboflow proxy (working version)
+ * Fixes NetworkError by adding 8s timeout to avoid Hobby 10s kill
  */
 
 const WORKFLOW_BASE = 'https://serverless.roboflow.com';
@@ -35,6 +34,11 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (image.length > 12 * 1024 * 1024) {
+    res.status(413).json({ error: 'Image too large. Max ~8MB base64.' });
+    return;
+  }
+
   let target;
   let payload;
   if (model) {
@@ -49,14 +53,26 @@ export default async function handler(req, res) {
   }
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
     const rf = await fetch(target, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: payload,
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeout);
     const text = await rf.text();
     res.status(rf.status).setHeader('Content-Type', 'application/json').send(text);
   } catch (err) {
-    res.status(502).json({ error: `Roboflow proxy failed: ${err?.message ?? err}` });
+    const isAbort = err.name === 'AbortError';
+    console.error('[roboflow proxy] error:', err.message);
+    res.status(isAbort ? 504 : 502).json({ 
+      error: `Roboflow proxy failed: ${err?.message ?? err}`,
+      hint: isAbort ? 'Timeout after 8s — Vercel Hobby limit 10s, workflow may be slow. Will fallback to on-device AI with exact outline.' : 'Check ROBOFLOW_API_KEY in Vercel env, or will fallback to exact outline mock',
+      fallback: true
+    });
   }
 }
