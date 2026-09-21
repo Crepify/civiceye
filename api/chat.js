@@ -44,7 +44,7 @@ function getLlmConfig() {
       model: getEnv('LLM_MODEL') || 'deepseek/deepseek-chat:free',
       fallbacks: [],
       extraHeaders: {
-        'HTTP-Referer': getEnv('LLM_HTTP_REFERER') || 'https://civiceye-pied.vercel.app',
+        'HTTP-Referer': getEnv('LLM_HTTP_REFERER') || 'https://civiceye.co.in',
         'X-Title': getEnv('LLM_X_TITLE') || 'CivicEye Chat',
       },
     };

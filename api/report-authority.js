@@ -113,7 +113,16 @@ function buildEmail({ authority, report, message, ref }) {
   const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
   const mapsUrl = hasCoords ? `https://www.google.com/maps?q=${lat},${lng}` : null;
   const mapsDirUrl = hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : null;
-  const reportUrl = report.url || (report.id ? `https://civiceye-pied.vercel.app/report/${report.id}` : null);
+  // Prefer the caller-provided URL; otherwise derive from the request Host
+  // header so emails always link to the domain the user is actually on
+  // (civiceye.co.in in production, vercel preview or localhost in dev).
+  const host = (process.env.APP_URL || '').replace(/https?:\/\//, '')
+    || req.headers['x-forwarded-host']
+    || req.headers.host
+    || 'civiceye.co.in';
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const origin = `${proto}://${host}`;
+  const reportUrl = report.url || (report.id ? `${origin}/report/${report.id}` : null);
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const isCampus = report.scope === 'campus';
   const severityUpper = String(report.severity || '').toUpperCase();

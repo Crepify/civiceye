@@ -9,7 +9,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
   {
     heading: '1. Acceptance of terms',
     body: [
-      'Welcome to CivicEye (and, for Amrita Vishwa Vidyapeetham Bengaluru campus users, its campus portal "Amrita Eye"). By accessing or using civiceye-pied.vercel.app (the "Service") you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.',
+      'Welcome to CivicEye (and, for Amrita Vishwa Vidyapeetham Bengaluru campus users, its campus portal "Amrita Eye"). By accessing or using civiceye.co.in (the "Service") you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.',
       'You must be at least 13 years old to use the Service, and if you are under 18 you represent that your parent or guardian has reviewed and agreed to these terms with you.',
     ],
   },

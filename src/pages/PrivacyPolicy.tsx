@@ -10,7 +10,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
     heading: '1. Who we are',
     body: [
       'CivicEye is a civic-issue reporting platform that lets citizens report potholes, broken street lights, garbage dumps, water logging and similar public-infrastructure problems with a photo, GPS location and AI-assisted analysis. Reports are shared with the community and forwarded by email/SMS to the responsible civic authority (BBMP for city reports; the Estate Office / campus administration for Amrita Vishwa Vidyapeetham, Bengaluru campus reports).',
-      'This policy describes what personal information CivicEye collects, how it is used, and the choices you have. It applies to the web app hosted at civiceye-pied.vercel.app (and any custom domain we later move to) and the Amrita Eye campus portal on the same deployment.',
+      'This policy describes what personal information CivicEye collects, how it is used, and the choices you have. It applies to the web app hosted at civiceye.co.in (the CivicEye city portal) and the Amrita Eye campus portal on the same deployment.',
     ],
   },
   {

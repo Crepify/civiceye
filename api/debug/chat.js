@@ -40,7 +40,7 @@ function getLlmConfig() {
       debugModel: getEnv('LLM_DEBUG_MODEL') || 'deepseek/deepseek-r1:free',
       fallbacks: [],
       extraHeaders: {
-        'HTTP-Referer': getEnv('LLM_HTTP_REFERER') || 'https://civiceye-pied.vercel.app',
+        'HTTP-Referer': getEnv('LLM_HTTP_REFERER') || 'https://civiceye.co.in',
         'X-Title': getEnv('LLM_X_TITLE') || 'CivicEye Debug',
       },
     };
