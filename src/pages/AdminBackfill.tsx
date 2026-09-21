@@ -39,10 +39,17 @@ export function AdminBackfill() {
   const oldReports = useMemo(() => {
     return reports.filter((r) => {
       const ai = r.ai as any;
-      if (!ai) return true;
-      if (!ai.annotatedImage) return true;
-      if (ai.annotatedImage === r.image) return true;
-      // If annotated is same as original URL (no boxes)
+      if (!ai) return true;                               // never AI-ran
+      if (!ai.annotatedImage) return true;               // no annotation at all
+      if (ai.annotatedImage === r.image) return true;    // annotated == original (no boxes)
+      // Locally-drawn canvas annotations are saved as data: URLs (they start
+      // with "data:image"). The correct Roboflow workflow image is uploaded
+      // to Supabase storage and ends up as an https:// URL. Re-run any report
+      // whose annotation is still a data: URL so it gets the clean Roboflow
+      // workflow output (no double-labels / red-blob overlay).
+      if (String(ai.annotatedImage).startsWith('data:')) return true;
+      // Anything labelled as a non-roboflow engine also needs re-running.
+      if (ai.engine && ai.engine !== 'roboflow') return true;
       return false;
     });
   }, [reports]);
@@ -72,9 +79,15 @@ export function AdminBackfill() {
       // and returns real predictions + a workflow-annotated image. Using the
       // cloud API means backfill produces the same-quality annotations as
       // new reports, instead of re-using stale/cached local annotations.
+      //
+      // IMPORTANT: if Roboflow returns an `annotatedImage`, we use it AS-IS.
+      // The Roboflow workflow already draws boxes, polygon fills, and per-box
+      // labels — drawing our own canvas overlay on top produces the "double
+      // label / red blob" mess seen in the wild (e.g. "Pothole (93%) 95%").
       if (hasRoboflowKey) {
         try {
           const rf = await analyzePhotoWithRoboflow(dataUrl, null);
+          // Prefer the workflow's annotated image — never overdraw on it.
           if (rf.annotatedImage) annotated = rf.annotatedImage;
           if (rf.predictions && rf.predictions.length > 0) predictions = rf.predictions;
           category = rf.category || existingCategory;
@@ -91,9 +104,10 @@ export function AdminBackfill() {
           `proxy=${roboflowConfig.proxyUrl || '/api/roboflow'}`;
       }
 
-      // ── FALLBACK / overlay: if Roboflow didn't return an annotated image,
-      // draw boxes locally from its predictions; if no predictions either,
-      // fall back to the old mock-annotation path.
+      // ── FALLBACK: only draw locally when Roboflow did NOT return an
+      // annotated image. If we have predictions (from Roboflow detect
+      // endpoint) draw real polygon boxes; otherwise fall back to the
+      // mock single-label annotation.
       if (!annotated) {
         if (predictions.length > 0 && predictions[0]?.x !== undefined) {
           try {
@@ -304,8 +318,8 @@ export function AdminBackfill() {
           </h4>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-xs leading-relaxed text-slate-300">
             <li>Fetches original image URL → converts to data URL</li>
-            <li><b>PRIMARY:</b> posts the image to the real Roboflow workflow API (via the Cloudflare Worker / <code>/api/roboflow</code> proxy) — same engine used for freshly-submitted reports. Gets back real predictions + the workflow-annotated image.</li>
-            <li><b>FALLBACK:</b> if Roboflow is unreachable/unconfigured, draws boxes locally with <code>generateAnnotatedFromPredictions</code>; if no predictions exist, falls back to <code>generateMockAnnotatedImage</code>.</li>
+            <li><b>PRIMARY:</b> posts the image to the real Roboflow workflow API (via the Cloudflare Worker / <code>/api/roboflow</code> proxy) — same engine used for freshly-submitted reports. Gets back real predictions + the workflow-annotated image, which is used <b>as-is</b> (no extra boxes drawn on top).</li>
+            <li><b>FALLBACK:</b> if Roboflow is unreachable/unconfigured <i>and</i> returned no annotated image, draws boxes locally with <code>generateAnnotatedFromPredictions</code> from predictions; if no predictions exist, falls back to <code>generateMockAnnotatedImage</code>. Previously backfilled reports with the red double-label / over-drawn look (data: URLs) are auto-queued for re-processing.</li>
             <li>Uploads the annotated image to Supabase Storage <code>report-photos/{`{userId}`}/annotated/</code> → public URL.</li>
             <li>Persists <code>ai.engine</code>, <code>ai.predictions</code>, <code>ai.confidence</code>, <code>ai.summary</code>, and <code>ai.backfilledAt</code> in the database — Community + Report Details then show the real boxes.</li>
             <li>Status badge shows <span className="text-emerald-300">success (roboflow)</span> when the cloud API answered, <span className="text-amber-300">success (local)</span> when the fallback was used.</li>
