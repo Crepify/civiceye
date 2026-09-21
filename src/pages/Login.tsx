@@ -141,23 +141,46 @@ export function Login() {
   };
 
   // Perform the actual navigation once the welcome card has had time to
-  // animate AND the signed-in user is present in React state.
-  const redirectTimerRef = useRef<{ startedAt: number; target: string } | null>(null);
+  // animate AND the signed-in user is present in React state. Safety: if
+  // the session never lands for some reason, navigate anyway after 4s so
+  // the user can't get stuck (Supabase has the cookie at that point).
+  const redirectTimerRef = useRef<{ startedAt: number; target: string; safetyT?: number } | null>(null);
   useEffect(() => {
     const pending = redirectTimerRef.current;
-    if (!pending || !justSignedInAs || !user) return;
+    if (!pending || !justSignedInAs) return;
+    if (!user && Date.now() - pending.startedAt < 4_000) return;
     const elapsed = Date.now() - pending.startedAt;
-    const waitMs = Math.max(0, 650 - elapsed);
+    const waitMs = user ? Math.max(0, 650 - elapsed) : 0;
     const t = window.setTimeout(() => {
+      if (redirectTimerRef.current?.safetyT) {
+        window.clearTimeout(redirectTimerRef.current.safetyT);
+      }
       redirectTimerRef.current = null;
       setPreviewBrand(null);
       setJustSignedInAs(null);
       navigate(pending.target, { replace: true });
     }, waitMs);
     return () => window.clearTimeout(t);
-  }, [justSignedInAs, user, navigate, setPreviewBrand]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [justSignedInAs, user]);
 
-  // Clean up any pending timer if the component unmounts mid-redirect.
+  // Safety net: if we never received a SIGNED_IN event (e.g. network/SDK
+  // quirk), force the navigation after 4s — the auth cookie will be there
+  // and the destination will pick up the session from the cookie.
+  useEffect(() => {
+    if (!justSignedInAs) return;
+    const pending = redirectTimerRef.current;
+    if (!pending) return;
+    pending.safetyT = window.setTimeout(() => {
+      // Force a state change so the effect above picks up even without `user`.
+      setStage((s) => (s === 'redirecting' ? 'redirecting' : s));
+    }, 4_000);
+    return () => {
+      if (pending.safetyT) window.clearTimeout(pending.safetyT);
+    };
+  }, [justSignedInAs]);
+
+  // Clean up preview brand override when unmounting.
   useEffect(() => () => {
     redirectTimerRef.current = null;
     setPreviewBrand(null);
@@ -174,11 +197,17 @@ export function Login() {
     try {
       if (mode === 'signin') {
         await signInWithPassword(email, password);
+        // Yield a tick so React flushes the setSession() call from inside
+        // signInWithPassword before we set justSignedInAs — that way the
+        // redirect effect sees a truthy `user` on the first render of the
+        // welcome card instead of needing an extra update.
+        await new Promise((r) => setTimeout(r, 0));
         toast.success('Welcome back! 👋', 'You are signed in.');
         redirectTo(brand);
       } else if (mode === 'signup') {
         const { session } = await signUp(email, password, fullName);
         if (session) {
+          await new Promise((r) => setTimeout(r, 0));
           toast.success('Account created! 🎉', 'You are signed in.');
           redirectTo(brand);
         } else {

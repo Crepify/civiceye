@@ -107,14 +107,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     if (!supabase) throw new Error('Supabase is not configured.');
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    // Flush the fresh session into React state synchronously before returning
-    // (instead of waiting for onAuthStateChange to fire on a later tick).
-    // This guarantees that when the caller calls navigate() immediately after,
-    // RequireAuth will see user !== null on the very first render.
-    const { data } = await supabase.auth.getSession();
-    setSession(data.session);
+    // Prefer the session returned in the response (the most reliable source
+    // on the same tick). As a fallback, poll getSession() briefly in case
+    // the SDK needs a microtask to persist the session. This guarantees
+    // the session/user is in React state before the caller navigates.
+    let settled: Session | null = data.session;
+    if (!settled) {
+      for (let i = 0; i < 10; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((r) => setTimeout(r, 30));
+        // eslint-disable-next-line no-await-in-loop
+        const { data: d } = await supabase.auth.getSession();
+        if (d.session) {
+          settled = d.session;
+          break;
+        }
+      }
+    }
+    if (!settled) {
+      // One last synchronous attempt to read any persisted session, then
+      // defer to onAuthStateChange. The caller's navigate will be gated by
+      // a useEffect that waits for user !== null anyway.
+      const { data: d } = await supabase.auth.getSession();
+      settled = d.session;
+    }
+    if (settled) setSession(settled);
+    else setLoading(false);
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {

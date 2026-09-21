@@ -20,6 +20,28 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <style>
+      /* Hide the floating civic-chat widget on auth/reset pages */
+      html[data-cve-hide="1"] #cve-root { display: none !important; }
+    </style>
+    <script>
+      (function () {
+        function refreshCveHide() {
+          var p = window.location.pathname;
+          var hide = (p.indexOf('/login') === 0 || p.indexOf('/auth/') === 0 || p.indexOf('/reset') === 0);
+          document.documentElement.setAttribute('data-cve-hide', hide ? '1' : '0');
+          var root = document.getElementById('cve-root');
+          if (root) root.style.display = hide ? 'none' : '';
+        }
+        refreshCveHide();
+        // React Router navigations don't reload the page — listen for push/replace/pop.
+        var origPush = history.pushState;
+        var origReplace = history.replaceState;
+        history.pushState = function () { var r = origPush.apply(this, arguments); refreshCveHide(); window.dispatchEvent(new Event('cve:nav')); return r; };
+        history.replaceState = function () { var r = origReplace.apply(this, arguments); refreshCveHide(); window.dispatchEvent(new Event('cve:nav')); return r; };
+        window.addEventListener('popstate', refreshCveHide);
+      })();
+    </script>
     <script>
       window.CivicEyeChatConfig = {
         theme: "auto",
