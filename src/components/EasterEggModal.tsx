@@ -40,7 +40,7 @@ const TEAM: TeamMember[] = [
     color: '#91dcc4',
     emoji: '🤖',
     placeholder:
-      'AI trainer and AI applications along with safety features for the site. Trains Roboflow + on-device YOLO models, builds live AI detection, and ensures safety features like SOS and security reporting work flawlessly for campus and city.',
+      'AI trainer and AI applications along with safety features for the site. Trains CivicLENS AI + on-device YOLO models, builds live AI detection, and ensures safety features like SOS and security reporting work flawlessly for campus and city.',
     funFact: 'Trains AI to spot potholes and garbage, and makes safety features actually safe.',
   },
   {

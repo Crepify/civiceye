@@ -52,7 +52,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
   {
     heading: '7. AI / third-party services',
     body: [
-      'AI annotations are generated using third-party providers (currently Roboflow) and are provided as-is, without warranty. You should not rely on AI-detected categories for safety-critical decisions.',
+      'AI annotations are generated using CivicLENS AI (our in-house vision engine) and are provided as-is, without warranty. You should not rely on AI-detected categories for safety-critical decisions.',
       'Google sign-in is provided by Google and governed by Google\'s terms and privacy policy.',
       'The Service is hosted on Vercel and uses Supabase for authentication and data. Links to third-party sites are not endorsements.',
     ],

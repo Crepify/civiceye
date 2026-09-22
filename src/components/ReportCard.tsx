@@ -150,11 +150,6 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
         <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-white/10">
           <VoteButtons report={report} compact />
           <div className="flex items-center gap-2">
-            {hasAnnotated ? (
-              <button onClick={() => setShowAnnotated((v) => !v)} className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-primary-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                <ScanLine className="h-3.5 w-3.5" /> {showAnnotated ? 'Original' : 'View AI'}
-              </button>
-            ) : null}
             <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{report.author}</span>
             <Link to={`https://www.google.com/maps/dir/?api=1&destination=${report.coordinates.lat},${report.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400" title="Get directions">
               <Navigation className="h-4 w-4" />

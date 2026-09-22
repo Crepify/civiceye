@@ -72,7 +72,7 @@ function civicEyeBackendPrompt(extraContext) {
     `- Only give a fix you are confident applies; otherwise give a short checklist of things to verify.`,
     `- Be concise and specific. No filler, no generic advice.`,
     ``,
-    `This chat server uses Vercel serverless. Main CivicEye website is React + Vite, separate from chatbot. Relevant services: Supabase, Roboflow, Vercel, OpenRouter/DeepSeek.`,
+    `This chat server uses Vercel serverless. Main CivicEye website is React + Vite, separate from chatbot. Relevant services: Supabase, CivicLENS AI, Vercel, OpenRouter/DeepSeek.`,
     ``,
     `RESPONSE FORMAT (when given concrete error):`,
     `1. WHAT IT MEANS — 1-2 lines`,

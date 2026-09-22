@@ -27,7 +27,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
     body: [
       'To run the service: to create your account, sign you in, let you submit reports, and display your reports on the community map.',
       'To forward reports to authorities: when you tap "Report to authority" or the SLA-breach escalation button, we email your report (including photo, annotated image, map link and your reporter email if you provided one) to the civic or campus authority contact we have on file.',
-      'To run AI annotation: photos you submit are sent to our AI vision provider (Roboflow) for object detection and severity classification. The provider processes the image only to return annotations back to us; they do not use them for model training unless you separately opt in on their platform.',
+      'To run AI annotation: photos you submit are sent to our AI vision provider (our CivicLENS AI vision engine) for object detection and severity classification. The provider processes the image only to return annotations back to us; they do not use them for model training unless you separately opt in on their platform.',
       'To enforce community standards and prevent abuse (spam, fake reports, harassment).',
     ],
   },
@@ -36,7 +36,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
     body: [
       'Public: the content of your reports (photo, location, description, severity) is public on the CivicEye map and feed. Your email address is NOT shown to other members of the public — only your display name (derived from your name or the first part of your email).',
       'Authorities: when you escalate or submit a report to an authority, that authority receives your report content and, if you chose to include it, your reporter email so they can follow up with you.',
-      'Service providers: we share the minimum necessary data with our hosting (Vercel), database (Supabase), AI annotation (Roboflow), and email (Nodemailer / SMTP) providers, all of whom process data on our behalf under contractual or equivalent confidentiality obligations.',
+      'Service providers: we share the minimum necessary data with our hosting (Vercel), database (Supabase), AI annotation (our CivicLENS AI vision engine), and email (Nodemailer / SMTP) providers, all of whom process data on our behalf under contractual or equivalent confidentiality obligations.',
       'Required by law: we will disclose information when required by a valid legal request from a court or government agency.',
       'We do NOT sell your personal information and we do not serve third-party advertising.',
     ],
