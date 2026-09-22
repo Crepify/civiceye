@@ -141,8 +141,60 @@ export const reportService = {
   },
 
   /** Authority actions. */
-  async markResolved(id: string): Promise<void> {
-    await this.updateStatus(id, 'resolved');
+  async markResolved(id: string, resolverName?: string): Promise<Report | undefined> {
+    if (!supabase) {
+      await this.updateStatus(id, 'resolved');
+      return undefined;
+    }
+    const { data, error } = await supabase
+      .from('reports')
+      .update({ status: 'resolved' })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+
+    // Best-effort thank-you email to the original reporter. Fire-and-forget
+    // so dashboard UX never blocks on SMTP.
+    const reporterUserId = (data as any)?.user_id;
+    let reporterEmail: string | null = null;
+    let reporterFullName: string | null = (data as any)?.author_name || null;
+    if (reporterUserId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', reporterUserId)
+        .maybeSingle();
+      if (profile) {
+        reporterEmail = (profile as any).email || null;
+        reporterFullName = (profile as any).full_name || reporterFullName;
+      }
+    }
+    if (reporterEmail) {
+      const webhookSecret = (import.meta as any)?.env?.VITE_EMAIL_WEBHOOK_SECRET || '';
+      fetch('/api/report-resolved', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(webhookSecret ? { 'x-webhook-secret': webhookSecret } : {}),
+        },
+        body: JSON.stringify({
+          report: {
+            id: data.id,
+            code: (data as any).code,
+            title: data.title,
+            locationName: (data as any).location_name,
+            scope: (data as any).scope,
+            author: reporterFullName || 'Citizen',
+            reporterEmail,
+            resolverName: resolverName || 'the concerned authority',
+            resolvedAt: new Date().toISOString(),
+          },
+        }),
+      }).catch((e) => console.warn('[report-resolved] notification email failed:', e));
+    }
+
+    return data ? mapRow(data as ReportRow) : undefined;
   },
 
   async markInProgress(id: string, assignedTo: string): Promise<void> {
@@ -179,10 +231,65 @@ export const reportService = {
   },
 
   /** Proof of fix - before/after */
-  async addProof(id: string, proof: { beforeImage: string; afterImage: string; fixedDate: string; verifiedByAI?: boolean; aiConfidence?: number; description?: string }): Promise<void> {
+  async addProof(
+    id: string,
+    proof: {
+      beforeImage: string;
+      afterImage: string;
+      fixedDate: string;
+      verifiedByAI?: boolean;
+      aiConfidence?: number;
+      description?: string;
+    },
+    resolverName?: string,
+  ): Promise<void> {
     if (!supabase) return;
-    const { error } = await supabase.from('reports').update({ proof, status: 'resolved' }).eq('id', id);
+    const { data, error } = await supabase
+      .from('reports')
+      .update({ proof, status: 'resolved' })
+      .eq('id', id)
+      .select()
+      .single();
     if (error) throw error;
+
+    // Send the same thank-you email to the reporter when proof is submitted.
+    const reporterUserId = (data as any)?.user_id;
+    let reporterEmail: string | null = null;
+    let reporterFullName: string | null = (data as any)?.author_name || null;
+    if (reporterUserId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', reporterUserId)
+        .maybeSingle();
+      if (profile) {
+        reporterEmail = (profile as any).email || null;
+        reporterFullName = (profile as any).full_name || reporterFullName;
+      }
+    }
+    if (reporterEmail) {
+      const webhookSecret = (import.meta as any)?.env?.VITE_EMAIL_WEBHOOK_SECRET || '';
+      fetch('/api/report-resolved', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(webhookSecret ? { 'x-webhook-secret': webhookSecret } : {}),
+        },
+        body: JSON.stringify({
+          report: {
+            id: data.id,
+            code: (data as any).code,
+            title: (data as any).title,
+            locationName: (data as any).location_name,
+            scope: (data as any).scope,
+            author: reporterFullName || 'Citizen',
+            reporterEmail,
+            resolverName: resolverName || 'the concerned authority',
+            resolvedAt: new Date().toISOString(),
+          },
+        }),
+      }).catch((e) => console.warn('[report-resolved] notification email failed:', e));
+    }
   },
 
   /** SLA escalation */

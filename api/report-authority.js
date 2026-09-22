@@ -51,7 +51,21 @@ function sanitizeString(input, maxLen = 5000) {
   return cleaned.trim();
 }
 
+/* Centralised sender/reply-to so every email in CivicEye is consistent.
+ * SMTP_FROM env is the source of truth. If it's not set yet we fall back to
+ * the canonical info@ address (SMTP_USER still has to be a real Gmail user
+ * for auth, but we set From to the branded address). */
+const BRAND_EMAIL = 'info@civiceye.co.in';
+function fromAddress() {
+  return process.env.SMTP_FROM || `CivicEye <${BRAND_EMAIL}>`;
+}
+function teamReplyTo() {
+  return { replyTo: BRAND_EMAIL };
+}
+
 /* Built-in authority directory (id → { name, department, email }).
+ * All internal CivicEye / Amrita campus addresses route to the single
+ * branded inbox; external civic bodies keep their official addresses.
  * Keep in sync with src/data/authorities.ts. Env vars always win. */
 const DIRECTORY = {
   'bbmp-42': { name: 'BBMP — Roads & Potholes', department: 'Roads & Infrastructure', email: 'comm@bbmp.gov.in' },
@@ -60,16 +74,16 @@ const DIRECTORY = {
   bescom: { name: 'BESCOM 1912', department: 'Street Lighting & Power', email: '' },
   'traffic-police': { name: 'Bengaluru Traffic Police', department: 'Traffic & Signals', email: '' },
   'forest-dept': { name: 'BBMP Forest Cell', department: 'Trees & Parks', email: 'comm@bbmp.gov.in' },
-  'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: 'civiceyeoffcial@gmail.com' },
-  'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: 'civiceyeoffcial@gmail.com' },
-  'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: 'civiceyeoffcial@gmail.com' },
+  'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: BRAND_EMAIL },
+  'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: BRAND_EMAIL },
+  'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: BRAND_EMAIL },
   /* SLA-breach higher authorities (city) */
   'bbmp-commissioner': { name: 'BBMP Commissioner', department: 'Office of the Commissioner · Level 1 escalation', email: 'comm@bbmp.gov.in' },
   'bbmp-chief-mayor': { name: 'BBMP Chief Commissioner + Mayor', department: 'Level 2 escalation', email: 'comm@bbmp.gov.in' },
   'ka-udd': { name: 'Karnataka Urban Development Dept', department: 'Principal Secretary UDD · Level 3 escalation', email: 'secyudd@karnataka.gov.in' },
   /* SLA-breach higher authorities (campus) */
-  'amrita-dean': { name: 'Dean / Director Office', department: 'Level 1 escalation — Campus Administration', email: 'civiceyeoffcial@gmail.com' },
-  'amrita-vc': { name: 'Vice Chancellor Office', department: 'Level 2 escalation', email: 'civiceyeoffcial@gmail.com' },
+  'amrita-dean': { name: 'Dean / Director Office', department: 'Level 1 escalation — Campus Administration', email: BRAND_EMAIL },
+  'amrita-vc': { name: 'Vice Chancellor Office', department: 'Level 2 escalation', email: BRAND_EMAIL },
 };
 
 // Max overall JSON payload (after parsing) — ~9 MB. After base64 overhead this
@@ -107,31 +121,32 @@ function emailFor(authorityId) {
   return (process.env[envKey] || '').trim() || DIRECTORY[authorityId].email;
 }
 
-function buildEmail({ authority, report, message, ref }) {
-  const lat = report?.coordinates?.lat;
-  const lng = report?.coordinates?.lng;
-  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
-  const mapsUrl = hasCoords ? `https://www.google.com/maps?q=${lat},${lng}` : null;
-  const mapsDirUrl = hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : null;
-  // Prefer the caller-provided URL; otherwise derive from the request Host
-  // header so emails always link to the domain the user is actually on
-  // (civiceye.co.in in production, vercel preview or localhost in dev).
+function originFromReq(req) {
   const host = (process.env.APP_URL || '').replace(/https?:\/\//, '')
     || req.headers['x-forwarded-host']
     || req.headers.host
     || 'civiceye.co.in';
   const proto = req.headers['x-forwarded-proto'] || 'https';
-  const origin = `${proto}://${host}`;
+  return `${proto}://${host}`;
+}
+
+function buildEmail({ authority, report, message, ref, origin }) {
+  const lat = report?.coordinates?.lat;
+  const lng = report?.coordinates?.lng;
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+  const mapsUrl = hasCoords ? `https://www.google.com/maps?q=${lat},${lng}` : null;
+  const mapsDirUrl = hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : null;
+  origin = origin || 'https://civiceye.co.in';
   const reportUrl = report.url || (report.id ? `${origin}/report/${report.id}` : null);
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const isCampus = report.scope === 'campus';
   const severityUpper = String(report.severity || '').toUpperCase();
   const isBreach = Boolean(report.slaBreach);
   const breachLevel = Number(report.escalationLevel) || 1;
-  const breachTag = isBreach ? `[SLA BREACH · L${breachLevel}] ` : '';
+  const breachTag = isBreach ? `[SLA ESCALATION · L${breachLevel}] ` : '';
   const severityNote = isBreach
-    ? `⚠️ SLA DEADLINE BREACHED — escalation Level ${breachLevel}. This report has exceeded its response window. Please intervene urgently.`
-    : report.severity === 'critical' ? 'Immediate action required — safety risk' : report.severity === 'high' ? 'High priority — please act within 24h' : report.severity === 'medium' ? 'Medium priority — 7 days' : 'Low priority — review when possible';
+    ? `⚠️ SLA DEADLINE BREACHED — Your Reports have crossed the limited time frame for fixing, SLA escalate now. Escalation Level ${breachLevel}. Please intervene urgently.`
+    : report.severity === 'critical' ? 'Immediate action required — safety risk' : report.severity === 'high' ? 'High priority — please act within 48h' : report.severity === 'medium' ? 'Medium priority — 7 days' : 'Low priority — 14 days';
 
   const ai = report.ai || {};
   const hasAnnotated = Boolean(ai.annotatedImage);
@@ -167,7 +182,7 @@ function buildEmail({ authority, report, message, ref }) {
 
   const bannerColor = isBreach ? '#b91c1c' : (isCampus ? '#A51636' : '#4f46e5');
   const breachBanner = isBreach
-    ? `<div style="background:#fef2f2;border-bottom:1px solid #fecaca;padding:10px 20px;color:#991b1b;font-size:12px;font-weight:700;">⚠️ SLA BREACH ESCALATION — Level ${breachLevel} — This report exceeded its response deadline and has been escalated to your office by a citizen.</div>`
+    ? `<div style="background:#fef2f2;border-bottom:1px solid #fecaca;padding:12px 20px;color:#991b1b;font-size:13px;font-weight:700;line-height:1.4;">⚠️ SLA ESCALATION — Level ${breachLevel}<br><span style="font-weight:600;">Your Reports have crossed the limited time frame for fixing, SLA escalate now.</span></div>`
     : '';
 
   const html = `<!doctype html>
@@ -189,8 +204,7 @@ function buildEmail({ authority, report, message, ref }) {
         ${reportUrl ? `<a href="${esc(reportUrl)}" style="display:inline-block;margin:0 6px 6px 0;padding:8px 14px;background:${isCampus ? '#A51636' : '#4f46e5'};color:#ffffff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">View Report</a>` : ''}
         ${mapsUrl ? `<a href="${esc(mapsUrl)}" style="display:inline-block;margin:0 6px 6px 0;padding:8px 14px;background:#0f172a;color:#ffffff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">Google Maps — ${esc(severityUpper)}</a>` : ''}
       </div>
-      ${strippedNote}
-      <p style="font-size:11px;color:#94a3b8;">Original: ${esc(report.image)} ${hasAnnotated ? '· Annotated: attached' : ''}</p>
+      <p style="font-size:11px;color:#94a3b8;">Sent via ${esc(appName)} · ${esc(origin)} · Original &amp; AI-annotated photos attached when available.</p>
     </div>
   </div>
 </body></html>`;
@@ -266,7 +280,8 @@ export default async function handler(req, res) {
 
   try {
     const transport = nodemailer.createTransport(smtp);
-    const mail = buildEmail({ authority, report, message, ref });
+    const origin = originFromReq(req);
+    const mail = buildEmail({ authority, report, message, ref, origin });
 
     // Attach original + AI annotated pictures as data URLs only if they are
     // not too large (SMTP relays and Vercel response buffering hate multi-MB
@@ -310,9 +325,14 @@ export default async function handler(req, res) {
     // For data URLs we attach, for http we leave as link (to avoid fetching in serverless)
 
     await transport.sendMail({
-      from: process.env.SMTP_FROM || `"CivicEye Alerts" <${process.env.SMTP_USER}>`,
+      from: fromAddress(),
       to,
-      ...(report.reporterEmail ? { replyTo: String(report.reporterEmail).slice(0, 254) } : {}),
+      // When the authority hits Reply, it routes to the CivicEye inbox by
+      // default; if the citizen attached their email we include it so the
+      // authority can reply directly to the reporter AND copy us.
+      replyTo: report.reporterEmail
+        ? `${String(report.reporterEmail).slice(0, 254)}, ${BRAND_EMAIL}`
+        : BRAND_EMAIL,
       subject: mail.subject,
       text: mail.text,
       html: mail.html,
