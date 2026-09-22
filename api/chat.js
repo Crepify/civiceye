@@ -95,10 +95,27 @@ function civicEyeFrontendPrompt(extraContext) {
 }
 
 function allowedOrigin(origin) {
-  const cfg = (process.env.CIVICEYE_ORIGIN || '*').trim();
-  if (cfg === '*') return '*';
-  const allowed = cfg.split(',').map((s) => s.trim()).filter(Boolean);
-  if (origin && allowed.includes(origin)) return origin;
+  // Allow origins from explicit env CIVICEYE_ORIGIN (comma-separated). If
+  // unset, accept the production domain, all Vercel preview deployments
+  // (for PR/staging previews), and common local-dev hosts. CORS is not a
+  // security boundary for this endpoint (it's a public-facing LLM helper
+  // with no auth) — we just don't want to be an open relay for arbitrary
+  // third-party sites.
+  const cfg = (process.env.CIVICEYE_ORIGIN || '').trim();
+  const extra = cfg ? cfg.split(',').map((s) => s.trim()).filter(Boolean) : [];
+  const allowed = [
+    'https://civiceye.co.in',
+    'https://www.civiceye.co.in',
+    'https://civiceye-pied.vercel.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    ...extra,
+  ];
+  if (!origin) return '*';
+  // Allow any vercel.app preview deployment (civiceye-*.vercel.app) so PR
+  // previews work without adding each subdomain individually.
+  if (/\.vercel\.app$/.test(new URL(origin).hostname)) return origin;
+  if (allowed.includes(origin)) return origin;
   return null;
 }
 

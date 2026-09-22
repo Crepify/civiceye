@@ -46,13 +46,26 @@
       })();
     </script>
     <script>
-      window.CivicEyeChatConfig = {
-        theme: "auto",
-        title: "CivicEye Assistant",
-        subtitle: "Ask about reporting an issue",
-        placeholder: "Ask about reporting, BBMP, Estate Office, maps...",
-        endpoint: "/api/chat"
-      };
+      // Brand-aware chat widget config: re-reads the <html> class list to set
+      // title / subtitle / launcher color so Amrita Eye gets maroon branding,
+      // CivicEye gets coral/cream. We point the widget at /api/chat on the
+      // current origin so it works on the custom domain + Vercel previews.
+      function refreshCivicEyeChatConfig() {
+        var isAmrita = document.documentElement.classList.contains('amrita');
+        window.CivicEyeChatConfig = {
+          theme: isAmrita ? 'amrita' : 'civiceye',
+          title: isAmrita ? 'Amrita Eye Assistant' : 'CivicEye Assistant',
+          subtitle: isAmrita ? 'Ask about Estate Office, maps, AI' : 'Ask about reporting, BBMP, maps, AI',
+          placeholder: isAmrita
+            ? 'Ask about Estate Office, campus map, reporting...'
+            : 'Ask about reporting, BBMP, Estate Office, maps...',
+          endpoint: '/api/chat',
+        };
+      }
+      refreshCivicEyeChatConfig();
+      // Re-apply config if the brand class changes (after an @amrita.edu sign-in).
+      var mo = new MutationObserver(refreshCivicEyeChatConfig);
+      mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     </script>
     <script src="/civiceye-chat.js" defer></script>
   </body>
