@@ -90,7 +90,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
   {
     heading: '13. Contact & governing law',
     body: [
-      'For questions about these Terms, email architrenjeev@gmail.com or open an issue at github.com/Crepify/civiceye.',
+      'For questions about these Terms, email info@civiceye.co.in.',
       'These Terms are governed by the laws of India; disputes shall be subject to the exclusive jurisdiction of the courts of Bengaluru, Karnataka.',
       'Last updated: 21 September 2026.',
     ],
