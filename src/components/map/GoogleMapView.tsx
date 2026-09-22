@@ -115,6 +115,7 @@ export function GoogleMapView({
   const droppedPinRef = useRef<google.maps.Marker | null>(null);
   const blackoutRefs = useRef<google.maps.Rectangle[]>([]);
   const viewSyncingRef = useRef(false);
+  const clampLockRef = useRef(false);
   const { theme } = useTheme();
 
   // Bootstrap the map exactly once.
@@ -164,11 +165,12 @@ export function GoogleMapView({
         else if (z > BLR_MAX_ZOOM) map.setZoom(BLR_MAX_ZOOM);
       });
 
-      // Fire view changes only on idle (when pan/zoom has settled) to
-      // avoid React re-render storms while the user drags.
-      idleListener = map.addListener('idle', () => {
-        if (!map) return;
-        // Belt-and-suspenders centre clamp.
+      // Aggressive centre clamp: fires continuously during drag so the map
+      // can never escape Bangalore, even at low zoom where strictBounds
+      // can leave one edge visible. Re-enters via setCenter but uses a
+      // lock flag to avoid infinite recursion.
+      map.addListener('center_changed', () => {
+        if (!map || clampLockRef.current) return;
         const c = map.getCenter();
         if (!c) return;
         let lat = c.lat();
@@ -178,7 +180,21 @@ export function GoogleMapView({
         if (lat > BLR_BOUNDS_LITERAL.north) { lat = BLR_BOUNDS_LITERAL.north; fixed = true; }
         if (lng < BLR_BOUNDS_LITERAL.west) { lng = BLR_BOUNDS_LITERAL.west; fixed = true; }
         if (lng > BLR_BOUNDS_LITERAL.east) { lng = BLR_BOUNDS_LITERAL.east; fixed = true; }
-        if (fixed) map.setCenter({ lat, lng });
+        if (fixed) {
+          clampLockRef.current = true;
+          map.setCenter({ lat, lng });
+          clampLockRef.current = false;
+        }
+      });
+
+      // Fire view changes only on idle (when pan/zoom has settled) to
+      // avoid React re-render storms while the user drags.
+      idleListener = map.addListener('idle', () => {
+        if (!map) return;
+        const c = map.getCenter();
+        if (!c) return;
+        const lat = clamp(c.lat(), BLR_BOUNDS_LITERAL.south, BLR_BOUNDS_LITERAL.north);
+        const lng = clamp(c.lng(), BLR_BOUNDS_LITERAL.west, BLR_BOUNDS_LITERAL.east);
         if (viewSyncingRef.current) { viewSyncingRef.current = false; return; }
         onViewChange({ lat, lng }, map.getZoom() ?? 12);
       });
@@ -296,6 +312,10 @@ export function GoogleMapView({
               : ''}
         </div>`;
       google.maps.event.addListener(marker, 'mouseover', () => {
+        // Don't show the hover preview if the selected-pin card is already
+        // open — InfoWindows are mutually exclusive and we don't want to
+        // fight the user's selection.
+        if (selectedId === r.id) return;
         const hover = hoverInfoRef.current;
         if (!hover || !map) return;
         hover.setContent(hoverHtml);
