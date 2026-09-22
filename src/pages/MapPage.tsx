@@ -181,7 +181,7 @@ export function MapPage() {
               const severity = SEVERITY_META[r.severity];
               const status = STATUS_META[r.status];
               return (
-                <button key={r.id} onClick={() => setSelectedId(r.id)} className={cn('flex w-full items-start gap-3 rounded-xl border p-2.5 text-left transition-colors', selectedId === r.id ? 'border-slate-400/40 bg-white shadow-sm' : 'border-slate-200/60 bg-white/60 hover:border-slate-300 hover:bg-white/90')}>
+                <button key={r.id} onClick={() => setSelectedId(r.id)} className={cn('flex w-full items-start gap-3 rounded-xl border-2 p-2.5 text-left transition-colors', selectedId === r.id ? 'border-[#ef6b59] bg-[#ffd630] shadow-[3px_3px_0_#172b44]' : 'border-[#172b44] bg-[#fffdf4] hover:border-[#ef6b59]')}>
                   <img src={r.image} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" loading="lazy" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-slate-800">{r.title}</p>
