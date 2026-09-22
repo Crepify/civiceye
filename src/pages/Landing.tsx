@@ -173,7 +173,7 @@ export function Landing() {
           <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {creators.map(([badge, name, role, tint], index) => (
               <li key={name}>
-                <Link onMouseEnter={() => founderThemes[index]?.()} onClick={() => founderThemes[index]?.()} to="/about#creators" tabIndex={0} className="flex h-full items-center gap-3 border-4 border-[#172b44] bg-[#fffdf4] p-4 shadow-[5px_5px_0_#172b44] transition hover:-translate-y-1 hover:rotate-[-1deg] hover:shadow-[7px_8px_0_#ffd630]">
+                <Link onClick={() => founderThemes[index]?.()} to="/about#creators" tabIndex={0} className="flex h-full items-center gap-3 border-4 border-[#172b44] bg-[#fffdf4] p-4 shadow-[5px_5px_0_#172b44] transition hover:-translate-y-1 hover:rotate-[-1deg] hover:shadow-[7px_8px_0_#ffd630]">
                   <span className="flex h-12 w-12 shrink-0 items-center justify-center border-[3px] border-[#172b44] font-serif text-xl font-black shadow-[3px_3px_0_#172b44]" style={{ background: tint }}>{badge}</span>
                   <span className="min-w-0">
                     <span className="block font-serif text-base font-black uppercase leading-tight">{name}</span>

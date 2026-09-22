@@ -106,14 +106,16 @@ export function Community() {
         eyebrow="Community"
         title="Reports from your neighbours"
         description="Every report below is citizen-submitted and community-validated. Search, filter and vote — the numbers decide what gets fixed first. View AI annotation on each card."
-      >
-        <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
-          <div className="text-sm text-slate-600 dark:text-slate-400">Community reports with AI view and leaderboard — gamification makes reporting fun.</div>
-          <Leaderboard />
-        </div>
-      </PageHeader>
+      />
 
-      <section className="section-pad py-10 sm:py-14">
+      <section className="section-pad py-6 sm:py-8">
+        {/* Compact leaderboard strip — visible first, reports come right after */}
+        <div className="mb-6 rounded-2xl border border-slate-200/70 bg-gradient-to-r from-amber-50 via-white to-emerald-50 p-4 backdrop-blur dark:border-white/5 dark:from-amber-500/10 dark:via-white/[0.02] dark:to-emerald-500/10">
+          <Leaderboard compact />
+        </div>
+      </section>
+
+      <section className="section-pad py-4 sm:py-8">
         {/* Controls */}
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center">
           <SearchBar
