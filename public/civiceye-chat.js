@@ -176,8 +176,23 @@
 
   /* ── apply theme (and react to host page changes) ─────────── */
   function applyTheme() {
+    // Re-read window.CivicEyeChatConfig so brand-aware title/subtitle/
+    // placeholder take effect after a sign-in brand switch (the host page
+    // mutates the config object in a MutationObserver, see index.html).
+    var liveCfg = window.CivicEyeChatConfig || {};
+    var liveTitle = liveCfg.title || TITLE;
+    var liveSub = liveCfg.subtitle || SUBTITLE;
+    var livePlaceholder = liveCfg.placeholder || PLACEHOLDER;
+
     var t = detectTheme();
     root.setAttribute("data-theme", t);
+
+    var titleEl = root.querySelector("#cve-title");
+    if (titleEl) titleEl.textContent = liveTitle;
+    var subEl = root.querySelector("#cve-sub");
+    if (subEl) subEl.textContent = liveSub;
+    var inp = root.querySelector("#cve-input");
+    if (inp) inp.setAttribute("placeholder", livePlaceholder);
     var launcher = root.querySelector("#cve-launcher");
     if (L_BG_OVERRIDE && launcher) launcher.style.background = L_BG_OVERRIDE;
   }
