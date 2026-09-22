@@ -409,7 +409,7 @@ export function AmritaCampusMap({
  const k = Math.min((bw - pad*2) / W, (bh - pad*2) / H) * 0.92;
  const x = (bw - W * k) / 2;
  const y = (bh - H * k) / 2;
- setCam({ x, y, k: Math.max(0.25, Math.min(5, k)) });
+ setCam({ x, y, k: Math.max(0.5, Math.min(4, k)) });
  }, [view, currentFloor]);
 
  useEffect(() => {
@@ -474,7 +474,7 @@ export function AmritaCampusMap({
  setCam((c) => ({
  x: mx - (mx - c.x) * f,
  y: my - (my - c.y) * f,
- k: Math.max(0.2, Math.min(6, c.k * f)),
+ k: Math.max(0.5, Math.min(4, c.k * f)),
  }));
  };
  svg.addEventListener('pointerdown', onPointerDown);
@@ -1074,7 +1074,7 @@ export function AmritaCampusMap({
  <button onClick={() => setCam((c) => ({ ...c, k: Math.min(4, c.k * 1.25) }))} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5 dark:text-white">
  <ZoomIn className="h-4 w-4" />
  </button>
- <button onClick={() => setCam((c) => ({ ...c, k: Math.max(0.3, c.k * 0.8) }))} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5 dark:text-white">
+ <button onClick={() => setCam((c) => ({ ...c, k: Math.max(0.5, c.k * 0.8) }))} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5 dark:text-white">
  <ZoomOut className="h-4 w-4" />
  </button>
  <button onClick={resetView} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-[#A51636]/30 dark:border-white/10 dark:bg-white/5 dark:text-white">

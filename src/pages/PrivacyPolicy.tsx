@@ -79,7 +79,7 @@ const SECTIONS: { heading: string; body: string[] }[] = [
   {
     heading: '10. Contact',
     body: [
-      'For privacy questions, data requests, or vulnerability reports, email us at architrenjeev@gmail.com or open an issue at github.com/Crepify/civiceye.',
+      'For privacy questions, data requests, or vulnerability reports, email us at info@civiceye.co.in.',
       'Last updated: 21 September 2026.',
     ],
   },

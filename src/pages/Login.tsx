@@ -8,7 +8,6 @@ import {
   LogIn,
   MailWarning,
   ShieldCheck,
-  Sparkles,
   UserPlus,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -36,7 +35,7 @@ type Mode = 'signin' | 'signup';
 export function Login() {
   const { configured, loading, user, signInWithPassword, signUp, resendConfirmation, resetPassword } =
     useAuth();
-  const { isAmrita, setPreviewBrand } = useBrand();
+  const { isAmrita, setPreviewBrand, meta } = useBrand();
   const toast = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -222,22 +221,26 @@ export function Login() {
   })();
 
   if (!configured) {
+    // Fallback UI only shown if the backend env is missing (should never
+    // happen in production). Gives a graceful way to tour the public pages
+    // without showing developer wording.
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-16 text-slate-900 dark:bg-slate-950 dark:text-white">
         <div className="w-full max-w-lg rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-soft dark:border-white/10 dark:bg-slate-900">
           <Logo to="/" className="justify-center" />
-          <p className="mt-7 inline-block rounded-full bg-primary-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[.14em] text-primary-600 dark:text-primary-400">
-            Preview access
-          </p>
-          <h1 className="mt-5 text-3xl font-extrabold tracking-tight">
-            {isAmrita ? 'Join the campus squad.' : 'Join the city squad.'}
-          </h1>
+          <h1 className="mt-6 text-3xl font-extrabold tracking-tight">Welcome to {meta?.appName || 'CivicEye'}</h1>
           <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">
-            Supabase is not connected in this preview. Continue as a demo citizen to review every page.
+            Sign-in is temporarily unavailable. You can still explore reports and the public map,
+            or try again shortly.
           </p>
-          <button onClick={() => navigate(next)} className="btn-primary mt-7 w-full">
-            Continue as demo citizen
-          </button>
+          <div className="mt-6 flex flex-col gap-2">
+            <button onClick={() => navigate('/')} className="btn-primary w-full">
+              Browse public map
+            </button>
+            <a href="mailto:info@civiceye.co.in" className="text-sm text-slate-500 underline">
+              Report the issue
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -532,35 +535,6 @@ function GoogleIcon() {
         d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.6l6 4.9c-.4.4 6.5-4.7 6.5-14.5 0-1.2-.1-2.3-.4-3.5z"
       />
     </svg>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* "Connect Supabase" screen — shown when env keys are missing         */
-/* ------------------------------------------------------------------ */
-
-export function SupabaseSetupScreen() {
-  const { meta } = useBrand();
-  return (
-    <div className="flex min-h-screen items-center justify-center px-4 pb-16 pt-24">
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg text-center"
-      >
-        <Logo className="justify-center" />
-        <h1 className="mt-8 text-2xl font-extrabold text-slate-900 dark:text-white">
-          Connect {meta.appName} to Supabase
-        </h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-          Sign-in and real data need a free Supabase project. It takes 3 minutes:
-        </p>
-        <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-400">
-          <Sparkles className="h-3.5 w-3.5" />
-          Full guide: <code className="font-semibold">SUPABASE_SETUP.md</code> in the project
-        </p>
-      </motion.div>
-    </div>
   );
 }
 
