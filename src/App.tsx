@@ -31,6 +31,7 @@ import { Debug } from '@/pages/Debug';
 import { NotFound } from '@/pages/NotFound';
 import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
 import { TermsOfService } from '@/pages/TermsOfService';
+import { RequireAdmin } from '@/components/RequireAdmin';
 
 /**
  * CivicEye / Amrita Eye application shell.
@@ -104,9 +105,9 @@ export default function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
-      <Route path="/admin" element={<AdminPanel />} />
-      <Route path="/admin/backfill" element={<AdminBackfill />} />
-      <Route path="/debug" element={<Debug />} />
+      <Route path="/admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
+      <Route path="/admin/backfill" element={<RequireAdmin><AdminBackfill /></RequireAdmin>} />
+      <Route path="/debug" element={<RequireAdmin><Debug /></RequireAdmin>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
