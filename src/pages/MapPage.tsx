@@ -173,8 +173,8 @@ export function MapPage() {
 
       <div className="grid min-h-0 flex-1 grid-rows-[1fr_auto] lg:grid-cols-[1fr_340px] lg:grid-rows-1">
         <div className="relative min-h-[320px] bg-[#fff8e7] p-4 sm:p-5">
-          <MapView ref={mapRef} reports={visibleReports} selectedId={selectedId} onSelect={setSelectedId} center={view.center} zoom={view.zoom} onViewChange={(c, z) => setView({ center: c, zoom: z })} heatmap={heatmap} className="h-full min-h-[320px] border-[5px] border-[#172b44] shadow-[8px_8px_0_#ef6b59]" />
-          <div className="pointer-events-none absolute bottom-8 left-8 z-20 hidden border-[3px] border-[#172b44] bg-[#fff8e7] px-4 py-3 shadow-[4px_4px_0_#172b44] sm:block">
+          <MapView ref={mapRef} reports={visibleReports} selectedId={selectedId} onSelect={setSelectedId} center={view.center} zoom={view.zoom} onViewChange={(c, z) => setView({ center: c, zoom: z })} heatmap={heatmap} className="h-full min-h-[320px] border-[3px] border-[#172b44] shadow-[5px_5px_0_#ef6b59]" />
+          <div className="pointer-events-none absolute bottom-8 left-8 z-20 hidden border-2 border-[#172b44] bg-[#fff8e7] px-4 py-3 shadow-[3px_3px_0_#172b44] sm:block">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Severity</p>
             <div className="space-y-1.5">
               {Object.entries(SEVERITY_META).map(([key, meta]) => (
@@ -192,7 +192,7 @@ export function MapPage() {
             ) : null}
           </AnimatePresence>
         </div>
-        <aside className="hidden min-h-0 flex-col overflow-hidden border-l-[5px] border-[#172b44] bg-[#91dcc4] lg:flex">
+        <aside className="hidden min-h-0 flex-col overflow-hidden border-l-4 border-[#172b44] bg-[#91dcc4] lg:flex">
           <div className="flex items-center justify-between border-b-2 border-[#172b44]/30 px-4 py-3">
             <p className="text-sm font-bold text-slate-800">Visible reports</p>
             {hasActiveFilters ? (

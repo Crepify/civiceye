@@ -240,8 +240,8 @@ export function Landing() {
       </section>
 
       <section className="section-pad pb-16 sm:pb-24">
-        <div className="relative overflow-hidden border-[5px] border-[#172b44] bg-[#172b44] p-6 text-[#fff8e7] shadow-[10px_10px_0_#ffd630] sm:p-10">
-          <div className="pointer-events-none absolute inset-0 opacity-20 [background:repeating-linear-gradient(135deg,transparent_0_24px,rgba(255,214,48,.3)_25px_28px,transparent_29px_48px)]" />
+        <div className="relative overflow-hidden border-4 border-[#172b44] bg-[#172b44] p-6 text-[#fff8e7] shadow-[6px_6px_0_#ffd630] sm:p-10">
+          
           <div className="relative z-10">
             <p className="inline-block border-[3px] border-[#172b44] bg-[#ffd630] px-3 py-1.5 text-xs font-black tracking-[.14em] text-[#172b44] shadow-[3px_3px_0_#fff8e7]">CIVIC HERO MISSIONS</p>
             <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
@@ -255,7 +255,7 @@ export function Landing() {
                   <p className="mt-2 text-xs font-bold text-[#172b44]/70">{missionProgress} of 3 confirmed — keep going!</p>
                 </div>
               </div>
-              <div className="border-[4px] border-[#172b44] bg-[#0f2e3d] p-6 text-[#fff8e7] shadow-[6px_6px_0_#ef6b59] sm:shadow-[8px_8px_0_#ef6b59]">
+              <div className="border-[4px] border-[#172b44] bg-[#0f2e3d] p-6 text-[#fff8e7] shadow-[4px_4px_0_#ef6b59]">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 animate-pulse rounded-full bg-[#ffd630]" />
                   <p className="text-[11px] font-black uppercase tracking-[.14em] text-[#91dcc4]">Reward unlocked at 3 / 3</p>
