@@ -198,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       session,
       profile,
+      isAmrita,
       signInWithPassword,
       signUp,
       signInWithMagicLink,

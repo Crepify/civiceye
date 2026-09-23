@@ -59,10 +59,8 @@ export function AuthCallback() {
     const waitForSession = async () => {
       // Give the SDK up to 12s to finish auto-detect + exchange.
       for (let attempt = 0; attempt < 40; attempt += 1) {
-        // eslint-disable-next-line no-await-in-loop
         await new Promise((r) => setTimeout(r, 300));
         if (cancelled) return;
-        // eslint-disable-next-line no-await-in-loop
         const { data } = await sb.auth.getSession();
         if (data.session) {
           goHome();

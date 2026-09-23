@@ -384,12 +384,11 @@ async function callProxy(body: { image: string; api_key?: string; model?: string
   // postJsonWithRetry manages its own per-attempt AbortController (so retries
   // aren't killed by the first attempt's timeout). We still enforce a global
   // cap of REQUEST_TIMEOUT_MS * MAX_ATTEMPTS here as a safety net.
-  let res: Response;
-  try {
-    res = await postJsonWithRetry(PROXY_TARGET, JSON.stringify(body), REQUEST_TIMEOUT_MS);
-  } catch (err) {
-    throw err;
-  }
+  const res: Response = await postJsonWithRetry(
+    PROXY_TARGET,
+    JSON.stringify(body),
+    REQUEST_TIMEOUT_MS,
+  );
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
