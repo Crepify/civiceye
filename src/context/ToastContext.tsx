@@ -104,74 +104,74 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             const Icon = ICONS[toast.type];
             const accent =
               toast.type === 'success'
-                ? isAmrita
-                  ? 'bg-[#A51636]'
-                  : 'bg-[#ffd630]'
+                ? 'bg-emerald-500'
                 : toast.type === 'error'
                   ? 'bg-rose-500'
                   : toast.type === 'warning'
-                    ? 'bg-amber-400'
+                    ? 'bg-amber-500'
                     : isAmrita
                       ? 'bg-[#A51636]'
-                      : 'bg-sky-500';
+                      : 'bg-sky-600';
 
-            const iconColor =
-              toast.type === 'success'
-                ? 'text-emerald-400'
-                : toast.type === 'error'
-                  ? 'text-rose-400'
-                  : toast.type === 'warning'
-                    ? 'text-amber-300'
-                    : isAmrita
-                      ? 'text-[#E52B50]'
-                      : 'text-sky-400';
-
-            const borderColor = isAmrita ? 'border-white/10' : 'border-[#172b44]/10';
-
+            // Square, chunky comic-book style: zero border radius, thick
+            // black border, hard offset shadow, colour-coded left bar.
+            // Amrita variant keeps the same geometry in brand colours.
             return (
               <motion.div
                 key={toast.id}
                 layout
-                initial={{ opacity: 0, y: -18, scale: 0.94, rotate: isAmrita ? 0 : -1 }}
-                animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, x: 44, scale: 0.92, rotate: isAmrita ? 0 : 1 }}
-                transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+                initial={{ opacity: 0, y: -18, rotate: isAmrita ? 0 : -2 }}
+                animate={{ opacity: 1, y: 0, rotate: isAmrita ? 0 : (toast.type === 'error' ? 1 : -1) }}
+                exit={{ opacity: 0, x: 44 }}
+                transition={{ type: 'spring', stiffness: 480, damping: 30 }}
                 className={
                   isAmrita
-                    ? `pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-[16px] border ${borderColor} bg-[#1a0f14]/95 shadow-[0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl`
-                    : `pointer-events-auto relative flex w-full max-w-sm overflow-hidden rounded-[14px] border-2 border-[#172b44] bg-[#0f1a2e]/95 shadow-[6px_6px_0_#172b44] backdrop-blur-xl`
+                    ? `pointer-events-auto relative flex w-full max-w-sm overflow-hidden border-[3px] border-[#A51636] bg-[#fff5f7] shadow-[5px_5px_0_#1a030a]`
+                    : `pointer-events-auto relative flex w-full max-w-sm overflow-hidden border-[3px] border-[#172b44] bg-[#fffdf4] shadow-[6px_6px_0_#172b44]`
                 }
+                style={{ borderRadius: 0 }}
               >
-                <div className={`absolute bottom-0 right-0 top-0 w-[5px] ${accent}`} />
-                <div className="flex items-start gap-3 p-4 pr-10">
-                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${toast.type === 'success' ? 'border-emerald-500/30 bg-emerald-500/10' : toast.type === 'error' ? 'border-rose-500/30 bg-rose-500/10' : toast.type === 'warning' ? 'border-amber-500/30 bg-amber-500/10' : isAmrita ? 'border-[#A51636]/30 bg-[#A51636]/10' : 'border-sky-500/30 bg-sky-500/10'}`}>
-                    <Icon className={`h-5 w-5 ${iconColor}`} />
+                <div className={`w-[6px] shrink-0 ${accent}`} />
+                <div className="flex items-start gap-3 p-3.5 pr-10">
+                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center border-[2px] ${
+                    toast.type === 'success'
+                      ? 'border-emerald-600 bg-emerald-100 text-emerald-700'
+                      : toast.type === 'error'
+                        ? 'border-rose-600 bg-rose-100 text-rose-700'
+                        : toast.type === 'warning'
+                          ? 'border-amber-600 bg-amber-100 text-amber-700'
+                          : isAmrita
+                            ? 'border-[#A51636] bg-[#ffd630] text-[#A51636]'
+                            : 'border-sky-700 bg-sky-100 text-sky-700'
+                  }`} style={{ borderRadius: 0 }}>
+                    <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-1.5 text-[14px] font-bold leading-tight text-white">
+                    <p className="flex items-center gap-1.5 text-[13px] font-black uppercase leading-tight tracking-wide text-[#172b44]">
                       {toast.title}
-                      {toast.type === 'success' ? <span>👋</span> : null}
-                      {toast.type === 'info' ? <Sparkles className="h-3.5 w-3.5 text-white/60" /> : null}
+                      {toast.type === 'success' ? <span>✓</span> : null}
+                      {toast.type === 'info' ? <Sparkles className="h-3 w-3 text-[#172b44]/60" /> : null}
                     </p>
                     {toast.message ? (
-                      <p className="mt-1 text-[13px] leading-[1.45] text-slate-300/90">{toast.message}</p>
+                      <p className="mt-1 text-[12.5px] font-semibold leading-[1.4] text-[#172b44]/75">{toast.message}</p>
                     ) : null}
                   </div>
                 </div>
 
                 <button
                   onClick={() => dismiss(toast.id)}
-                  className="absolute right-[14px] top-3 rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                  className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center border-[2px] border-[#172b44] bg-[#ffd630] text-[#172b44] transition hover:bg-[#ef6b59] hover:text-white"
+                  style={{ borderRadius: 0 }}
                   aria-label="Dismiss notification"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3.5 w-3.5" strokeWidth={3} />
                 </button>
 
                 <motion.div
                   initial={{ scaleX: 1 }}
                   animate={{ scaleX: 0 }}
                   transition={{ duration: TOAST_DURATION / 1000, ease: 'linear' }}
-                  className={`absolute bottom-0 left-0 h-[3px] origin-left ${accent}`}
+                  className={`absolute bottom-0 left-0 h-[4px] origin-left ${accent}`}
                 />
               </motion.div>
             );
