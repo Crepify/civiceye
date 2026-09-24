@@ -67,6 +67,7 @@ export function Login() {
     secret?: string;
   } | null>(null);
   const [mfaCode, setMfaCode] = useState('');
+  const [mfaChecking, setMfaChecking] = useState(false);
   const [fullName, setFullName] = useState('');
   const [busy, setBusy] = useState(false);
   const [sentReset, setSentReset] = useState(false);
@@ -75,13 +76,13 @@ export function Login() {
 
   /* --- Auto-redirect if already signed in (hard-reload style) -------- */
   useEffect(() => {
-    if (configured && !loading && user && !mfaStage) {
+    if (configured && !loading && user && !mfaStage && !mfaChecking) {
       // Already signed in (e.g. landed on /login via back button) — take
       // them home using a full reload so we don't race any half-mounted
       // state.
       window.location.replace(next);
     }
-  }, [configured, loading, user, next, mfaStage]);
+  }, [configured, loading, user, next, mfaStage, mfaChecking]);
 
   /* --- Instant brand preview while the user types -------------------- */
   useEffect(() => {
@@ -174,6 +175,7 @@ export function Login() {
     }
     try {
       if (mode === 'signin') {
+        setMfaChecking(true);
         await signInWithPassword(email, password);
         // 2FA is COMPULSORY: verified factor -> code step; otherwise the very
         // first sign-in enrolls an authenticator app right here on this page.
