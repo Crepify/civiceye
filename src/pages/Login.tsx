@@ -59,7 +59,13 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
-  const [mfaStage, setMfaStage] = useState<{ factorId: string; challengeId: string } | null>(null);
+  const [mfaStage, setMfaStage] = useState<{
+    kind: 'verify' | 'enroll';
+    factorId: string;
+    challengeId?: string;
+    qr?: string;
+    secret?: string;
+  } | null>(null);
   const [mfaCode, setMfaCode] = useState('');
   const [fullName, setFullName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -136,17 +142,24 @@ export function Login() {
     if (!supabase || !mfaStage || busy) return;
     setBusy(true);
     setError(null);
-    const { error } = await supabase.auth.mfa.verify({
-      factorId: mfaStage.factorId,
-      challengeId: mfaStage.challengeId,
-      code: mfaCode.trim(),
-    });
-    if (error) {
+    try {
+      let challengeId = mfaStage.challengeId;
+      if (mfaStage.kind === 'enroll' || !challengeId) {
+        const ch = await supabase.auth.mfa.challenge({ factorId: mfaStage.factorId });
+        if (ch.error) throw ch.error;
+        challengeId = ch.data.id;
+      }
+      const { error } = await supabase.auth.mfa.verify({
+        factorId: mfaStage.factorId,
+        challengeId,
+        code: mfaCode.trim(),
+      });
+      if (error) throw error;
+      hardRedirect(next);
+    } catch {
       setError('Wrong code — open your authenticator app and try the current 6-digit code.');
       setBusy(false);
-      return;
     }
-    hardRedirect(next);
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -162,14 +175,31 @@ export function Login() {
     try {
       if (mode === 'signin') {
         await signInWithPassword(email, password);
-        // 2FA: if a verified authenticator factor exists, ask for its code.
+        // 2FA is COMPULSORY: verified factor -> code step; otherwise the very
+        // first sign-in enrolls an authenticator app right here on this page.
         if (supabase) {
           const factors = await supabase.auth.mfa.listFactors();
           const totp = factors.data?.totp.find((f) => f.status === 'verified');
           if (totp) {
             const ch = await supabase.auth.mfa.challenge({ factorId: totp.id });
             if (!ch.error) {
-              setMfaStage({ factorId: totp.id, challengeId: ch.data.id });
+              setMfaStage({ kind: 'verify', factorId: totp.id, challengeId: ch.data.id });
+              setMfaCode('');
+              setBusy(false);
+              return;
+            }
+          } else {
+            const en = await supabase.auth.mfa.enroll({
+              factorType: 'totp',
+              friendlyName: 'Authenticator app',
+            });
+            if (!en.error) {
+              setMfaStage({
+                kind: 'enroll',
+                factorId: en.data.id,
+                qr: en.data.totp?.qr_code ?? '',
+                secret: en.data.totp?.secret ?? '',
+              });
               setMfaCode('');
               setBusy(false);
               return;
@@ -436,11 +466,28 @@ export function Login() {
 
           {mfaStage ? (
               <div className="mb-4 border-[3px] border-[#172b44] bg-[#fff8e7] p-4 shadow-[3px_3px_0_#172b44]">
-                <p className="inline-block border-2 border-[#172b44] bg-[#ffd630] px-2 py-1 text-[10px] font-black tracking-wide text-[#172b44]">STEP 2 OF 2</p>
-                <h2 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">Authenticator code</h2>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Password accepted. Now enter the 6-digit code from your authenticator app.
-                </p>
+                {mfaStage.kind === 'enroll' ? (
+                  <>
+                    <p className="inline-block border-2 border-[#172b44] bg-[#ef6b59] px-2 py-1 text-[10px] font-black tracking-wide text-[#172b44]">2FA SETUP — REQUIRED</p>
+                    <h2 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">Secure your account first</h2>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      2FA is compulsory. Scan this QR with Google Authenticator / Authy (or type the
+                      secret), then enter the 6-digit code to finish signing in.
+                    </p>
+                    {mfaStage.qr ? (
+                      <img src={mfaStage.qr} alt="Scan with your authenticator app" className="mt-3 h-36 w-36 border-[3px] border-[#172b44] bg-white p-2" />
+                    ) : null}
+                    <code className="mt-2 block break-all text-[10px] font-bold text-slate-500 dark:text-slate-400">{mfaStage.secret}</code>
+                  </>
+                ) : (
+                  <>
+                    <p className="inline-block border-2 border-[#172b44] bg-[#ffd630] px-2 py-1 text-[10px] font-black tracking-wide text-[#172b44]">STEP 2 OF 2</p>
+                    <h2 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">Authenticator code</h2>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Password accepted. Now enter the 6-digit code from your authenticator app.
+                    </p>
+                  </>
+                )}
                 <form onSubmit={verifyMfa} className="mt-3 flex flex-wrap items-center gap-2">
                   <input
                     value={mfaCode}
@@ -517,7 +564,7 @@ export function Login() {
 
             <p className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              2FA supported — enable an authenticator app from your Dashboard after signing in.
+              2FA is compulsory — first sign-in sets up your authenticator app right here.
             </p>
             <button type="submit" disabled={busy} className="btn-primary w-full">
               {busy ? (
