@@ -37,6 +37,8 @@ import { Loader } from '@/components/Loader';
 import { useReports } from '@/hooks/useReports';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
+import { TwoFactorGate } from '@/components/TwoFactorGate';
+import { isGuest } from '@/utils/guest';
 import { ANALYSIS_STAGES, analysisTotalMs, runImageAnalysis } from '@/services/aiAnalysisService';
 import { roboflowStatus } from '@/services/roboflowService';
 import { requestLocation } from '@/services/geoService';
@@ -94,7 +96,8 @@ function ReportWizard() {
   const { addReport, getById } = useReports();
   const toast = useToast();
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, configured } = useAuth();
+  const [mfaGateOpen, setMfaGateOpen] = useState(false);
   const { isAmrita } = useBrand();
   const availableCategories = getAvailableCategories(isAmrita);
   const [uploading, setUploading] = useState(false);
@@ -545,7 +548,13 @@ function ReportWizard() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => void submit()}
+                      onClick={() => {
+                        if (configured && user && !isGuest()) {
+                          setMfaGateOpen(true);
+                        } else {
+                          void submit();
+                        }
+                      }}
                       disabled={!canContinue || uploading}
                       className="btn-primary"
                     >
@@ -1453,6 +1462,15 @@ function PhoneCapture({ sessionId }: { sessionId: string }) {
           </div>
         )}
       </div>
+
+      <TwoFactorGate
+        open={mfaGateOpen}
+        onClose={() => setMfaGateOpen(false)}
+        onVerified={() => {
+          setMfaGateOpen(false);
+          void submit();
+        }}
+      />
     </div>
   );
 }
