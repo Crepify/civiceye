@@ -13,6 +13,10 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+
+/** 2FA enforcement at sign-in is paused for now. Flip to true to re-enable
+ *  the compulsory enroll/code step on this page. */
+const ENFORCE_2FA_AT_LOGIN = false;
 import { useToast } from '@/hooks/useToast';
 import { useBrand } from '@/hooks/useBrand';
 import { isAmritaEmail } from '@/utils/auth';
@@ -196,9 +200,8 @@ export function Login() {
       if (mode === 'signin') {
         setMfaChecking(true);
         await signInWithPassword(email, password);
-        // 2FA is COMPULSORY: verified factor -> code step; otherwise the very
-        // first sign-in enrolls an authenticator app right here on this page.
-        if (supabase) {
+        // 2FA at sign-in (currently paused — see ENFORCE_2FA_AT_LOGIN).
+        if (ENFORCE_2FA_AT_LOGIN && supabase) {
           const factors = await supabase.auth.mfa.listFactors();
           const totp = factors.data?.totp.find((f) => f.status === 'verified');
           if (totp) {
@@ -592,7 +595,7 @@ export function Login() {
 
             <p className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              2FA is compulsory — first sign-in sets up your authenticator app right here.
+              2FA available — enable it from your Dashboard after signing in.
             </p>
             <button type="submit" disabled={busy} className="btn-primary w-full">
               {busy ? (
