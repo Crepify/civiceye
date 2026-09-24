@@ -55,12 +55,29 @@ export function isStandalonePwa(): boolean {
   );
 }
 
-const DISMISS_KEY = 'civiceye:pwa-prompt-dismissed';
+const LATER_KEY = 'civiceye:pwa-prompt-later'; // "Maybe later" — soft dismiss, can re-prompt later
+const SUPPRESS_KEY = 'civiceye:pwa-prompt-suppressed'; // "Don't show again" — permanent dismiss
+const LATER_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days before re-asking after "Maybe later"
+
 export function hasDismissedInstallPrompt(): boolean {
-  try { return localStorage.getItem(DISMISS_KEY) === '1'; } catch { return false; }
+  try {
+    if (localStorage.getItem(SUPPRESS_KEY) === '1') return true;
+    const later = localStorage.getItem(LATER_KEY);
+    if (!later) return false;
+    const when = parseInt(later, 10);
+    if (Number.isNaN(when)) return false;
+    // Still within the cooldown — treat as dismissed for now.
+    return Date.now() - when < LATER_COOLDOWN_MS;
+  } catch { return false; }
 }
 export function markInstallPromptDismissed() {
-  try { localStorage.setItem(DISMISS_KEY, '1'); } catch { /* noop */ }
+  try { localStorage.setItem(LATER_KEY, String(Date.now())); } catch { /* noop */ }
+}
+export function suppressInstallPromptForever() {
+  try {
+    localStorage.setItem(SUPPRESS_KEY, '1');
+    localStorage.removeItem(LATER_KEY);
+  } catch { /* noop */ }
 }
 export function isInstalled(): boolean {
   try { return localStorage.getItem('civiceye:pwa-installed') === '1'; } catch { return false; }

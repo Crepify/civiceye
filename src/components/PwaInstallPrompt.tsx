@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Download, X, Smartphone, Laptop } from 'lucide-react';
+import { Download, X, Smartphone, Laptop, BellOff } from 'lucide-react';
 import {
   consumeInstallPrompt,
   hasDismissedInstallPrompt,
@@ -8,44 +8,70 @@ import {
   isStandalonePwa,
   markInstallPromptDismissed,
   onBeforeInstallPrompt,
+  suppressInstallPromptForever,
 } from '@/utils/pwa';
 
 /**
- * One-time comic-style "Install CivicEye as an app" banner.
+ * Comic-style "Install CivicEye as an app" banner.
  *
- * Shows ONCE per device, ~3s after first load so it doesn't fight the
- * hero UI. Rules:
- *   - Never shows if running inside the installed PWA.
- *   - Never shows if the user previously dismissed it (localStorage).
- *   - If beforeinstallprompt fires (Chrome/Edge/Android/desktop Chrome),
- *     clicking "Install" triggers the native install dialog.
- *   - On iOS Safari / Firefox (no beforeinstallprompt), shows manual
- *     install instructions instead.
+ * Behaviour:
+ *  - Never shows inside an already-installed PWA.
+ *  - Never shows after user taps "Don't show again" (persistent).
+ *  - "Maybe later" is a soft dismiss — the banner reappears 3 days later
+ *    (cooldown in localStorage).
+ *  - Re-checks on tab visibility change (so returning to the site after
+ *    the cooldown pops it back up without a full cache-bust reload).
+ *  - If the browser fires beforeinstallprompt (Chrome/Edge/Android/
+ *    desktop Chrome), clicking "Install" triggers the native dialog.
+ *  - Otherwise (iOS Safari / Firefox) shows manual install instructions.
  */
 export function PwaInstallPrompt() {
   const [open, setOpen] = useState(false);
   const [canNative, setCanNative] = useState(false);
   const [isIos, setIsIos] = useState(false);
 
+  // Decide whether to show the prompt now.
+  const shouldShow = () => !isStandalonePwa() && !isInstalled() && !hasDismissedInstallPrompt();
+
   useEffect(() => {
-    if (isStandalonePwa() || isInstalled() || hasDismissedInstallPrompt()) return;
+    setIsIos(/iPhone|iPad|iPod/.test(navigator.userAgent) && !('MSStream' in window));
 
-    const t = window.setTimeout(() => setOpen(true), 3200);
+    const tryOpen = () => {
+      if (shouldShow()) setOpen(true);
+    };
 
-    const off = onBeforeInstallPrompt((ev) => setCanNative(Boolean(ev)));
+    // Show after a short delay so it doesn't fight the hero UI.
+    const t = window.setTimeout(tryOpen, 3200);
 
-    const ua = navigator.userAgent;
-    setIsIos(/iPhone|iPad|iPod/.test(ua) && !('MSStream' in window));
+    const off = onBeforeInstallPrompt((ev) => {
+      setCanNative(Boolean(ev));
+      if (shouldShow()) setOpen(true);
+    });
+
+    // Also re-check when the tab becomes visible again (e.g. user comes
+    // back after the "Maybe later" cooldown, or after installing on
+    // another device and returning).
+    const onVis = () => {
+      if (document.visibilityState === 'visible') tryOpen();
+    };
+    document.addEventListener('visibilitychange', onVis);
 
     return () => {
       window.clearTimeout(t);
       off();
+      document.removeEventListener('visibilitychange', onVis);
     };
+    
   }, []);
 
-  const dismiss = () => {
+  const dismissLater = () => {
     setOpen(false);
     markInstallPromptDismissed();
+  };
+
+  const dismissForever = () => {
+    setOpen(false);
+    suppressInstallPromptForever();
   };
 
   const triggerInstall = async () => {
@@ -55,11 +81,15 @@ export function PwaInstallPrompt() {
         await ev.prompt();
         const res = await ev.userChoice;
         if (res?.outcome === 'accepted') {
+          // Installed! Permanently hide.
           setOpen(false);
+          suppressInstallPromptForever();
           return;
         }
+        // User dismissed the native dialog — fall through, leave card
+        // open so they can choose later / don't-show.
       } catch {
-        /* user cancelled */
+        /* ignore */
       }
     }
   };
@@ -75,11 +105,11 @@ export function PwaInstallPrompt() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.96 }}
           transition={{ type: 'spring', stiffness: 380, damping: 26 }}
-          className="fixed bottom-4 left-4 right-4 z-[85] sm:bottom-6 sm:left-auto sm:right-6 sm:max-w-[380px]"
+          className="fixed bottom-4 left-4 right-4 z-[85] sm:bottom-6 sm:left-auto sm:right-6 sm:max-w-[400px]"
         >
           <div className="relative border-[4px] border-[#172b44] bg-[#fffdf4] p-5 shadow-[8px_8px_0_#ef6b59]">
             <button
-              onClick={dismiss}
+              onClick={dismissLater}
               aria-label="Close install prompt"
               className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center border-[3px] border-[#172b44] bg-[#ffd630] text-[#172b44] shadow-[2px_2px_0_#172b44] transition hover:bg-[#ef6b59] hover:text-white"
             >
@@ -128,12 +158,21 @@ export function PwaInstallPrompt() {
                   </span>
                 </div>
               )}
-              <button
-                onClick={dismiss}
-                className="w-full border-[3px] border-[#172b44] bg-white px-4 py-2 text-xs font-black uppercase tracking-wide text-[#172b44] shadow-[3px_3px_0_#172b44] transition hover:bg-[#91dcc4]"
-              >
-                Maybe later
-              </button>
+
+              <div className="flex items-stretch gap-2">
+                <button
+                  onClick={dismissLater}
+                  className="flex-1 border-[3px] border-[#172b44] bg-white px-3 py-2 text-[11px] font-black uppercase tracking-wide text-[#172b44] shadow-[3px_3px_0_#172b44] transition hover:bg-[#91dcc4]"
+                >
+                  Maybe later
+                </button>
+                <button
+                  onClick={dismissForever}
+                  className="flex flex-1 items-center justify-center gap-1.5 border-[3px] border-[#172b44] bg-[#fff8e7] px-3 py-2 text-[11px] font-black uppercase tracking-wide text-[#172b44] shadow-[3px_3px_0_#172b44] transition hover:bg-[#ef6b59] hover:text-white"
+                >
+                  <BellOff className="h-3.5 w-3.5" /> Don't show again
+                </button>
+              </div>
             </div>
 
             <span className="absolute -right-3 -top-3 rotate-6 border-[3px] border-[#172b44] bg-[#ef6b59] px-2 py-1 text-[9px] font-black uppercase tracking-wider text-white shadow-[2px_2px_0_#172b44]">
