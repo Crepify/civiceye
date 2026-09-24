@@ -237,6 +237,10 @@ export function Dashboard() {
           </div>
         </div>
 
+        <div className="mt-6">
+          <TwoFactorCard />
+        </div>
+
         {/* KPI cards */}
         <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {loading ? (
@@ -653,9 +657,6 @@ export function Dashboard() {
         </ChartCard>
       </div>
 
-      <div className="section-pad mt-8">
-        <TwoFactorCard />
-      </div>
     </div>
   );
 }

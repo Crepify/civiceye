@@ -515,6 +515,10 @@ export function Login() {
               </div>
             </div>
 
+            <p className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+              2FA supported — enable an authenticator app from your Dashboard after signing in.
+            </p>
             <button type="submit" disabled={busy} className="btn-primary w-full">
               {busy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
