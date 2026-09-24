@@ -331,6 +331,14 @@ function ReportWizard() {
 
   return (
     <div className="pb-20 pt-[calc(var(--nav-height)+2.5rem)] sm:pt-[calc(var(--nav-height)+3.5rem)]">
+      <TwoFactorGate
+        open={mfaGateOpen}
+        onClose={() => setMfaGateOpen(false)}
+        onVerified={() => {
+          setMfaGateOpen(false);
+          void submit();
+        }}
+      />
       <div className="section-pad">
         <div className="mb-10">
           <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">
@@ -1463,14 +1471,6 @@ function PhoneCapture({ sessionId }: { sessionId: string }) {
         )}
       </div>
 
-      <TwoFactorGate
-        open={mfaGateOpen}
-        onClose={() => setMfaGateOpen(false)}
-        onVerified={() => {
-          setMfaGateOpen(false);
-          void submit();
-        }}
-      />
     </div>
   );
 }
