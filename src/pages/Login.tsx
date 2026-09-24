@@ -5,6 +5,8 @@ import { z } from 'zod';
 import {
   KeyRound,
   Loader2,
+  Eye,
+  EyeOff,
   LogIn,
   MailWarning,
   ShieldCheck,
@@ -56,6 +58,9 @@ export function Login() {
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [mfaStage, setMfaStage] = useState<{ factorId: string; challengeId: string } | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
   const [fullName, setFullName] = useState('');
   const [busy, setBusy] = useState(false);
   const [sentReset, setSentReset] = useState(false);
@@ -64,13 +69,13 @@ export function Login() {
 
   /* --- Auto-redirect if already signed in (hard-reload style) -------- */
   useEffect(() => {
-    if (configured && !loading && user) {
+    if (configured && !loading && user && !mfaStage) {
       // Already signed in (e.g. landed on /login via back button) — take
       // them home using a full reload so we don't race any half-mounted
       // state.
       window.location.replace(next);
     }
-  }, [configured, loading, user, next]);
+  }, [configured, loading, user, next, mfaStage]);
 
   /* --- Instant brand preview while the user types -------------------- */
   useEffect(() => {
@@ -126,6 +131,24 @@ export function Login() {
     }, 450);
   };
 
+  const verifyMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabase || !mfaStage || busy) return;
+    setBusy(true);
+    setError(null);
+    const { error } = await supabase.auth.mfa.verify({
+      factorId: mfaStage.factorId,
+      challengeId: mfaStage.challengeId,
+      code: mfaCode.trim(),
+    });
+    if (error) {
+      setError('Wrong code — open your authenticator app and try the current 6-digit code.');
+      setBusy(false);
+      return;
+    }
+    hardRedirect(next);
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy || !validate()) return;
@@ -139,6 +162,20 @@ export function Login() {
     try {
       if (mode === 'signin') {
         await signInWithPassword(email, password);
+        // 2FA: if a verified authenticator factor exists, ask for its code.
+        if (supabase) {
+          const factors = await supabase.auth.mfa.listFactors();
+          const totp = factors.data?.totp.find((f) => f.status === 'verified');
+          if (totp) {
+            const ch = await supabase.auth.mfa.challenge({ factorId: totp.id });
+            if (!ch.error) {
+              setMfaStage({ factorId: totp.id, challengeId: ch.data.id });
+              setMfaCode('');
+              setBusy(false);
+              return;
+            }
+          }
+        }
         hardRedirect(next);
       } else {
         const { session } = await signUp(email, password, fullName);
@@ -397,7 +434,30 @@ export function Login() {
             </div>
           ) : null}
 
-          <form onSubmit={submit} className="space-y-4">
+          {mfaStage ? (
+              <div className="mb-4 border-[3px] border-[#172b44] bg-[#fff8e7] p-4 shadow-[3px_3px_0_#172b44]">
+                <p className="inline-block border-2 border-[#172b44] bg-[#ffd630] px-2 py-1 text-[10px] font-black tracking-wide text-[#172b44]">STEP 2 OF 2</p>
+                <h2 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">Authenticator code</h2>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Password accepted. Now enter the 6-digit code from your authenticator app.
+                </p>
+                <form onSubmit={verifyMfa} className="mt-3 flex flex-wrap items-center gap-2">
+                  <input
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    inputMode="numeric"
+                    placeholder="••••••"
+                    autoFocus
+                    className="input-base w-32 text-center text-xl font-black tracking-[.3em]"
+                    aria-label="6-digit authenticator code"
+                  />
+                  <button type="submit" disabled={busy || mfaCode.length !== 6} className="btn-primary">
+                    Verify & sign in
+                  </button>
+                </form>
+              </div>
+            ) : null}
+            <form onSubmit={submit} style={mfaStage ? { display: 'none' } : undefined} className="space-y-4">
             {mode === 'signup' ? (
               <div>
                 <label htmlFor="name" className="label-base">
@@ -433,15 +493,26 @@ export function Login() {
               <label htmlFor="password" className="label-base">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
-                className="input-base"
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPwd ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
+                  className="input-base pr-10"
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd((v) => !v)}
+                  aria-label={showPwd ? 'Hide password' : 'Show password'}
+                  title={showPwd ? 'Hide password' : 'Show password'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-primary-600 dark:text-slate-300 dark:hover:text-white"
+                >
+                  {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <button type="submit" disabled={busy} className="btn-primary w-full">
