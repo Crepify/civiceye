@@ -138,6 +138,25 @@ export function Login() {
     }, 450);
   };
 
+
+  const resetMfa = async () => {
+    if (!supabase || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const factors = await supabase.auth.mfa.listFactors();
+      for (const f of factors.data?.totp ?? []) {
+        const { error } = await supabase.auth.mfa.unenroll({ factorId: f.id });
+        if (error) throw error;
+      }
+      // Factors removed — let them in; the compulsory flow re-enrolls next sign-in.
+      hardRedirect(next);
+    } catch {
+      setError('Automatic reset was blocked by the server. Use the "Magic link" tab to sign in via your email, or ask an admin to remove the factor in the Supabase dashboard.');
+      setBusy(false);
+    }
+  };
+
   const verifyMfa = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!supabase || !mfaStage || busy) return;
@@ -504,6 +523,13 @@ export function Login() {
                     Verify & sign in
                   </button>
                 </form>
+                <button
+                  type="button"
+                  onClick={() => void resetMfa()}
+                  className="mt-2 text-xs font-bold text-primary-600 underline hover:text-primary-700 dark:text-primary-400"
+                >
+                  Lost your authenticator? Reset 2FA
+                </button>
               </div>
             ) : null}
             <form onSubmit={submit} style={mfaStage ? { display: 'none' } : undefined} className="space-y-4">
