@@ -25,6 +25,7 @@ import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { MapView } from '@/components/map/MapView';
 import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
 import { Leaderboard } from '@/components/Leaderboard';
+import { TwoFactorCard } from '@/components/TwoFactorCard';
 import { BeforeAfterSlider } from '@/components/BeforeAfterSlider';
 import { EstateOfficeDashboard } from '@/components/EstateOfficeDashboard';
 import { getSLAStatus, formatSLATime, getEscalationTarget } from '@/services/slaService';
@@ -650,6 +651,10 @@ export function Dashboard() {
             Showing the 10 most recent reports — all actions update the shared database instantly.
           </div>
         </ChartCard>
+      </div>
+
+      <div className="section-pad mt-8">
+        <TwoFactorCard />
       </div>
     </div>
   );
