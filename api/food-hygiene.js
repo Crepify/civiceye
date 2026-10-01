@@ -215,8 +215,11 @@ function buildMail({ ref, location, issueType, severity, description, whenHappen
   </div>
 </body></html>`;
 
+  const photoLine = photoCount
+    ? `Photos    : ${photoCount} photo(s) attached to the anonymous email (ref ${ref}) — please cross-reference by reference number.`
+    : '';
   const text = [
-    `ANONYMOUS FOOD-HYGIENE COMPLAINT (${ref})`,
+    `FOOD-HYGIENE COMPLAINT (ref ${ref})`,
     `Amrita Vishwa Vidyapeetham, Bengaluru Campus`,
     ``,
     `Issue     : ${issueLabel}`,
@@ -224,11 +227,12 @@ function buildMail({ ref, location, issueType, severity, description, whenHappen
     `Location  : ${locLabel}`,
     `When      : ${when}`,
     dietary ? `Dietary   : ${dietary}` : '',
+    photoLine ? photoLine : '',
     ``,
     `Details:`,
     description || '(no details provided)',
     ``,
-    `— This report was submitted anonymously. No name, email, account, IP, device ID, or other identifying information was collected. —`,
+    `(Submitted from CivicEye / Amrita Eye. An anonymous copy of this report was already sent to the Chief Warden, Hostel Office, DSW, Student Welfare, Mess Complaints, Estate, and info@blr.amrita.edu with the same reference number.)`,
   ].filter(Boolean).join('\n');
 
   return {

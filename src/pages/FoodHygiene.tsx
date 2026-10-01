@@ -7,6 +7,7 @@ import {
   ChefHat,
   CircleHelp,
   Clock,
+  Download,
   Droplets,
   ExternalLink,
   ImagePlus,
@@ -122,6 +123,25 @@ export function FoodHygienePage() {
 
   const removeImage = (i: number) => {
     setImages((prev) => prev.filter((_, idx) => idx !== i));
+  };
+
+  // Save a scrubbed photo to the user's device. The data URL is already
+  // an EXIF-free JPEG produced by anonymizeImage() — what the user
+  // saves here is exactly what was/will be attached to the anonymous
+  // email, so they can attach it to a personal grievance ticket too.
+  const downloadPhoto = (img: AnonImage, idx: number) => {
+    const a = document.createElement('a');
+    a.href = img.dataUrl;
+    a.download = `food-hygiene-${ref || 'evidence'}-${idx + 1}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+  const downloadAllPhotos = () => {
+    images.forEach((img, i) => {
+      // Small stagger so mobile browsers don't drop multiple downloads.
+      window.setTimeout(() => downloadPhoto(img, i), i * 180);
+    });
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -246,7 +266,51 @@ export function FoodHygienePage() {
                   you want a personal ticket number. <em>This one is NOT
                   anonymous</em> (it uses your mail app).
                 </p>
-                <div className="mt-2 flex flex-wrap gap-2">
+
+                {images.length > 0 && (
+                  <>
+                    <p className="mt-3 text-[11px] font-black uppercase tracking-wider text-[#172b44]">
+                      📸 Save your photo evidence first
+                    </p>
+                    <p className="mt-1 text-[11px] font-bold leading-snug text-[#172b44]/75">
+                      Browsers can't attach files automatically to a
+                      mailto link, so tap <strong>Save</strong> on each
+                      photo below (they're already stripped of GPS/EXIF)
+                      and attach them to the grievance email or upload
+                      form after you click the button. The same photos
+                      are already attached to the anonymous email.
+                    </p>
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      {images.map((img, i) => (
+                        <div
+                          key={i}
+                          className="relative aspect-square overflow-hidden border-[3px] border-[#172b44] bg-black shadow-[3px_3px_0_#172b44]"
+                        >
+                          <img src={img.dataUrl} alt="" className="h-full w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => downloadPhoto(img, i)}
+                            className="absolute bottom-1 right-1 flex items-center gap-1 border-[2px] border-[#172b44] bg-[#ffd630] px-1.5 py-0.5 text-[9px] font-black uppercase text-[#172b44] shadow-[2px_2px_0_#172b44] transition hover:bg-[#91dcc4]"
+                          >
+                            <Download className="h-3 w-3" strokeWidth={3} /> Save
+                          </button>
+                          <span className="absolute bottom-1 left-1 border-[2px] border-[#172b44] bg-[#fffdf4] px-1 py-0.5 text-[9px] font-black uppercase text-[#172b44]">
+                            {i + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={downloadAllPhotos}
+                      className="mt-2 inline-flex items-center gap-1.5 border-[3px] border-[#172b44] bg-[#fffdf4] px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-[#172b44] shadow-[2px_2px_0_#172b44] transition hover:-translate-y-0.5 hover:bg-[#91dcc4]"
+                    >
+                      <Download className="h-3 w-3" strokeWidth={3} /> Save all photos ({images.length})
+                    </button>
+                  </>
+                )}
+
+                <div className="mt-3 flex flex-wrap gap-2">
                   {grievancePortal && (
                     <a
                       href={grievancePortal}
