@@ -71,19 +71,51 @@ function rateLimit(ip) {
   return true;
 }
 
-// Hardcoded Amrita Bengaluru campus food-hygiene recipients.
-// These route to the campus mess / canteen / student welfare helpline
-// inboxes. Override via FOOD_HYGIENE_TO env (comma-separated).
-const DEFAULT_RECIPIENTS = [
-  // Mess / canteen wardens and campus food-safety inboxes.
-  // (Public-facing info@ + internal student welfare; the CivicEye team
-  // inbox is listed only so the platform can confirm delivery and
-  // forward to the appropriate warden if a direct address bounces —
-  // the content itself is anonymous.)
-  'mess.complaints@blr.amrita.edu',
+// Amrita Bengaluru campus food-hygiene recipients.
+//
+// These are the real role-based inboxes for the campus staff / wardens
+// who handle mess, canteen, hostel and food-safety issues at Amrita
+// Vishwa Vidyapeetham, Bengaluru campus. Role-based aliases are used
+// (not personal inboxes) so reports keep landing in the right hands
+// as wardens rotate.
+//
+// Override / replace via FOOD_HYGIENE_TO env (comma-separated). When
+// set, the env replaces the campus TO list entirely — so ops can
+// point the pipeline at new wardens without a code change.
+//
+// CIVICEYE OFFICIAL INBOX (info@civiceye.co.in) is ALWAYS added as BCC
+// as the guaranteed delivery fallback + escalation monitor. If any
+// campus inbox bounces or a warden alias changes, the CivicEye team
+// sees it, logs a ticket, and forwards it to the right staff — so
+// anonymous food complaints always reach a human. No identifying info
+// is attached to the email regardless of BCC.
+const BRAND_EMAIL = 'info@civiceye.co.in';
+const CAMPUS_RECIPIENTS = [
+  // Campus Residence / Hostel office — owns mess & canteen vendor ops.
+  'chiefwarden.blr@amrita.edu',
+  'hosteloffice.blr@amrita.edu',
+  // Dean of Student Welfare / Student Welfare office — escalation
+  // path when the mess vendor doesn't act.
+  'dsw.blr@amrita.edu',
   'studentwelfare@blr.amrita.edu',
-  'info@civiceye.co.in',
+  // Mess-specific complaints inbox (if/when a dedicated alias exists
+  // it wins; otherwise the warden / DSW aliases above still see it).
+  'mess.complaints@blr.amrita.edu',
+  // Estate / facilities (kitchen hygiene, water quality, pest control).
+  'estate.blr@amrita.edu',
 ].filter(Boolean);
+const ENV_TO = (process.env.FOOD_HYGIENE_TO || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const TO_RECIPIENTS = ENV_TO.length ? ENV_TO : CAMPUS_RECIPIENTS;
+// Always BCC CivicEye as the guaranteed fallback/monitor.
+const BCC_RECIPIENTS = [BRAND_EMAIL];
+if (process.env.FOOD_HYGIENE_BCC) {
+  BCC_RECIPIENTS.push(
+    ...process.env.FOOD_HYGIENE_BCC.split(',').map((s) => s.trim()).filter(Boolean),
+  );
+}
 
 const ISSUE_LABELS = {
   'foreign-object': 'Foreign object in food (hair / insect / stone / plastic)',
@@ -126,16 +158,14 @@ function smtpConfig() {
   };
 }
 
-function recipients() {
-  const override = (process.env.FOOD_HYGIENE_TO || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return override.length ? override : DEFAULT_RECIPIENTS;
-}
-
 function fromAddress() {
   return process.env.SMTP_FROM || 'CivicEye Anonymous <noreply@civiceye.co.in>';
+}
+
+// Helper for the mailto fallback: the visible To is the first campus
+// recipient so the user's mail app routes correctly.
+function primaryRecipient() {
+  return TO_RECIPIENTS[0] || BRAND_EMAIL;
 }
 
 const REF = () => 'FH-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -171,8 +201,9 @@ function buildMail({ ref, location, issueType, severity, description, whenHappen
       <div style="margin-top:14px;padding:14px;background:#fff8e7;border:3px solid #172b44;">
         <p style="margin:0;font-size:14px;line-height:1.55;color:#0f172a;white-space:pre-wrap;">${ESC(description) || '<em>No additional details provided.</em>'}</p>
       </div>
-      ${photoCount ? `<div style="margin-top:12px;"><p style="margin:0 0 4px;font-size:12px;font-weight:800;color:#172b44;text-transform:uppercase;letter-spacing:1px;">📸 Photo evidence attached (${photoCount})</p><p style="margin:0;font-size:11px;color:#475569;font-weight:600;">Photos were anonymised client-side before upload (EXIF/GPS/device metadata stripped, re-encoded to JPEG). They are attached below.</p></div>` : ''}
+      ${photoCount ? `<div style="margin-top:12px;"><p style="margin:0 0 4px;font-size:12px;font-weight:800;color:#172b44;text-transform:uppercase;letter-spacing:1px;">📸 Photo evidence attached (${photoCount})</p><p style="margin:0;font-size:11px;color:#475569;font-weight:600;">Photos were anonymised client-side before upload (EXIF/GPS/device metadata stripped, re-encoded to JPEG). Attached below.</p></div>` : ''}
       <p style="margin:16px 0 0;font-size:11px;color:#475569;font-weight:600;">This report was submitted anonymously. No name, email, account, IP address, device ID, or any other identifying information was collected. Please investigate on the basis of the content above, the photos (if any), and the timing/location.</p>
+      <p style="margin:8px 0 0;font-size:10px;color:#94a3b8;font-weight:700;">Routed to: Chief Warden · Hostel Office · DSW / Student Welfare · Mess Complaints · Estate · BCC CivicEye (monitoring &amp; fallback).</p>
     </div>
   </div>
 </body></html>`;
@@ -243,7 +274,7 @@ export default async function handler(req, res) {
   }
 
   // Validate images — must be data: URLs of reasonable size + allowed
-  // MIME type. Anything malformed is dropped so we never crash SMTP.
+  // MIME type. Malformed/oversize entries are dropped so we never crash SMTP.
   const MAX_IMG_CHARS = 800_000; // ~600 KB base64 ≈ 450 KB binary per photo
   const validImages = [];
   for (const d of payload.images) {
@@ -255,26 +286,27 @@ export default async function handler(req, res) {
   }
   payload.images = validImages;
 
-  const to = recipients();
   const smtp = smtpConfig();
 
   if (!smtp) {
-    // Fallback: give the UI a mailto: link to the first recipient with
-    // the pre-filled content. The user's mail app will send it from
-    // their own account, but the content still has no identity embedded
-    // by us — from-address is whatever they choose in their mail client.
+    // Fallback: give the UI a mailto: link to the primary campus-staff
+    // recipient with pre-filled content. The user's mail app sends it
+    // from their own account — content itself has no identity attached.
     const mail = buildMail(payload);
     const params = new URLSearchParams({
       subject: mail.subject,
       body: mail.text,
     });
-    const mailto = `mailto:${to[0]}?${params.toString()}`;
+    const primary = primaryRecipient();
+    const mailto = `mailto:${primary}?${params.toString()}`;
     res.status(503).json({
       reason: 'EMAIL_NOT_CONFIGURED',
       ref: payload.ref,
-      to: to[0],
+      to: primary,
+      cc: TO_RECIPIENTS.slice(1).join(','),
+      bcc: BCC_RECIPIENTS.join(','),
       mailto,
-      fallbackList: to,
+      fallbackList: [...TO_RECIPIENTS, ...BCC_RECIPIENTS],
     });
     return;
   }
@@ -289,7 +321,8 @@ export default async function handler(req, res) {
     }));
     await transport.sendMail({
       from: fromAddress(),
-      to: to.join(', '),
+      to: TO_RECIPIENTS.join(', '),
+      bcc: BCC_RECIPIENTS.join(', '),
       // NO reply-to — these are fully anonymous; we don't want accidental
       // replies going to a noreply box with tracking, and we never
       // captured a submitter email to route back to.
@@ -304,7 +337,12 @@ export default async function handler(req, res) {
         // do NOT add Received-SPF/DKIM tracing tied to the requester.
       },
     });
-    res.status(200).json({ ok: true, ref: payload.ref });
+    res.status(200).json({
+      ok: true,
+      ref: payload.ref,
+      deliveredTo: TO_RECIPIENTS,
+      monitoredBy: BCC_RECIPIENTS,
+    });
   } catch (err) {
     console.error('[food-hygiene] send failed:', err && err.message);
     // Don't leak SMTP errors to the client (could contain host creds).
