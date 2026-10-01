@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   AlertTriangle,
   Bug,
+  Camera,
   ChefHat,
   CircleHelp,
   Clock,
   Droplets,
+  ImagePlus,
   Leaf,
   Loader2,
   Lock,
@@ -16,9 +18,11 @@ import {
   Sparkles,
   UtensilsCrossed,
   CheckCircle2,
+  X,
 } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { cn } from '@/utils/cn';
+import { anonymizeImage, ANON_IMAGE_LIMITS, type AnonImage } from '@/utils/anonymizeImage';
 
 /**
  * Food Hygiene Complaints — 100% anonymous, lightning-quick form.
@@ -68,18 +72,51 @@ export function FoodHygienePage() {
   const [whenHappened, setWhenHappened] = useState<string>('');
   const [dietary, setDietary] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+  const [images, setImages] = useState<AnonImage[]>([]);
+  const [imageProcessing, setImageProcessing] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>('idle');
   const [ref, setRef] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [mailto, setMailto] = useState<string>('');
   const toast = useToast();
 
-  const canSubmit = issueType.length > 0 && description.trim().length >= 3 && phase !== 'sending';
+  const canSubmit = issueType.length > 0 && description.trim().length >= 3 && phase !== 'sending' && !imageProcessing;
 
   const reset = () => {
     setLocation(''); setIssueType(''); setSeverity('medium');
     setWhenHappened(''); setDietary(''); setDescription('');
+    setImages([]); setImageError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setPhase('idle'); setRef(''); setError(''); setMailto('');
+  };
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setImageError('');
+    const remaining = ANON_IMAGE_LIMITS.maxFiles - images.length;
+    const toProcess = Array.from(files).slice(0, remaining);
+    if (files.length > remaining) {
+      setImageError(`You can attach at most ${ANON_IMAGE_LIMITS.maxFiles} photos — extra ones were skipped.`);
+    }
+    setImageProcessing(true);
+    const added: AnonImage[] = [];
+    for (const f of toProcess) {
+      try {
+        const img = await anonymizeImage(f);
+        added.push(img);
+      } catch (e: any) {
+        setImageError(e?.message || 'Could not read one of the images.');
+      }
+    }
+    setImages((prev) => [...prev, ...added]);
+    setImageProcessing(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeImage = (i: number) => {
+    setImages((prev) => prev.filter((_, idx) => idx !== i));
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -92,7 +129,10 @@ export function FoodHygienePage() {
         headers: { 'Content-Type': 'application/json' },
         // Intentionally NO credentials / Authorization — this is anonymous.
         credentials: 'omit',
-        body: JSON.stringify({ location, issueType, severity, whenHappened, dietary, description }),
+        body: JSON.stringify({
+          location, issueType, severity, whenHappened, dietary, description,
+          images: images.map((i) => i.dataUrl),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
@@ -290,6 +330,72 @@ export function FoodHygienePage() {
               <div className="mt-1 text-right text-[10px] font-bold text-[#172b44]/60">
                 {description.length}/1800
               </div>
+            </Section>
+
+            {/* Photos (optional — AI doesn't detect food hygiene) */}
+            <Section title="7 · Photo evidence (optional)" icon={Camera}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                capture="environment"
+                onChange={(e) => handleFiles(e.target.files)}
+                className="hidden"
+              />
+              <div className="grid grid-cols-3 gap-2">
+                {images.map((img, i) => (
+                  <div
+                    key={i}
+                    className="relative aspect-square overflow-hidden border-[3px] border-[#172b44] bg-black shadow-[3px_3px_0_#172b44]"
+                  >
+                    <img src={img.dataUrl} alt="" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      aria-label="Remove photo"
+                      onClick={() => removeImage(i)}
+                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center border-[2px] border-[#172b44] bg-[#ef6b59] text-white shadow-[2px_2px_0_#172b44] transition hover:bg-[#b91c1c]"
+                    >
+                      <X className="h-3 w-3" strokeWidth={3} />
+                    </button>
+                    <span className="absolute bottom-1 left-1 border-[2px] border-[#172b44] bg-[#fffdf4] px-1 py-0.5 text-[9px] font-black uppercase text-[#172b44]">
+                      {img.sizeKb}KB
+                    </span>
+                  </div>
+                ))}
+                {images.length < ANON_IMAGE_LIMITS.maxFiles && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={imageProcessing}
+                    className={cn(
+                      'flex aspect-square flex-col items-center justify-center gap-1 border-[3px] border-dashed border-[#172b44] bg-[#fff8e7] text-[#172b44] shadow-[3px_3px_0_#172b44] transition',
+                      imageProcessing
+                        ? 'cursor-wait opacity-70'
+                        : 'hover:-translate-y-0.5 hover:bg-[#ffd630]',
+                    )}
+                  >
+                    {imageProcessing ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <ImagePlus className="h-5 w-5" strokeWidth={2.5} />
+                    )}
+                    <span className="text-[10px] font-black uppercase leading-tight">
+                      {imageProcessing ? 'Scrubbing…' : 'Add photo'}
+                    </span>
+                  </button>
+                )}
+              </div>
+              <p className="mt-2 flex items-start gap-1.5 text-[11px] font-bold leading-snug text-[#172b44]/75">
+                <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0f766e]" />
+                Photos are re-encoded in your browser before upload — EXIF
+                metadata (GPS location, camera serial, time, phone model) is
+                wiped automatically. Max {ANON_IMAGE_LIMITS.maxFiles} photos,
+                phone camera opens directly.
+              </p>
+              {imageError && (
+                <p className="mt-1.5 text-[11px] font-bold text-[#b91c1c]">{imageError}</p>
+              )}
             </Section>
 
             {error && (

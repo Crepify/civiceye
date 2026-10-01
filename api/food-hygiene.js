@@ -140,7 +140,7 @@ function fromAddress() {
 
 const REF = () => 'FH-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
 
-function buildMail({ ref, location, issueType, severity, description, whenHappened, dietary }) {
+function buildMail({ ref, location, issueType, severity, description, whenHappened, dietary, images }) {
   const when = whenHappened || 'Not specified';
   const issueLabel = ISSUE_LABELS[issueType] || issueType || 'Other';
   const sevLabel = SEVERITY_LABELS[severity] || severity || 'Reported';
@@ -150,6 +150,7 @@ function buildMail({ ref, location, issueType, severity, description, whenHappen
     : severity === 'high' ? '#ea580c'
     : severity === 'medium' ? '#ca8a04'
     : '#0f766e';
+  const photoCount = Array.isArray(images) ? images.length : 0;
 
   const html = `<!doctype html>
 <html><body style="margin:0;padding:24px;background:#fff8e7;font-family:Inter,Arial,sans-serif;">
@@ -170,7 +171,8 @@ function buildMail({ ref, location, issueType, severity, description, whenHappen
       <div style="margin-top:14px;padding:14px;background:#fff8e7;border:3px solid #172b44;">
         <p style="margin:0;font-size:14px;line-height:1.55;color:#0f172a;white-space:pre-wrap;">${ESC(description) || '<em>No additional details provided.</em>'}</p>
       </div>
-      <p style="margin:16px 0 0;font-size:11px;color:#475569;font-weight:600;">This report was submitted anonymously. No name, email, account, IP address, device ID, or any other identifying information was collected. Please investigate on the basis of the content above and the timing/location.</p>
+      ${photoCount ? `<div style="margin-top:12px;"><p style="margin:0 0 4px;font-size:12px;font-weight:800;color:#172b44;text-transform:uppercase;letter-spacing:1px;">📸 Photo evidence attached (${photoCount})</p><p style="margin:0;font-size:11px;color:#475569;font-weight:600;">Photos were anonymised client-side before upload (EXIF/GPS/device metadata stripped, re-encoded to JPEG). They are attached below.</p></div>` : ''}
+      <p style="margin:16px 0 0;font-size:11px;color:#475569;font-weight:600;">This report was submitted anonymously. No name, email, account, IP address, device ID, or any other identifying information was collected. Please investigate on the basis of the content above, the photos (if any), and the timing/location.</p>
     </div>
   </div>
 </body></html>`;
@@ -198,8 +200,10 @@ function buildMail({ ref, location, issueType, severity, description, whenHappen
   };
 }
 
-// Keep payload small — no uploads, anonymous text only.
-export const config = { api: { bodyParser: { sizeLimit: '64kb' } } };
+// Allow photos (client strips EXIF, re-encodes to JPEG, downscales to
+// 1600px @ 0.82q — roughly 200-400 KB each). We cap total at 6 MB for
+// up to 3 photos plus text fields.
+export const config = { api: { bodyParser: { sizeLimit: '6mb' } } };
 
 export default async function handler(req, res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -230,12 +234,26 @@ export default async function handler(req, res) {
     whenHappened: sanitize(body.whenHappened, 120),
     dietary: sanitize(body.dietary, 200),
     description: sanitize(body.description, 1800),
+    images: Array.isArray(body.images) ? body.images.slice(0, 3) : [],
   };
 
   if (!payload.description && !payload.issueType) {
     res.status(400).json({ error: 'Please describe the issue.' });
     return;
   }
+
+  // Validate images — must be data: URLs of reasonable size + allowed
+  // MIME type. Anything malformed is dropped so we never crash SMTP.
+  const MAX_IMG_CHARS = 800_000; // ~600 KB base64 ≈ 450 KB binary per photo
+  const validImages = [];
+  for (const d of payload.images) {
+    if (typeof d !== 'string' || !d.startsWith('data:image/')) continue;
+    if (d.length > MAX_IMG_CHARS) continue;
+    const m = d.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/);
+    if (!m) continue;
+    validImages.push({ contentType: m[1], base64: m[2] });
+  }
+  payload.images = validImages;
 
   const to = recipients();
   const smtp = smtpConfig();
@@ -264,6 +282,11 @@ export default async function handler(req, res) {
   try {
     const transport = nodemailer.createTransport(smtp);
     const mail = buildMail(payload);
+    const attachments = payload.images.map((img, i) => ({
+      filename: `evidence-${payload.ref}-${i + 1}.jpg`,
+      content: Buffer.from(img.base64, 'base64'),
+      contentType: img.contentType,
+    }));
     await transport.sendMail({
       from: fromAddress(),
       to: to.join(', '),
@@ -273,6 +296,7 @@ export default async function handler(req, res) {
       subject: mail.subject,
       text: mail.text,
       html: mail.html,
+      attachments: attachments.length ? attachments : undefined,
       // Explicitly zero out headers that could leak identity.
       headers: {
         'X-Mailer': 'CivicEye-Anonymous',
