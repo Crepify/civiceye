@@ -446,12 +446,26 @@ export function FoodHygienePage() {
 
             {/* Photos (optional — AI doesn't detect food hygiene) */}
             <Section title="7 · Photo evidence (optional)" icon={Camera}>
+              {/* Camera input: capture="environment" opens the rear camera
+                  directly on phones for quick snaps. */}
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 multiple
                 capture="environment"
+                onChange={(e) => handleFiles(e.target.files)}
+                className="hidden"
+              />
+              {/* Gallery input: NO capture attribute — on phones this
+                  opens the photo library / Files / gallery picker so
+                  users can attach screenshots, photos they took
+                  earlier, or images from WhatsApp/DCIM. */}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                id="fh-gallery-input"
                 onChange={(e) => handleFiles(e.target.files)}
                 className="hidden"
               />
@@ -475,35 +489,41 @@ export function FoodHygienePage() {
                     </span>
                   </div>
                 ))}
-                {images.length < ANON_IMAGE_LIMITS.maxFiles && (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={imageProcessing}
-                    className={cn(
-                      'flex aspect-square flex-col items-center justify-center gap-1 border-[3px] border-dashed border-[#172b44] bg-[#fff8e7] text-[#172b44] shadow-[3px_3px_0_#172b44] transition',
-                      imageProcessing
-                        ? 'cursor-wait opacity-70'
-                        : 'hover:-translate-y-0.5 hover:bg-[#ffd630]',
-                    )}
-                  >
-                    {imageProcessing ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
+                {images.length < ANON_IMAGE_LIMITS.maxFiles && !imageProcessing && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex aspect-square flex-col items-center justify-center gap-1 border-[3px] border-dashed border-[#172b44] bg-[#fff8e7] text-[#172b44] shadow-[3px_3px_0_#172b44] transition hover:-translate-y-0.5 hover:bg-[#ffd630]"
+                    >
+                      <Camera className="h-5 w-5" strokeWidth={2.5} />
+                      <span className="text-[10px] font-black uppercase leading-tight">Take photo</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('fh-gallery-input')?.click()}
+                      className="flex aspect-square flex-col items-center justify-center gap-1 border-[3px] border-dashed border-[#172b44] bg-[#fff8e7] text-[#172b44] shadow-[3px_3px_0_#172b44] transition hover:-translate-y-0.5 hover:bg-[#91dcc4]"
+                    >
                       <ImagePlus className="h-5 w-5" strokeWidth={2.5} />
-                    )}
-                    <span className="text-[10px] font-black uppercase leading-tight">
-                      {imageProcessing ? 'Scrubbing…' : 'Add photo'}
-                    </span>
-                  </button>
+                      <span className="text-[10px] font-black uppercase leading-tight">Upload from gallery</span>
+                    </button>
+                  </>
+                )}
+                {imageProcessing && (
+                  <div className="flex aspect-square flex-col items-center justify-center gap-1 border-[3px] border-dashed border-[#172b44] bg-[#fff8e7] text-[#172b44] shadow-[3px_3px_0_#172b44]">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-[10px] font-black uppercase leading-tight">Scrubbing…</span>
+                  </div>
                 )}
               </div>
               <p className="mt-2 flex items-start gap-1.5 text-[11px] font-bold leading-snug text-[#172b44]/75">
                 <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0f766e]" />
                 Photos are re-encoded in your browser before upload — EXIF
                 metadata (GPS location, camera serial, time, phone model) is
-                wiped automatically. Max {ANON_IMAGE_LIMITS.maxFiles} photos,
-                phone camera opens directly.
+                wiped automatically. Max {ANON_IMAGE_LIMITS.maxFiles} photos.
+                Tap <strong>Take photo</strong> to snap one now, or <strong>Upload
+                from gallery</strong> to pick one you already took (gallery,
+                screenshots, DCIM, WhatsApp images all work).
               </p>
               {imageError && (
                 <p className="mt-1.5 text-[11px] font-bold text-[#b91c1c]">{imageError}</p>
