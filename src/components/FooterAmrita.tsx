@@ -7,6 +7,7 @@ const QUICK_LINKS = [
   { to: '/map', label: 'Interactive Map' },
   { to: '/amrita/map', label: 'Campus Map' },
   { to: '/report', label: 'Report an Issue' },
+  { to: '/food-hygiene', label: 'Mess / Food Hygiene (Anonymous)' },
   { to: '/community', label: 'Community Reports' },
   { to: '/features', label: 'Features' },
 ];

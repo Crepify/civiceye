@@ -31,6 +31,7 @@ import { Debug } from '@/pages/Debug';
 import { NotFound } from '@/pages/NotFound';
 import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
 import { TermsOfService } from '@/pages/TermsOfService';
+import { FoodHygienePage } from '@/pages/FoodHygiene';
 import { RequireAdmin } from '@/components/RequireAdmin';
 
 /**
@@ -70,6 +71,8 @@ export default function App() {
     location.pathname.startsWith('/reset');
   const isLegalPage =
     location.pathname === '/privacy' || location.pathname === '/terms';
+  // Public (no-login) pages: legal pages + anonymous food-hygiene form.
+  const isPublicPage = isLegalPage || location.pathname === '/food-hygiene';
 
   // DEMO MODE (VITE_DEMO_MODE=true): bypass the login gate so pages render
   // without a Supabase session — used for screenshots & live demos.
@@ -105,6 +108,7 @@ export default function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/food-hygiene" element={<FoodHygienePage />} />
       <Route path="/admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
       <Route path="/admin/backfill" element={<RequireAdmin><AdminBackfill /></RequireAdmin>} />
       <Route path="/debug" element={<RequireAdmin><Debug /></RequireAdmin>} />
@@ -129,8 +133,8 @@ export default function App() {
           footer (the koushikkkkkkkkkk.github.io/civiceye design). Legal pages
           always keep chrome so users can navigate away. */}
       {!isAuthPage ? (amritaChrome ? <NavbarAmrita /> : <Navbar />) : null}
-      {/* Global one-tap SOS (only shows for signed-in users). */}
-      {!isAuthPage ? <SOSButton /> : null}
+      {/* Global one-tap SOS (only shows for signed-in users; not on anonymous public forms). */}
+      {!isAuthPage && !isPublicPage ? <SOSButton /> : null}
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
@@ -142,7 +146,7 @@ export default function App() {
         >
           {isAuthPage
             ? authRoutes
-            : isLegalPage
+            : isPublicPage
               ? gatedRoutes
               : demoMode
                 ? gatedRoutes
