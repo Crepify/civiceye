@@ -8,10 +8,12 @@ import {
   CircleHelp,
   Clock,
   Droplets,
+  ExternalLink,
   ImagePlus,
   Leaf,
   Loader2,
   Lock,
+  Mail,
   MapPin,
   Send,
   ShieldCheck,
@@ -80,6 +82,8 @@ export function FoodHygienePage() {
   const [ref, setRef] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [mailto, setMailto] = useState<string>('');
+  const [grievanceMailto, setGrievanceMailto] = useState<string>('');
+  const [grievancePortal, setGrievancePortal] = useState<string>('');
   const toast = useToast();
 
   const canSubmit = issueType.length > 0 && description.trim().length >= 3 && phase !== 'sending' && !imageProcessing;
@@ -90,6 +94,7 @@ export function FoodHygienePage() {
     setImages([]); setImageError('');
     if (fileInputRef.current) fileInputRef.current.value = '';
     setPhase('idle'); setRef(''); setError(''); setMailto('');
+    setGrievanceMailto(''); setGrievancePortal('');
   };
 
   const handleFiles = async (files: FileList | null) => {
@@ -137,8 +142,10 @@ export function FoodHygienePage() {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
         setRef(data.ref);
+        setGrievanceMailto(data.grievance?.mailto || '');
+        setGrievancePortal(data.grievance?.portalUrl || '');
         setPhase('done');
-        toast.success('Sent anonymously', `Your report is on its way to the mess/canteen helpline. Ref ${data.ref}`);
+        toast.success('Sent anonymously', `Your report is on its way to the mess/canteen helpline and campus info. Ref ${data.ref}`);
         return;
       }
       if (res.status === 503 && data.reason === 'EMAIL_NOT_CONFIGURED' && data.mailto) {
@@ -217,10 +224,51 @@ export function FoodHygienePage() {
               </div>
             </div>
             <p className="mt-4 text-sm font-semibold leading-snug text-[#172b44]/85">
-              Your report is on its way to the mess / canteen wardens and the
-              campus student welfare desk anonymously. No one can trace it
-              back to you. Please give staff time to investigate.
+              Your anonymous report has been emailed to the campus info desk
+              (<span className="font-mono">info@blr.amrita.edu</span>), the
+              Chief Warden, Hostel Office, DSW / Student Welfare, Mess
+              Complaints and Estate. The CivicEye team is BCC'd so nothing
+              falls through the cracks. Please give staff time to investigate.
             </p>
+
+            {/* Optional: file a non-anonymous ticket on the official
+                Amrita grievance portal as well, with the same details
+                pre-filled so the student gets a ticket number they can
+                track. Clicking this is entirely optional. */}
+            {(grievancePortal || grievanceMailto) && (
+              <div className="mt-5 border-[3px] border-dashed border-[#172b44] bg-[#fff8e7] p-3 shadow-[3px_3px_0_#172b44]">
+                <p className="text-[11px] font-black uppercase tracking-wider text-[#172b44]">
+                  File on Amrita grievance portal (optional)
+                </p>
+                <p className="mt-1 text-[11px] font-bold leading-snug text-[#172b44]/75">
+                  Tap to open the official Amrita contact / grievance page
+                  or a pre-filled email to info@blr.amrita.edu — useful if
+                  you want a personal ticket number. <em>This one is NOT
+                  anonymous</em> (it uses your mail app).
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {grievancePortal && (
+                    <a
+                      href={grievancePortal}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 border-[3px] border-[#172b44] bg-[#ffd630] px-3 py-2 text-[11px] font-black uppercase tracking-wide text-[#172b44] shadow-[3px_3px_0_#172b44] transition hover:-translate-y-0.5 hover:bg-[#91dcc4]"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" /> Open grievance portal
+                    </a>
+                  )}
+                  {grievanceMailto && (
+                    <a
+                      href={grievanceMailto}
+                      className="inline-flex items-center gap-1.5 border-[3px] border-[#172b44] bg-white px-3 py-2 text-[11px] font-black uppercase tracking-wide text-[#172b44] shadow-[3px_3px_0_#172b44] transition hover:-translate-y-0.5 hover:bg-[#91dcc4]"
+                    >
+                      <Mail className="h-3.5 w-3.5" /> Pre-filled email to info@blr.amrita.edu
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="mt-5 flex flex-wrap gap-2">
               <button
                 onClick={reset}

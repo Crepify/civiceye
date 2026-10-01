@@ -90,7 +90,14 @@ function rateLimit(ip) {
 // anonymous food complaints always reach a human. No identifying info
 // is attached to the email regardless of BCC.
 const BRAND_EMAIL = 'info@civiceye.co.in';
+// Canonical campus info / grievance inbox — always included so the
+// main Amrita Bengaluru administrative contact sees every food-hygiene
+// report alongside the warden / DSW / estate aliases.
+const CAMPUS_INFO = 'info@blr.amrita.edu';
+const GRIEVANCE_PORTAL_URL = 'https://www.amrita.edu/campus/bengaluru/contact';
 const CAMPUS_RECIPIENTS = [
+  // Official campus info / grievance contact — added per request.
+  CAMPUS_INFO,
   // Campus Residence / Hostel office — owns mess & canteen vendor ops.
   'chiefwarden.blr@amrita.edu',
   'hosteloffice.blr@amrita.edu',
@@ -203,7 +210,7 @@ function buildMail({ ref, location, issueType, severity, description, whenHappen
       </div>
       ${photoCount ? `<div style="margin-top:12px;"><p style="margin:0 0 4px;font-size:12px;font-weight:800;color:#172b44;text-transform:uppercase;letter-spacing:1px;">📸 Photo evidence attached (${photoCount})</p><p style="margin:0;font-size:11px;color:#475569;font-weight:600;">Photos were anonymised client-side before upload (EXIF/GPS/device metadata stripped, re-encoded to JPEG). Attached below.</p></div>` : ''}
       <p style="margin:16px 0 0;font-size:11px;color:#475569;font-weight:600;">This report was submitted anonymously. No name, email, account, IP address, device ID, or any other identifying information was collected. Please investigate on the basis of the content above, the photos (if any), and the timing/location.</p>
-      <p style="margin:8px 0 0;font-size:10px;color:#94a3b8;font-weight:700;">Routed to: Chief Warden · Hostel Office · DSW / Student Welfare · Mess Complaints · Estate · BCC CivicEye (monitoring &amp; fallback).</p>
+      <p style="margin:8px 0 0;font-size:10px;color:#94a3b8;font-weight:700;">Routed to: Campus Info (info@blr.amrita.edu) · Chief Warden · Hostel Office · DSW / Student Welfare · Mess Complaints · Estate · BCC CivicEye (monitoring &amp; fallback).</p>
     </div>
   </div>
 </body></html>`;
@@ -342,6 +349,18 @@ export default async function handler(req, res) {
       ref: payload.ref,
       deliveredTo: TO_RECIPIENTS,
       monitoredBy: BCC_RECIPIENTS,
+      // Pre-filled links so students can also file via the official
+      // campus grievance channel in one tap (e.g. if they want a
+      // ticket number in their own name after the anonymous email
+      // already reached wardens). Body is pre-filled from the
+      // submission content; we do NOT append any identity info.
+      grievance: {
+        portalUrl: GRIEVANCE_PORTAL_URL,
+        mailto: `mailto:${CAMPUS_INFO}?` + new URLSearchParams({
+          subject: `Food Hygiene Complaint — ${payload.ref}`,
+          body: mail.text,
+        }).toString(),
+      },
     });
   } catch (err) {
     console.error('[food-hygiene] send failed:', err && err.message);
