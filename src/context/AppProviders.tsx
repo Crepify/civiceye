@@ -6,6 +6,7 @@ import { BrandProvider } from './BrandContext';
 import { ReportsProvider } from './ReportsContext';
 import { NotificationProvider } from './NotificationContext';
 import { PwaInstallPrompt } from '@/components/PwaInstallPrompt';
+import { AIChatbot } from '@/components/AIChatbot';
 
 /**
  * Composition root for all cross-cutting providers.
@@ -25,6 +26,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
               <NotificationProvider>
                 {children}
                 <PwaInstallPrompt />
+                <AIChatbot />
               </NotificationProvider>
             </ReportsProvider>
           </BrandProvider>
