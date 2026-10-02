@@ -116,7 +116,7 @@ export function AIChatbot() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[90]"
+          className="fixed inset-0 z-[88]"
           role="dialog"
           aria-modal="true"
           aria-label="AI Assistant"
@@ -181,7 +181,7 @@ export function AIChatbot() {
           // On mobile put the chat FAB on the LEFT bottom corner so it
           // never collides with the SOS button on the right. On desktop
           // it goes back to the bottom-right next to the report FAB.
-          'fixed left-4 z-[89] flex h-14 w-14 items-center justify-center rounded-full bg-[#A51636] text-white shadow-[0_8px_24px_rgba(165,22,54,0.4)]',
+          'fixed left-4 z-[80] flex h-14 w-14 items-center justify-center rounded-full bg-[#A51636] text-white shadow-[0_8px_24px_rgba(165,22,54,0.4)]',
           'bottom-24 sm:bottom-8 sm:left-auto sm:right-7',
         )}
         aria-label={open ? 'Close AI chat' : 'Open AI chat'}
