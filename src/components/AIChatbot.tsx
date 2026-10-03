@@ -2,9 +2,24 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bot, LoaderCircle, MessageSquare, Plus, Send, Sparkles, Square, X } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import {
+  Bot,
+  LoaderCircle,
+  MessageSquare,
+  Mic,
+  MicOff,
+  Plus,
+  Send,
+  Sparkles,
+  Square,
+  Volume2,
+  X,
+} from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useBrand } from '@/hooks/useBrand';
+import { useAuth } from '@/hooks/useAuth';
+import { parseNavigationIntent } from '@/services/navigationService';
+import { JarvisVoice, VOICE_LANGUAGES, voiceCapabilities } from '@/services/voiceService';
 import {
   ChatServiceError,
   isChatAbortError,
@@ -22,6 +37,7 @@ const QUICK_PROMPTS = [
   'How do I get started?',
   'Explain this page',
   'Help me report an issue',
+  'Take me to the map',
 ];
 
 interface ChatMessage extends ChatRequestMessage {
@@ -108,7 +124,9 @@ function SafeMessageContent({ content }: { content: string }) {
 
 export function AIChatbot() {
   const { isAmrita } = useBrand();
+  const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const hidden = isHiddenRoute(location.pathname);
   const brandName = isAmrita ? 'Amrita Eye' : 'CivicEye';
   const accent = isAmrita ? '#A51636' : '#4F46E5';
@@ -120,20 +138,45 @@ export function AIChatbot() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [listening, setListening] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
+  const [voiceLanguage, setVoiceLanguage] = useState('en-IN');
+  const [capabilities] = useState(voiceCapabilities);
+  const hasSpeechSynthesis = capabilities.synthesis;
+  const [readAloud, setReadAloud] = useState(capabilities.synthesis);
+  const [autoSendVoice, setAutoSendVoice] = useState(false);
+  const [voice] = useState(
+    () =>
+      new JarvisVoice({
+        onListening: setListening,
+        onSpeaking: setSpeaking,
+        onError: setVoiceError,
+      }),
+  );
+  const voicePrefsRef = useRef({ readAloud, voiceLanguage, active: false });
+  voicePrefsRef.current = { readAloud, voiceLanguage, active: open && !hidden };
+  const voiceEpochRef = useRef(0);
+
+  const stopVoice = useCallback(() => {
+    voiceEpochRef.current += 1;
+    voice.stopAll();
+  }, [voice]);
 
   const abortRef = useRef<AbortController | null>(null);
   const generationRef = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
-  const mobileInputRef = useRef<HTMLTextAreaElement>(null);
-  const desktopInputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const closeChat = useCallback(() => {
+    stopVoice();
     setOpen(false);
     window.setTimeout(() => fabRef.current?.focus(), 0);
-  }, []);
+  }, [stopVoice]);
 
   const clearChat = useCallback(() => {
+    stopVoice();
     generationRef.current += 1;
     abortRef.current?.abort();
     abortRef.current = null;
@@ -143,76 +186,149 @@ export function AIChatbot() {
     setBusy(false);
     setError(null);
     setStatus(null);
-  }, []);
+    setVoiceError('');
+  }, [stopVoice]);
 
-  const beginGeneration = useCallback(async (history: ChatRequestMessage[]) => {
-    const controller = new AbortController();
-    const generation = generationRef.current + 1;
-    generationRef.current = generation;
-    abortRef.current = controller;
-    setBusy(true);
-    setError(null);
-    setStatus(null);
-    setStreamingText('');
+  const beginGeneration = useCallback(
+    async (history: ChatRequestMessage[]) => {
+      stopVoice();
+      const voiceEpoch = voiceEpochRef.current;
+      const controller = new AbortController();
+      const generation = generationRef.current + 1;
+      generationRef.current = generation;
+      abortRef.current = controller;
+      setBusy(true);
+      setError(null);
+      setStatus(null);
+      setStreamingText('');
 
-    let completedText = '';
-    try {
-      await streamChat(history, {
-        signal: controller.signal,
-        onText: (text) => {
-          if (generation !== generationRef.current) return;
-          completedText += text;
-          setStreamingText(completedText);
-        },
-      });
+      let completedText = '';
+      try {
+        await streamChat(history, {
+          signal: controller.signal,
+          onText: (text) => {
+            if (generation !== generationRef.current) return;
+            completedText += text;
+            setStreamingText(completedText);
+          },
+        });
 
-      if (!completedText.trim()) {
-        throw new ChatServiceError('JARVIS returned an empty response.');
+        if (!completedText.trim()) {
+          throw new ChatServiceError('JARVIS returned an empty response.');
+        }
+
+        if (generation !== generationRef.current) return;
+        setMessages((current) => [
+          ...current,
+          { id: messageId('assistant'), role: 'assistant', content: completedText },
+        ]);
+        setStreamingText('');
+        // Speak only complete replies, while the chat is visible and opted in.
+        // Closing, navigation, Stop, or switching tabs invalidates queued audio.
+        const prefs = voicePrefsRef.current;
+        if (
+          prefs.readAloud &&
+          prefs.active &&
+          voiceEpoch === voiceEpochRef.current &&
+          document.visibilityState !== 'hidden'
+        ) {
+          voice.speak(completedText, prefs.voiceLanguage);
+        }
+      } catch (caughtError) {
+        if (generation !== generationRef.current) return;
+        setStreamingText('');
+        if (controller.signal.aborted || isChatAbortError(caughtError)) return;
+        setError(errorMessage(caughtError));
+      } finally {
+        if (generation === generationRef.current) {
+          abortRef.current = null;
+          setBusy(false);
+        }
+      }
+    },
+    [stopVoice, voice],
+  );
+
+  const sendText = useCallback(
+    (draft: string) => {
+      if (busy || abortRef.current) return;
+      const text = draft.trim().slice(0, MAX_INPUT_LENGTH);
+      if (!text) return;
+
+      const userMessage: ChatMessage = {
+        id: messageId('user'),
+        role: 'user',
+        content: text,
+      };
+      const nextMessages = [...messages, userMessage];
+      setMessages(nextMessages);
+      setInput('');
+      setVoiceError('');
+
+      const navigation = parseNavigationIntent(text);
+      if (navigation) {
+        const reply = navigation.back
+          ? 'Going back to the previous page.'
+          : `Opening ${navigation.label}.`;
+        setMessages([
+          ...nextMessages,
+          { id: messageId('assistant'), role: 'assistant', content: reply },
+        ]);
+        setError(null);
+        setStatus(reply);
+        if (navigation.back) navigate(-1);
+        else if (navigation.path) navigate(navigation.path);
+
+        const prefs = voicePrefsRef.current;
+        if (prefs.readAloud && prefs.active && document.visibilityState !== 'hidden') {
+          voice.speak(reply, prefs.voiceLanguage);
+        }
+        return;
       }
 
-      if (generation !== generationRef.current) return;
-      setMessages((current) => [
-        ...current,
-        { id: messageId('assistant'), role: 'assistant', content: completedText },
-      ]);
-      setStreamingText('');
-    } catch (caughtError) {
-      if (generation !== generationRef.current) return;
-      setStreamingText('');
-      if (controller.signal.aborted || isChatAbortError(caughtError)) return;
-      setError(errorMessage(caughtError));
-    } finally {
-      if (generation === generationRef.current) {
-        abortRef.current = null;
-        setBusy(false);
-      }
-    }
-  }, []);
+      void beginGeneration(buildRequestHistory(nextMessages));
+    },
+    [beginGeneration, busy, messages, navigate, voice],
+  );
 
-  const send = useCallback(() => {
+  const send = useCallback(() => sendText(input), [sendText, input]);
+
+  const toggleMicrophone = () => {
     if (busy) return;
-    const text = input.trim();
-    if (!text) return;
-
-    const userMessage: ChatMessage = {
-      id: messageId('user'),
-      role: 'user',
-      content: text,
-    };
-    const nextMessages = [...messages, userMessage];
-    setMessages(nextMessages);
-    setInput('');
-    void beginGeneration(buildRequestHistory(nextMessages));
-  }, [beginGeneration, busy, input, messages]);
+    if (listening) {
+      voice.finishListening();
+      return;
+    }
+    stopVoice();
+    const prefix = input.trimEnd();
+    const join = (text: string) => (text ? `${prefix}${prefix ? ' ' : ''}${text}` : prefix);
+    voice.startListening(
+      voiceLanguage,
+      {
+        onTranscript: (text) => setInput(join(text)),
+        onFinish: (text, successful) => {
+          const draft = join(text);
+          setInput(draft);
+          // Only final, successful recognition can auto-send. Aborts/errors
+          // restore finalized words for editing and never call the chat API.
+          if (successful && (autoSendVoice || Boolean(parseNavigationIntent(draft)))) {
+            sendText(draft);
+          }
+        },
+      },
+      MAX_INPUT_LENGTH - prefix.length - (prefix ? 1 : 0),
+    );
+  };
 
   const retry = useCallback(() => {
-    if (busy) return;
+    if (busy || listening || abortRef.current) return;
     const latestUser = latestUserMessage(messages);
     if (!latestUser) return;
     void beginGeneration(buildRequestHistory(messages));
-  }, [beginGeneration, busy, messages]);
+  }, [beginGeneration, busy, listening, messages]);
 
   const stopGeneration = useCallback(() => {
+    stopVoice();
     if (!busy) return;
     generationRef.current += 1;
     abortRef.current?.abort();
@@ -221,22 +337,33 @@ export function AIChatbot() {
     setStreamingText('');
     setError(null);
     setStatus('Generation stopped. The unfinished reply was not saved.');
-  }, [busy]);
+  }, [busy, stopVoice]);
 
   // Auth and reset screens must not expose or send chat context.
   useEffect(() => {
     if (!hidden) return;
-    generationRef.current += 1;
-    abortRef.current?.abort();
-    abortRef.current = null;
     setOpen(false);
-    setMessages([]);
-    setStreamingText('');
-    setInput('');
-    setBusy(false);
-    setError(null);
-    setStatus(null);
-  }, [hidden]);
+    clearChat();
+  }, [hidden, clearChat]);
+
+  useEffect(() => {
+    clearChat();
+    setReadAloud(hasSpeechSynthesis);
+    setAutoSendVoice(false);
+  }, [user?.id, clearChat, hasSpeechSynthesis]);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') stopVoice();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', stopVoice);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', stopVoice);
+      stopVoice();
+    };
+  }, [stopVoice, location.pathname]);
 
   useEffect(() => {
     return () => {
@@ -262,11 +389,7 @@ export function AIChatbot() {
   useEffect(() => {
     if (!open) return;
     const focusTimer = window.setTimeout(() => {
-      const candidates = [mobileInputRef.current, desktopInputRef.current];
-      const visibleInput = candidates.find(
-        (candidate) => candidate && candidate.getClientRects().length > 0,
-      );
-      (visibleInput ?? candidates[0])?.focus();
+      inputRef.current?.focus();
     }, 120);
     return () => window.clearTimeout(focusTimer);
   }, [open]);
@@ -285,7 +408,8 @@ export function AIChatbot() {
 
   if (hidden) return null;
 
-  const canRetry = !busy && Boolean(latestUserMessage(messages));
+  const canRetry = !busy && !listening && Boolean(latestUserMessage(messages));
+  const lastReply = [...messages].reverse().find((message) => message.role === 'assistant');
   const sharedMessageListProps = {
     messages,
     streamingText,
@@ -307,6 +431,28 @@ export function AIChatbot() {
     onSend: send,
     onStop: stopGeneration,
     onPrompt: setInput,
+    listening,
+    speaking,
+    voiceError,
+    capabilities,
+    voiceLanguage,
+    readAloud,
+    autoSendVoice,
+    onMicrophone: toggleMicrophone,
+    onLanguage: setVoiceLanguage,
+    onReadAloud: (enabled: boolean) => {
+      setReadAloud(enabled);
+      if (!enabled) {
+        voiceEpochRef.current += 1;
+        voice.stopSpeaking();
+      }
+    },
+    onAutoSendVoice: setAutoSendVoice,
+    onStopSpeaking: () => voice.stopSpeaking(),
+    onReadReply: () => {
+      if (lastReply) voice.speak(lastReply.content, voiceLanguage);
+    },
+    hasReply: Boolean(lastReply),
   };
 
   const panel = (
@@ -317,6 +463,7 @@ export function AIChatbot() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[90]"
+          id="jarvis-chat-panel"
           role="dialog"
           aria-modal="true"
           aria-labelledby="jarvis-chat-title"
@@ -330,20 +477,16 @@ export function AIChatbot() {
             aria-hidden="true"
           />
 
-          {/* Mobile sheet: full viewport width with room for the home indicator. */}
+          {/* One responsive panel keeps refs, microphone controls and IDs unique. */}
           <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 340, damping: 32 }}
             className={cn(
-              'absolute inset-x-0 bottom-0 flex flex-col border-t-4 bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.35)] sm:hidden',
+              'absolute inset-x-0 bottom-0 flex h-[calc(100dvh-16px)] flex-col overflow-hidden border-t-4 bg-white pb-[env(safe-area-inset-bottom,0)] shadow-[0_-20px_50px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:bottom-24 sm:right-7 sm:h-[640px] sm:max-h-[calc(100dvh-120px)] sm:w-[400px] sm:rounded-2xl sm:border-2 sm:pb-0',
               isAmrita ? 'border-[#A51636]' : 'border-indigo-600',
             )}
-            style={{
-              height: 'calc(100dvh - 16px)',
-              paddingBottom: 'env(safe-area-inset-bottom, 0)',
-            }}
           >
             <ChatHeader
               brandName={brandName}
@@ -352,26 +495,7 @@ export function AIChatbot() {
               onClear={clearChat}
             />
             <MessageList {...sharedMessageListProps} />
-            <Composer {...sharedComposerProps} inputRef={mobileInputRef} />
-          </motion.div>
-
-          {/* Desktop card: remains above drawers, SOS, and PWA toasts. */}
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 340, damping: 28 }}
-            className="hidden sm:absolute sm:bottom-24 sm:right-7 sm:flex sm:h-[560px] sm:w-[380px] sm:flex-col sm:overflow-hidden sm:rounded-2xl sm:border-2 sm:bg-white sm:shadow-[0_20px_60px_rgba(15,23,42,0.25)]"
-            style={{ borderColor: `${accent}55` }}
-          >
-            <ChatHeader
-              brandName={brandName}
-              accent={accent}
-              onClose={closeChat}
-              onClear={clearChat}
-            />
-            <MessageList {...sharedMessageListProps} />
-            <Composer {...sharedComposerProps} inputRef={desktopInputRef} />
+            <Composer {...sharedComposerProps} inputRef={inputRef} />
           </motion.div>
         </motion.div>
       ) : null}
@@ -389,7 +513,7 @@ export function AIChatbot() {
         style={{ backgroundColor: accent }}
         aria-label={open ? 'Close JARVIS chat' : 'Open JARVIS chat'}
         aria-expanded={open}
-        aria-controls="jarvis-chat-title"
+        aria-controls="jarvis-chat-panel"
       >
         {open ? (
           <X className="h-6 w-6" strokeWidth={2.5} />
@@ -476,7 +600,7 @@ function MessageList({
   return (
     <div
       className={cn(
-        'flex-1 overflow-y-auto overscroll-contain p-3',
+        'min-h-0 flex-1 overflow-y-auto overscroll-contain p-3',
         isAmrita ? 'bg-[#FFF6F7] dark:bg-[#1a0f14]' : 'bg-slate-50 dark:bg-slate-950',
       )}
       aria-live="polite"
@@ -594,6 +718,20 @@ function Composer({
   onSend,
   onStop,
   onPrompt,
+  listening,
+  speaking,
+  voiceError,
+  capabilities,
+  voiceLanguage,
+  readAloud,
+  autoSendVoice,
+  onMicrophone,
+  onLanguage,
+  onReadAloud,
+  onAutoSendVoice,
+  onStopSpeaking,
+  onReadReply,
+  hasReply,
 }: {
   input: string;
   busy: boolean;
@@ -604,15 +742,30 @@ function Composer({
   onSend: () => void;
   onStop: () => void;
   onPrompt: (value: string) => void;
+  listening: boolean;
+  speaking: boolean;
+  voiceError: string;
+  capabilities: ReturnType<typeof voiceCapabilities>;
+  voiceLanguage: string;
+  readAloud: boolean;
+  autoSendVoice: boolean;
+  onMicrophone: () => void;
+  onLanguage: (value: string) => void;
+  onReadAloud: (value: boolean) => void;
+  onAutoSendVoice: (value: boolean) => void;
+  onStopSpeaking: () => void;
+  onReadReply: () => void;
+  hasReply: boolean;
 }) {
+  const canRecord = capabilities.secure && capabilities.recognition;
   return (
-    <div className="border-t border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-slate-900">
+    <div className="max-h-[55dvh] shrink-0 overflow-y-auto border-t border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-slate-900">
       <div className="-mx-1 mb-2 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {QUICK_PROMPTS.map((prompt) => (
           <button
             key={prompt}
             onClick={() => onPrompt(prompt)}
-            disabled={busy}
+            disabled={busy || listening}
             className={cn(
               'shrink-0 rounded-full border bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 transition disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white/5 dark:text-slate-300',
               isAmrita
@@ -624,15 +777,52 @@ function Composer({
           </button>
         ))}
       </div>
+      <div role="status" aria-live="polite" className="text-xs text-slate-600 dark:text-slate-300">
+        {listening ? (
+          <p className="mb-2 font-medium text-red-600 dark:text-red-300">
+            Listening… speak, then pause or tap the mic to finish.
+          </p>
+        ) : null}
+        {speaking ? <p className="mb-2">Reading reply aloud…</p> : null}
+      </div>
+      {voiceError ? (
+        <p role="alert" className="mb-2 text-xs text-red-700 dark:text-red-300">
+          {voiceError}
+        </p>
+      ) : null}
       <div className="flex items-end gap-2">
+        <button
+          type="button"
+          onClick={onMicrophone}
+          disabled={busy || !canRecord}
+          aria-label={listening ? 'Finish voice input' : 'Start voice input'}
+          aria-pressed={listening}
+          title={
+            canRecord ? 'Dictate a message' : 'Voice input requires a supported browser and HTTPS'
+          }
+          className={cn(
+            'flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-40',
+            listening
+              ? 'bg-red-600 text-white'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-white/10 dark:text-white',
+          )}
+        >
+          {listening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+        </button>
         <textarea
           ref={inputRef}
           value={input}
           maxLength={MAX_INPUT_LENGTH}
-          disabled={busy}
+          disabled={busy || listening}
           onChange={(event) => onChange(event.target.value.slice(0, MAX_INPUT_LENGTH))}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey && !busy) {
+            if (
+              event.key === 'Enter' &&
+              !event.shiftKey &&
+              !event.nativeEvent.isComposing &&
+              !busy &&
+              !listening
+            ) {
               event.preventDefault();
               onSend();
             }
@@ -641,7 +831,7 @@ function Composer({
           placeholder="Ask JARVIS a question…"
           aria-label="Message JARVIS"
           className={cn(
-            'min-h-[42px] max-h-28 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-[14px] leading-snug outline-none focus:bg-white focus:ring-2 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:bg-white/10',
+            'min-h-[42px] min-w-0 max-h-28 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-[14px] leading-snug outline-none focus:bg-white focus:ring-2 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:bg-white/10',
             isAmrita
               ? 'focus:border-[#A51636]/50 focus:ring-[#A51636]/20'
               : 'focus:border-indigo-500/50 focus:ring-indigo-500/20',
@@ -659,7 +849,7 @@ function Composer({
         ) : (
           <button
             onClick={onSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || listening}
             aria-label="Send message"
             className={cn(
               'flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-white/10',
@@ -670,6 +860,67 @@ function Composer({
           </button>
         )}
       </div>
+      {!canRecord ? (
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          {capabilities.secure
+            ? 'Voice input is unavailable here. Try Chrome or Edge, or type below.'
+            : 'Voice input needs HTTPS or localhost.'}
+        </p>
+      ) : null}
+      <details className="mt-2 text-xs text-slate-600 dark:text-slate-300">
+        <summary className="cursor-pointer py-1 font-medium">Voice settings</summary>
+        <div className="mt-2 space-y-2">
+          <label className="flex items-center justify-between gap-2">
+            Speech language
+            <select
+              value={voiceLanguage}
+              onChange={(event) => onLanguage(event.target.value)}
+              disabled={listening || speaking || busy}
+              className="min-h-9 rounded-lg border border-slate-200 bg-white px-2 dark:border-white/20 dark:bg-slate-800"
+            >
+              {VOICE_LANGUAGES.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex min-h-9 items-center gap-2">
+            <input
+              type="checkbox"
+              checked={autoSendVoice}
+              disabled={!canRecord || listening || busy}
+              onChange={(event) => onAutoSendVoice(event.target.checked)}
+            />
+            Send after speaking
+          </label>
+          <label className="flex min-h-9 items-center gap-2">
+            <input
+              type="checkbox"
+              checked={readAloud}
+              disabled={!capabilities.synthesis}
+              onChange={(event) => onReadAloud(event.target.checked)}
+            />
+            Read replies aloud
+          </label>
+          {!capabilities.synthesis ? <p>Spoken replies are unavailable in this browser.</p> : null}
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            Voice uses your browser’s speech service, which may process audio online. Only the
+            transcript is sent to JARVIS.
+          </p>
+        </div>
+      </details>
+      {capabilities.synthesis && (hasReply || speaking) ? (
+        <button
+          type="button"
+          onClick={speaking ? onStopSpeaking : onReadReply}
+          disabled={!speaking && (busy || listening)}
+          className="mt-1 inline-flex min-h-9 items-center gap-1.5 text-xs font-medium text-indigo-600 disabled:opacity-40 dark:text-indigo-300"
+        >
+          {speaking ? <Square className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+          {speaking ? 'Stop speaking' : 'Read last reply'}
+        </button>
+      ) : null}
       <div className="mt-1.5 flex items-center justify-between gap-2 text-[10px] text-slate-400">
         <span>Shift + Enter for a new line</span>
         <span>

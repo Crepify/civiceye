@@ -12,7 +12,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test:jarvis": "node scripts/test-jarvis-api.mjs",
+    "test:jarvis": "node scripts/test-jarvis-api.mjs && node scripts/test-jarvis-voice.mjs && node scripts/test-jarvis-navigation.mjs",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
