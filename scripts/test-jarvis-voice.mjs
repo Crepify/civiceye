@@ -83,13 +83,18 @@ const dictation = {
 try {
   globalThis.window = {
     isSecureContext: true,
+    navigator: {
+      mediaDevices: {
+        getUserMedia: async () => ({ getTracks: () => [{ stop: () => {} }] }),
+      },
+    },
     webkitSpeechRecognition: MockRecognition,
     SpeechSynthesisUtterance: MockUtterance,
     speechSynthesis,
   };
   assert.deepEqual(voiceCapabilities(), { secure: true, recognition: true, synthesis: true });
 
-  voice.startListening('hi-IN', dictation, 8000);
+  await voice.startListening('hi-IN', dictation, 8000);
   const first = MockRecognition.instances.at(-1);
   assert.equal(first.lang, 'hi-IN');
   assert.equal(first.continuous, false);
@@ -106,7 +111,7 @@ try {
   assert.equal(first.aborted, true);
   assert.equal(timers.size, 0);
 
-  voice.startListening('en-IN', dictation, 8000);
+  await voice.startListening('en-IN', dictation, 8000);
   const abandoned = MockRecognition.instances.at(-1);
   abandoned.result([
     ['final words', true],
@@ -120,18 +125,18 @@ try {
   assert.equal(finishes.length, finishCount);
   assert.equal(drafts.at(-1), 'final words unfinished words');
 
-  voice.startListening('en-IN', dictation, 8000);
+  await voice.startListening('en-IN', dictation, 8000);
   MockRecognition.instances.at(-1).onerror({ error: 'not-allowed' });
   assert.match(callbacks.errors.at(-1), /denied/);
   assert.equal(finishes.at(-1).successful, false, 'errors must not auto-send');
 
-  voice.startListening('en-IN', dictation, 8000);
+  await voice.startListening('en-IN', dictation, 8000);
   MockRecognition.instances.at(-1).onend();
   assert.match(callbacks.errors.at(-1), /No speech/);
   assert.equal(finishes.at(-1).successful, false);
 
   // A second session must be able to stop after the previous session ended.
-  voice.startListening('en-IN', dictation, 5);
+  await voice.startListening('en-IN', dictation, 5);
   const bounded = MockRecognition.instances.at(-1);
   bounded.result([['123456789', true]]);
   assert.equal(drafts.at(-1), '12345');
@@ -140,7 +145,7 @@ try {
   assert.equal(finishes.at(-1).text, '12345');
 
   // Watchdog stops listening at 30 seconds; stalled finalization cannot submit.
-  voice.startListening('en-IN', dictation, 8000);
+  await voice.startListening('en-IN', dictation, 8000);
   const watchdog = MockRecognition.instances.at(-1);
   [...timers.values()].find((timer) => timer.ms === 30000).callback();
   assert.equal(watchdog.stopped, true);
@@ -149,7 +154,7 @@ try {
   assert.equal(timers.size, 0);
 
   MockRecognition.failStart = true;
-  voice.startListening('en-IN', dictation, 8000);
+  await voice.startListening('en-IN', dictation, 8000);
   assert.match(callbacks.errors.at(-1), /Could not start/);
   assert.equal(callbacks.listening.at(-1), false);
   MockRecognition.failStart = false;
@@ -174,17 +179,17 @@ try {
   assert.equal(cancelled, 1);
 
   voice.speak('Read me', 'en-IN');
-  voice.startListening('en-IN', dictation, 8000);
+  await voice.startListening('en-IN', dictation, 8000);
   assert.equal(cancelled, 2, 'starting the mic must stop playback to avoid feedback');
   voice.stopAll();
   assert.equal(callbacks.listening.at(-1), false);
   assert.equal(timers.size, 0);
 
   delete globalThis.window.webkitSpeechRecognition;
-  voice.startListening('en-IN', dictation, 8000);
+  await voice.startListening('en-IN', dictation, 8000);
   assert.match(callbacks.errors.at(-1), /unavailable/);
   globalThis.window.isSecureContext = false;
-  voice.startListening('en-IN', dictation, 8000);
+  await voice.startListening('en-IN', dictation, 8000);
   assert.match(callbacks.errors.at(-1), /HTTPS/);
   delete globalThis.window.speechSynthesis;
   voice.speak('Hello', 'en-IN');

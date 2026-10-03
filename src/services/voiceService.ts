@@ -98,6 +98,7 @@ export function spokenChunks(content: string): string[] {
 export class JarvisVoice {
   private recognition: Recognition | null = null;
   private finish: ((successful: boolean) => void) | null = null;
+  private startToken = 0;
   private listeningTimer: ReturnType<typeof setTimeout> | undefined;
   private stopTimer: ReturnType<typeof setTimeout> | undefined;
   private speechId = 0;
@@ -105,7 +106,11 @@ export class JarvisVoice {
 
   constructor(private readonly callbacks: VoiceCallbacks) {}
 
-  startListening(language: string, callbacks: DictationCallbacks, maxLength: number): void {
+  async startListening(
+    language: string,
+    callbacks: DictationCallbacks,
+    maxLength: number,
+  ): Promise<void> {
     if (this.recognition) return;
     const browser = voiceWindow();
     const Constructor = browser?.SpeechRecognition || browser?.webkitSpeechRecognition;
@@ -126,6 +131,37 @@ export class JarvisVoice {
 
     this.stopSpeaking();
     this.callbacks.onError('');
+    const startToken = ++this.startToken;
+    this.callbacks.onListening(true);
+
+    // Ask for the browser's actual microphone permission first. SpeechRecognition
+    // errors are otherwise ambiguous (a denied permission can look like a
+    // silent network failure on Chromium/Linux). The short-lived stream is
+    // closed immediately; SpeechRecognition owns the recording session after
+    // this permission check succeeds.
+    try {
+      const getUserMedia = browser.navigator?.mediaDevices?.getUserMedia;
+      if (!getUserMedia) throw new Error('microphone-unavailable');
+      const stream = await getUserMedia.call(browser.navigator.mediaDevices, { audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      if (startToken !== this.startToken) {
+        this.callbacks.onListening(false);
+        return;
+      }
+    } catch (error) {
+      if (startToken !== this.startToken) return;
+      this.callbacks.onListening(false);
+      const name = error instanceof DOMException ? error.name : '';
+      this.callbacks.onError(
+        name === 'NotFoundError'
+          ? RECOGNITION_ERRORS['audio-capture']
+          : name === 'NotAllowedError' || name === 'SecurityError'
+            ? RECOGNITION_ERRORS['not-allowed']
+            : 'Microphone permission could not be opened. Check the browser site permission and try again.',
+      );
+      return;
+    }
+
     let finalText = '';
     let recognition: Recognition;
     try {
@@ -189,7 +225,6 @@ export class JarvisVoice {
       if (!finalText.trim()) this.callbacks.onError(RECOGNITION_ERRORS['no-speech']);
       finish(true);
     };
-    this.callbacks.onListening(true);
     // Bound each recording; never keep the microphone open in the background.
     this.listeningTimer = setTimeout(() => this.finishListening(), 30000);
     try {
@@ -215,6 +250,7 @@ export class JarvisVoice {
   }
 
   cancelListening(): void {
+    this.startToken += 1;
     this.finish?.(false);
     this.stopTimer = undefined;
   }
