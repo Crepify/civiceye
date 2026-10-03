@@ -30,7 +30,10 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
     return { valid: false, error: `Invalid file type ${file.type}. Only JPEG, PNG, WebP allowed.` };
   }
   if (file.size > maxSize) {
-    return { valid: false, error: `File too large ${Math.round(file.size/1024/1024)}MB. Max 10MB.` };
+    return {
+      valid: false,
+      error: `File too large ${Math.round(file.size / 1024 / 1024)}MB. Max 10MB.`,
+    };
   }
   const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
   const ext = '.' + file.name.split('.').pop()?.toLowerCase();
@@ -44,7 +47,12 @@ export function validateImageDataUrl(dataUrl: string): { valid: boolean; error?:
   if (!dataUrl.startsWith('data:image/')) {
     return { valid: false, error: 'Not an image data URL' };
   }
-  const allowedPrefixes = ['data:image/jpeg', 'data:image/jpg', 'data:image/png', 'data:image/webp'];
+  const allowedPrefixes = [
+    'data:image/jpeg',
+    'data:image/jpg',
+    'data:image/png',
+    'data:image/webp',
+  ];
   if (!allowedPrefixes.some((p) => dataUrl.startsWith(p))) {
     return { valid: false, error: 'Invalid image format in data URL' };
   }
@@ -75,7 +83,7 @@ export function getSecurityHeaders() {
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(self), microphone=(), geolocation=(self)',
+    'Permissions-Policy': 'camera=(self), microphone=(self), geolocation=(self)',
   };
 }
 
@@ -109,7 +117,10 @@ export interface AuditLog {
 const auditLogs: AuditLog[] = [];
 const MAX_AUDIT_LOGS = 500;
 
-export function logAudit(action: string, details: { userId?: string; reportId?: string; details?: string }) {
+export function logAudit(
+  action: string,
+  details: { userId?: string; reportId?: string; details?: string },
+) {
   auditLogs.push({
     action,
     userId: details.userId,
