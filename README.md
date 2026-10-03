@@ -41,6 +41,7 @@ npm run build        # type-check + production build
 npm run preview      # preview the build
 npm run lint         # eslint (zero warnings)
 npm run typecheck    # typescript only
+npm run test:jarvis  # server-side JARVIS streaming and injection checks
 ```
 
 ---
@@ -85,10 +86,33 @@ All keys are stored on **Vercel** (or `.env` locally). Every `VITE_` var is read
 | `VITE_AI_ONDEVICE` · `VITE_ONDEVICE_MODEL` | On-device AI (default `true`, model `Xenova/yolos-tiny`) |
 | `VITE_ONDEVICE_YOLO_URL` · `VITE_ONDEVICE_YOLO_LABELS` | Custom civic YOLO ONNX model (optional — detect potholes etc. on-device) |
 | `VITE_HF_API_TOKEN` · `VITE_HF_MODEL` | Hugging Face backup (default `facebook/detr-resnet-50`) |
+| `LLM_BASE_URL` · `LLM_API_KEY` · `LLM_MODEL` | Server-side OpenAI-compatible provider for JARVIS |
+| `OPENROUTER_API_KEY` / `OPENCODE_API_KEY` / `OMNIROUTER_API_KEY` / `DEEPSEEK_API_KEY` | Alternative server-side JARVIS providers; use one provider, never `VITE_` prefixes |
+| `CIVICEYE_ORIGIN` | Comma-separated browser origins allowed to call `/api/chat` |
+| `MOCK_LLM` | Set to `1` only for offline UI smoke checks; no provider call is made |
 | `VITE_ADMIN_EMAILS` | Extra comma-separated admin emails |
 | `VITE_APP_URL` | Public origin (QR + magic links) |
 
 **SMTP / EmailJS (optional):** `SMTP_HOST/PORT/USER/PASS/FROM` or `VITE_EMAILJS_SERVICE_ID/TEMPLATE_ID/PUBLIC_KEY` enable real authority escalation emails. Without them, the app falls back to `mailto:`.
+
+### JARVIS assistant
+
+JARVIS is the primary general-purpose assistant in the floating chat. The React widget sends a bounded conversation to `POST /api/chat`; the Vercel function streams the response from the configured server-side LLM provider. The complete production system prompt is stored in `api/JARVIS_SYSTEM_PROMPT.txt` and included in the serverless deployment through `vercel.json`.
+
+To enable it locally:
+
+```bash
+cp .env.example .env
+# Set one server-side provider, for example:
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_API_KEY=your-server-side-key
+LLM_MODEL=your-provider-model
+npm run dev
+```
+
+Do not use `VITE_` for JARVIS provider keys. Vite variables are bundled into the browser. The current endpoint has no web search, retrieval, vision, calculator, code-execution, memory, or external-action tools connected, so JARVIS must say when current information or an action cannot be verified. Add those capabilities as authenticated server-side tools before describing them as available.
+
+If no provider is configured, the UI remains usable and displays an honest offline-mode response rather than pretending that an AI request succeeded.
 
 ---
 
