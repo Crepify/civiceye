@@ -107,14 +107,33 @@ assert.match(
 
 process.env.LLM_API_KEY = 'test-key';
 process.env.MOCK_LLM = '';
+let transientAttempts = 0;
+globalThis.fetch = async (_url, options) => {
+  transientAttempts += 1;
+  if (transientAttempts === 1) throw new Error('fetch failed');
+  const request = JSON.parse(options.body);
+  assert.equal(request.messages.at(-1).content, 'Recover from a transient failure');
+  return responseForSse([
+    'data: {"choices":[{"delta":{"content":"Recovered successfully."}}]}\n\n',
+    'data: [DONE]',
+  ]);
+};
+const recovered = await call('Recover from a transient failure', '10.0.0.13');
+assert.equal(recovered.status, 200);
+assert.deepEqual(
+  recovered.events.map((event) => event.type),
+  ['content', 'done'],
+);
+assert.equal(transientAttempts, 2, 'transient provider failures should be retried once');
+
 globalThis.fetch = async () =>
   responseForSse(['data: {"choices":[{"delta":{"content":"Partial"}}]}\n\n']);
-const incomplete = await call('Test incomplete stream', '10.0.0.13');
+const incomplete = await call('Test incomplete stream', '10.0.0.14');
 assert.equal(incomplete.status, 200);
 assert.ok(incomplete.events.some((event) => event.type === 'error'));
 assert.ok(!incomplete.events.some((event) => event.type === 'done'));
 
-const tooLong = await call('x'.repeat(8001), '10.0.0.14');
+const tooLong = await call('x'.repeat(8001), '10.0.0.15');
 assert.equal(tooLong.status, 400);
 assert.equal(tooLong.events.length, 0);
 
