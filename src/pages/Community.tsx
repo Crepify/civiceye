@@ -103,9 +103,11 @@ export function Community() {
   return (
     <>
       <PageHeader
-        eyebrow="Community"
-        title="Reports from your neighbours"
-        description="Every report below is citizen-submitted and community-validated. Search, filter and vote — the numbers decide what gets fixed first. View AI annotation on each card."
+        eyebrow={isAmrita ? 'Campus community' : 'Community'}
+        title={isAmrita ? 'Campus reports from your community' : 'Reports from your neighbours'}
+        description={isAmrita
+          ? 'Search verified campus reports, follow progress, and help the responsible team prioritize what needs attention.'
+          : 'Every report below is citizen-submitted and community-validated. Search, filter and vote — the numbers decide what gets fixed first. View AI annotation on each card.'}
       />
 
       <section className="section-pad py-6 sm:py-8">

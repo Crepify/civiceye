@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { useReports } from '@/hooks/useReports';
-import { AsciiAnimation } from '@/components/AsciiAnimation';
 import { AmritaHero } from '@/components/amritaeye/AmritaHero';
 import { AmritaMetrics } from '@/components/amritaeye/AmritaMetrics';
 import { AmritaMapCanvas } from '@/components/amritaeye/AmritaMapCanvas';
@@ -35,7 +34,6 @@ export function AmritaEye() {
 
   return (
     <div className="relative min-h-screen bg-[#FFF5F7] dark:bg-[#1A030A] text-neutral-900 dark:text-white font-sans antialiased selection:bg-primary-500 selection:text-white overflow-x-hidden">
-      <AsciiAnimation />
       <div className="relative z-10 w-full">
         <div className="w-full h-full">
           <AmritaHero />

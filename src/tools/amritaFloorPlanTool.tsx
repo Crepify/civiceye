@@ -7,6 +7,8 @@
  * A Block 1st floor open corridor south with railing facing courtyard, rooms north
  */
 
+import { getOfficialFloorPlan } from '@/data/amritaCampus/officialFloorPlans';
+
 export interface Wall {
   id: string;
   x1: number;
@@ -62,6 +64,97 @@ export interface FloorPlan {
   windows: Window[];
   rooms: Room[];
   corridor: { x: number; y: number; w: number; h: number; openSide: 'south' | 'north' | 'east' | 'west'; railing: boolean };
+  /** Exact PDF-derived visual; room index remains searchable separately. */
+  imageSrc?: string;
+}
+
+function officialRoomType(type: string | undefined): Room['type'] {
+  switch (type) {
+    case 'lab': return 'lab';
+    case 'office': return 'office';
+    case 'hall': return 'hall';
+    case 'library': return 'amenity';
+    case 'washroom': return 'restroom';
+    case 'stairs': return 'stairs';
+    case 'lift': return 'support';
+    case 'entrance': return 'entrance';
+    case 'service': return 'support';
+    default: return 'classroom';
+  }
+}
+
+/** Build a clean, consistently scaled SVG plan from the verified PDF room index. */
+function generateOfficialFloorPlan(buildingId: string, floorId: string): FloorPlan | null {
+  const definition = getOfficialFloorPlan(buildingId, floorId);
+  if (!definition) return null;
+
+  const W = 1000;
+  const H = 460;
+  const corridor = { x: 34, y: 302, w: 932, h: 58, openSide: 'south' as const, railing: true };
+  const utilityTypes = new Set(['stairs', 'restroom', 'support', 'entrance']);
+  const primary = definition.rooms.filter((room) => !utilityTypes.has(room.type || 'room'));
+  const utilities = definition.rooms.filter((room) => utilityTypes.has(room.type || 'room'));
+  const columns = primary.length <= 6 ? 3 : primary.length <= 10 ? 4 : 5;
+  const roomGap = 8;
+  const roomWidth = (W - 52 - roomGap * (columns - 1)) / columns;
+  const rowHeight = primary.length > columns * 2 ? 64 : 92;
+  const rowGap = primary.length > columns * 2 ? 8 : 12;
+  const rooms: Room[] = primary.map((room, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    return {
+      id: `${floorId}-${index}`,
+      label: room.label,
+      name: room.name,
+      type: officialRoomType(room.type),
+      x: 26 + col * (roomWidth + roomGap),
+      y: 24 + row * (rowHeight + rowGap),
+      w: roomWidth,
+      h: rowHeight,
+      capacity: room.capacity,
+      notes: room.note,
+    };
+  });
+
+  const utilityColumns = Math.min(6, Math.max(1, utilities.length));
+  const utilityWidth = (W - 52 - roomGap * (utilityColumns - 1)) / utilityColumns;
+  utilities.forEach((room, index) => {
+    const col = index % utilityColumns;
+    const row = Math.floor(index / utilityColumns);
+    rooms.push({
+      id: `${floorId}-utility-${index}`,
+      label: room.label,
+      name: room.name,
+      type: officialRoomType(room.type),
+      x: 26 + col * (utilityWidth + roomGap),
+      y: corridor.y + corridor.h + 16 + row * 46,
+      w: utilityWidth,
+      h: 34,
+      capacity: room.capacity,
+      notes: room.note,
+    });
+  });
+
+  return {
+    id: definition.floorId,
+    name: `${definition.buildingId.toUpperCase()} Block ${definition.floorName}`,
+    buildingId: definition.buildingId,
+    buildingName: `Block ${definition.buildingId.toUpperCase()}`,
+    width: W,
+    height: H,
+    walls: [
+      { id: 'outer-north', x1: 20, y1: 20, x2: 980, y2: 20, thickness: 4, type: 'outer' },
+      { id: 'outer-east', x1: 980, y1: 20, x2: 980, y2: 440, thickness: 4, type: 'outer' },
+      { id: 'outer-south', x1: 980, y1: 440, x2: 20, y2: 440, thickness: 4, type: 'outer' },
+      { id: 'outer-west', x1: 20, y1: 440, x2: 20, y2: 20, thickness: 4, type: 'outer' },
+      { id: 'corridor', x1: 34, y1: corridor.y, x2: 966, y2: corridor.y, thickness: 3, type: 'corridor' },
+    ],
+    doors: [],
+    windows: [],
+    rooms,
+    corridor,
+    imageSrc: `/floor-plans/images/block-${definition.buildingId}-${definition.floorId.split('-')[1]}.png`,
+  };
 }
 
 export function generateABlockFirstFloor(): FloorPlan {
@@ -449,6 +542,9 @@ export function generateProperFloorPlan(buildingId: string, floorId: string): Fl
   const bid = buildingId.toLowerCase();
   const fid = floorId.toLowerCase();
 
+  const official = generateOfficialFloorPlan(bid, fid);
+  if (official) return official;
+
   if (bid === 'a') {
     if (fid === 'a-g' || fid === 'a-2') return generateABlockFloor(fid as any);
     return generateABlockFirstFloor();
@@ -463,16 +559,25 @@ export function generateProperFloorPlan(buildingId: string, floorId: string): Fl
 
 export function ProperFloorPlanSVG({ plan, onRoomClick }: { plan: FloorPlan; onRoomClick?: (room: Room) => void }) {
   return (
+    <foreignObject x={0} y={0} width={plan.width} height={plan.height}>
+    <div className="relative h-full w-full">
     <svg viewBox={`0 0 ${plan.width} ${plan.height}`} className="h-full w-full bg-white">
       <rect x={0} y={0} width={plan.width} height={plan.height} fill="#ffffff" />
-      <rect x={plan.corridor.x} y={plan.corridor.y} width={plan.corridor.w} height={plan.corridor.h} fill="#f8fafc" stroke="#e2e8f0" strokeWidth={1} />
-      {plan.corridor.railing ? (
+      {plan.imageSrc ? (
+        <>
+          <image href={plan.imageSrc} x={0} y={0} width={plan.width} height={plan.height} preserveAspectRatio="xMidYMid meet" />
+          <rect x={12} y={12} width={210} height={28} rx={14} fill="#ffffff" fillOpacity={0.92} stroke="#A51636" strokeWidth={1} />
+          <text x={24} y={30} fontSize={12} fontWeight={700} fill="#A51636">Official PDF plan · source</text>
+        </>
+      ) : null}
+      {!plan.imageSrc ? <rect x={plan.corridor.x} y={plan.corridor.y} width={plan.corridor.w} height={plan.corridor.h} fill="#f8fafc" stroke="#e2e8f0" strokeWidth={1} /> : null}
+      {!plan.imageSrc && plan.corridor.railing ? (
         <path d={`M${plan.corridor.x},${plan.corridor.y + plan.corridor.h} L${plan.corridor.x + plan.corridor.w},${plan.corridor.y + plan.corridor.h}`} stroke="#94a3b8" strokeWidth={2} strokeDasharray="8 4" />
       ) : null}
-      {plan.walls.map((wall) => (
+      {!plan.imageSrc ? plan.walls.map((wall) => (
         <line key={wall.id} x1={wall.x1} y1={wall.y1} x2={wall.x2} y2={wall.y2} stroke={wall.type === 'outer' ? '#0f172a' : wall.type === 'corridor' ? '#334155' : '#64748b'} strokeWidth={wall.thickness} strokeLinecap="round" />
-      ))}
-      {plan.rooms.map((room) => {
+      )) : null}
+      {!plan.imageSrc ? plan.rooms.map((room) => {
         const fillColor =
           room.type === 'hall'
             ? '#fef3c7'
@@ -516,17 +621,51 @@ export function ProperFloorPlanSVG({ plan, onRoomClick }: { plan: FloorPlan; onR
             <text x={room.x + room.w / 2} y={room.y + 16} textAnchor="middle" fontSize={11} fontWeight={700} fill="#0f172a">
               {room.label}
             </text>
-            <text x={room.x + room.w / 2} y={room.y + 28} textAnchor="middle" fontSize={9} fill="#475569">
-              {room.name.length > 18 ? room.name.slice(0, 18) + '…' : room.name}
-            </text>
+            <title>{room.name}{room.notes ? ` — ${room.notes}` : ''}</title>
+            {room.name
+              .split(/\s+/)
+              .reduce<string[]>((lines, word) => {
+                const last = lines[lines.length - 1] || '';
+                if ((last + ' ' + word).trim().length <= 20) {
+                  if (lines.length === 0) lines.push(word);
+                  else lines[lines.length - 1] = `${last} ${word}`.trim();
+                } else if (lines.length < 3) lines.push(word);
+                return lines;
+              }, [])
+              .slice(0, 3)
+              .map((line, lineIndex) => (
+                <text key={`${room.id}-line-${lineIndex}`} x={room.x + room.w / 2} y={room.y + 29 + lineIndex * 11} textAnchor="middle" fontSize={8.5} fill="#475569">
+                  {line}
+                </text>
+              ))}
             {room.capacity ? (
-              <text x={room.x + room.w / 2} y={room.y + 40} textAnchor="middle" fontSize={8} fill="#64748b">
+              <text x={room.x + room.w / 2} y={room.y + room.h - 8} textAnchor="middle" fontSize={8} fill="#64748b">
                 {room.capacity} seats
               </text>
             ) : null}
           </g>
         );
-      })}
+      }) : null}
     </svg>
+    {plan.imageSrc ? (
+      <div className="campus-interactive absolute right-3 top-3 max-h-[calc(100%-1.5rem)] w-52 overflow-auto rounded-xl border border-slate-200/80 bg-white/95 p-2 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-950/90">
+        <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-[#A51636]">Room index</p>
+        <div className="space-y-0.5">
+          {plan.rooms.map((room) => (
+            <button
+              key={room.id}
+              type="button"
+              onClick={() => onRoomClick?.(room)}
+              className="block w-full rounded-lg px-2 py-1.5 text-left text-[11px] leading-tight text-slate-700 transition-colors hover:bg-[#A51636]/10 hover:text-[#A51636] dark:text-slate-200"
+            >
+              <span className="block font-bold">{room.label}</span>
+              <span className="block truncate text-[10px] text-slate-500 dark:text-slate-400">{room.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    ) : null}
+    </div>
+    </foreignObject>
   );
 }

@@ -11,14 +11,14 @@ import { isAdminEmail } from '@/data/admins';
 import { cn } from '@/utils/cn';
 
 const NAV_LINKS = [
-  { to: '/', label: 'Home' },
-  { to: '/map', label: 'Map' },
-  { to: '/live', label: 'Live AI' },
-  { to: '/food-hygiene', label: 'Mess / Hygiene' },
-  { to: '/community', label: 'Community' },
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/about', label: 'About' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/amrita', label: 'Home' },
+  { to: '/amrita/map', label: 'Campus Map' },
+  { to: '/amrita/report', label: 'Report' },
+  { to: '/amrita/food-hygiene', label: 'Mess / Hygiene' },
+  { to: '/amrita/community', label: 'Community' },
+  { to: '/amrita/dashboard', label: 'Dashboard' },
+  { to: '/amrita/about', label: 'About' },
+  { to: '/amrita/contact', label: 'Contact' },
 ];
 
 export function NavbarAmrita() {
@@ -67,7 +67,7 @@ export function NavbarAmrita() {
           
           {/* LEFT: Floating Logo */}
           <div className="navbar-logo-pill pointer-events-auto flex min-w-0 items-center justify-center rounded-full bg-white/90 py-2 pl-2 pr-3 shadow-md backdrop-blur-xl border border-neutral-200/50 dark:border-white/10 dark:bg-[#111113]/80 sm:py-3 sm:px-6">
-            <Logo to="/" className="min-w-0" />
+            <Logo to="/amrita" className="min-w-0" />
           </div>
 
           {/* RIGHT: Floating Pill Navbar */}
@@ -80,7 +80,7 @@ export function NavbarAmrita() {
                 <li key={link.to}>
                   <NavLink
                     to={link.to}
-                    end={link.to === '/'}
+                    end={link.to === '/amrita'}
                     className={({ isActive }) =>
                       cn(
                         'px-3 py-1.5 text-xs font-medium transition-colors rounded-full',
@@ -158,7 +158,7 @@ export function NavbarAmrita() {
               )}
 
               <Link
-                to="/report"
+                to="/amrita/report"
                 className="ml-2 hidden lg:flex items-center gap-1.5 rounded-full bg-[#111] dark:bg-white px-4 py-1.5 text-xs font-medium text-white dark:text-black transition-transform hover:scale-105 active:scale-95"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -183,7 +183,7 @@ export function NavbarAmrita() {
               <li key={link.to}>
                 <NavLink
                   to={link.to}
-                  end={link.to === '/'}
+                  end={link.to === '/amrita'}
                   className={({ isActive }) =>
                     cn(
                       'flex items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-colors',
@@ -210,7 +210,7 @@ export function NavbarAmrita() {
                 Sign out
               </button>
             )}
-            <Link to="/report" className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#111] dark:bg-white px-4 py-3 text-sm font-medium text-white dark:text-black">
+            <Link to="/amrita/report" className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#111] dark:bg-white px-4 py-3 text-sm font-medium text-white dark:text-black">
               <Plus className="h-4 w-4" />
               Report an issue
             </Link>

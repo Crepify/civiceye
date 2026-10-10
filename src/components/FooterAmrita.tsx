@@ -1,29 +1,27 @@
 import { Link } from 'react-router-dom';
-import { Heart, Instagram, Linkedin, Mail, MapPin } from 'lucide-react';
+import { Heart, Mail, MapPin } from 'lucide-react';
 import { Logo } from './Logo';
 import { useBrand } from '@/hooks/useBrand';
 
 const QUICK_LINKS = [
-  { to: '/map', label: 'Interactive Map' },
   { to: '/amrita/map', label: 'Campus Map' },
-  { to: '/report', label: 'Report an Issue' },
-  { to: '/food-hygiene', label: 'Mess / Food Hygiene (Anonymous)' },
-  { to: '/community', label: 'Community Reports' },
-  { to: '/features', label: 'Features' },
+  { to: '/amrita/report', label: 'Report an Issue' },
+  { to: '/amrita/food-hygiene', label: 'Food Safety & Hygiene' },
+  { to: '/amrita/community', label: 'Community Reports' },
+  { to: '/amrita/dashboard', label: 'Campus Dashboard' },
 ];
 
 const COMPANY_LINKS = [
-  { to: '/about', label: 'About us' },
-  { to: '/contact', label: 'Contact' },
-  { to: '/features', label: 'How it works' },
+  { to: '/amrita/about', label: 'About Amrita Eye' },
+  { to: '/amrita/contact', label: 'Campus contacts' },
+  { to: '/amrita/map', label: 'How it works' },
 ];
 
 const AMRITA_PLACE = 'Amrita Vishwa Vidyapeetham \u00b7 Bengaluru Campus';
 
 const SOCIALS = [
-  { href: 'https://www.instagram.com/civiceye_offcial/', label: 'Instagram', icon: Instagram },
-  { href: 'https://www.linkedin.com/in/civiceye-official-21296242b', label: 'LinkedIn', icon: Linkedin },
-  { href: 'mailto:info@civiceye.co.in', label: 'Email', icon: Mail },
+  { href: 'https://www.amrita.edu/campus/bengaluru/', label: 'Amrita Bengaluru', icon: MapPin },
+  { href: 'mailto:info@blr.amrita.edu', label: 'Campus email', icon: Mail },
 ];
 
 /** Site-wide footer, structural HIG layout. */
@@ -40,7 +38,7 @@ export function FooterAmrita() {
               {meta.tagline}{' '}
               {isAmrita
                 ? 'Reports go straight to campus staff so they can act fast.'
-                : 'Citizens report, the community verifies, authorities fix.'}
+                : 'Students report, campus teams verify, and the responsible office acts.'}
             </p>
             <div className="mt-8 flex items-start gap-3 text-xs font-medium text-neutral-600 dark:text-neutral-300">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-neutral-900 dark:text-white" />
@@ -85,11 +83,11 @@ export function FooterAmrita() {
               ))}
             </ul>
             <a
-              href="mailto:info@civiceye.co.in"
+              href="mailto:info@blr.amrita.edu"
               className="mt-6 flex items-center gap-3 text-sm font-medium text-neutral-600 dark:text-neutral-300 transition-colors hover:text-neutral-900 dark:text-white"
             >
               <Mail className="h-4 w-4" />
-              info@civiceye.co.in
+              info@blr.amrita.edu
             </a>
           </nav>
 
@@ -113,7 +111,7 @@ export function FooterAmrita() {
               ))}
             </div>
             <p className="mt-8 rounded-sm bg-neutral-50 dark:bg-neutral-900 p-4 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-              Making cities better, one report at a time. Report a civic issue in seconds — AI verifies and routes it to the right team.
+              Campus issues, wayfinding, faculty rooms, and student safety in one verified campus workspace.
             </p>
           </div>
         </div>
@@ -137,7 +135,7 @@ export function FooterAmrita() {
               Terms of Service
             </Link>
             <span className="flex items-center gap-1.5 bg-neutral-100 dark:bg-neutral-800 px-2.5 py-1 rounded-sm">
-              Made for citizens
+              Built for the Amrita campus
               <Heart className="h-3 w-3 text-neutral-900 dark:text-white" />
             </span>
           </div>

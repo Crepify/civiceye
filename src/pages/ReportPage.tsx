@@ -343,12 +343,13 @@ function ReportWizard() {
         <div className="mb-10">
           <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">
             <Target className="h-4 w-4" />
-            Report an issue
+            {isAmrita ? 'Report a campus issue' : 'Report an issue'}
           </p>
-          <h1 className="heading-xl mt-2">60 seconds to a safer street</h1>
+          <h1 className="heading-xl mt-2">{isAmrita ? 'Make the campus easier to fix' : '60 seconds to a safer street'}</h1>
           <p className="mt-3 max-w-2xl text-sm text-slate-500 dark:text-slate-400 sm:text-base">
-            Your report is saved to the live database and shared with the community + staff who can
-            fix it.
+            {isAmrita
+              ? 'Add the exact block, floor, room, or campus location so the responsible team can act without guessing.'
+              : 'Your report is saved to the live database and shared with the community + staff who can fix it.'}
           </p>
         </div>
 
@@ -366,7 +367,7 @@ function ReportWizard() {
               setSubmitted(false);
             }}
             onMap={() => navigate('/map')}
-            onReport={() => createdId && navigate(`/report/${createdId}`)}
+             onReport={() => createdId && navigate(isAmrita ? `/amrita/report/${createdId}` : `/report/${createdId}`)}
           />
         ) : (
           <div className="mx-auto max-w-3xl">

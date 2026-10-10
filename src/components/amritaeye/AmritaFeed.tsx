@@ -188,7 +188,7 @@ export function AmritaFeed({ campusReports }: AmritaFeedProps) {
                         {formatReportDate(report.date)}
                       </time>
                       <Link
-                        to={`/report/${report.id}`}
+                        to={`/amrita/report/${report.id}`}
                         aria-label={`View report: ${report.title}`}
                         className="inline-flex items-center gap-2 rounded-none text-sm font-semibold text-neutral-900 dark:text-white underline decoration-neutral-300 underline-offset-4 transition-colors hover:decoration-neutral-900"
                       >

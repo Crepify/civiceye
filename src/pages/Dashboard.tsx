@@ -164,7 +164,7 @@ export function Dashboard() {
       '=================================================================',
     ];
     downloadTextFile(
-      `civiceye-ward-report-${new Date().toISOString().slice(0, 10)}.txt`,
+      `${isAmrita ? 'amrita-campus' : 'civiceye-ward'}-report-${new Date().toISOString().slice(0, 10)}.txt`,
       lines.join('\n'),
     );
     toast.success('Report generated', 'Ward report downloaded as a text file.');
@@ -217,7 +217,7 @@ export function Dashboard() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ReportToAuthority
-              subject="the selected ward package"
+              subject={isAmrita ? 'the selected campus package' : 'the selected ward package'}
               label="Report to authority"
               variant="primary"
             />
@@ -327,7 +327,7 @@ export function Dashboard() {
         </ChartCard>
 
         {/* Severity donut */}
-        <ChartCard title="Severity distribution" subtitle="Risk-weighted view of the ward">
+          <ChartCard title="Severity distribution" subtitle={isAmrita ? 'Risk-weighted view of campus issues' : 'Risk-weighted view of the ward'}>
           <div className="flex items-center gap-6">
             <div className="relative h-40 w-40 shrink-0">
               <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
@@ -525,7 +525,7 @@ export function Dashboard() {
 
       {/* Recent reports table */}
       <div className="section-pad mt-5">
-        <ChartCard title="Recent reports" subtitle="Latest citizen submissions awaiting action">
+        <ChartCard title="Recent reports" subtitle={isAmrita ? 'Latest campus submissions awaiting action' : 'Latest citizen submissions awaiting action'}>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead>
@@ -585,8 +585,13 @@ export function Dashboard() {
                       </td>
                       <td className="py-3.5 pr-4">
                         <div className="flex flex-col gap-1">
-                          <Badge className={cn(status.bg, status.color)}>{status.label}</Badge>
-                          {assigned ? (
+                           <Badge className={cn(status.bg, status.color)}>{status.label}</Badge>
+                           {r.authorityVerificationStatus === 'automated_resolved' ? (
+                             <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                               Automated verification · admin review pending
+                             </span>
+                           ) : null}
+                           {assigned ? (
                             <span className="text-[10px] font-medium text-slate-400">
                               {assigned.name}
                             </span>
@@ -646,7 +651,7 @@ export function Dashboard() {
               <Inbox className="mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
               <p className="text-sm font-bold text-slate-700 dark:text-slate-200">No reports yet</p>
               <p className="mt-1 text-xs text-slate-400">
-                Reports appear here the moment citizens submit them.
+                {isAmrita ? 'Reports appear here as students and staff submit campus issues.' : 'Reports appear here the moment citizens submit them.'}
               </p>
             </div>
           ) : null}

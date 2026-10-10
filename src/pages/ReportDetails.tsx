@@ -86,6 +86,8 @@ export function ReportDetails() {
     }
   };
 
+  const reportBasePath = report.scope === 'campus' ? '/amrita/report' : '/report';
+
   return (
     <div className="pb-20 pt-[calc(var(--nav-height)+2.5rem)] sm:pt-[calc(var(--nav-height)+3.5rem)]">
       <div className="section-pad">
@@ -361,7 +363,7 @@ export function ReportDetails() {
                 variant="primary"
                 className="w-full"
               />
-              <Link to="/report" className="btn-ghost w-full">
+              <Link to={reportBasePath} className="btn-ghost w-full">
                 File your own report
               </Link>
             </div>

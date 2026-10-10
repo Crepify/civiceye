@@ -10,9 +10,16 @@
 
 -- ---------- MIGRATIONS for databases created before this version ----
 alter table if exists public.reports add column if not exists scope text not null default 'city';
+alter table if exists public.reports
+  add column if not exists authority_verification_status text not null default 'none',
+  add column if not exists authority_replied_at timestamptz,
+  add column if not exists authority_reply_from text,
+  add column if not exists authority_reply_subject text,
+  add column if not exists authority_reply_reference text;
 
 do $$
 begin
+  if to_regclass('public.reports') is null then return; end if;
   if not exists (select 1 from pg_constraint where conname = 'reports_scope_check') then
     alter table public.reports add constraint reports_scope_check check (scope in ('city','campus'));
   end if;
@@ -21,6 +28,10 @@ begin
       ('pothole','broken-road','garbage','sidewalk','manhole','fallen-tree',
        'street-light','water-leakage','sewage','illegal-dumping',
        'traffic-signal','accident','security','other'));
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'reports_authority_verification_status_check') then
+    alter table public.reports add constraint reports_authority_verification_status_check
+      check (authority_verification_status in ('none','needs_review','automated_resolved','admin_approved','admin_rejected'));
   end if;
 end $$;
 
@@ -126,6 +137,11 @@ create table if not exists public.reports (
   rejects       int not null default 0,
   verified      boolean not null default false,
   assigned_to   text,
+  authority_verification_status text not null default 'none' check (authority_verification_status in ('none','needs_review','automated_resolved','admin_approved','admin_rejected')),
+  authority_replied_at timestamptz,
+  authority_reply_from text,
+  authority_reply_subject text,
+  authority_reply_reference text,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
@@ -134,17 +150,63 @@ create index if not exists reports_status_idx  on public.reports (status);
 create index if not exists reports_category_idx on public.reports (category);
 create index if not exists reports_created_idx on public.reports (created_at desc);
 create index if not exists reports_scope_idx   on public.reports (scope);
+create index if not exists reports_authority_verification_idx on public.reports (authority_verification_status);
 
 alter table public.reports enable row level security;
 
+-- Normalised authority replies are retained for admin review. The inbound
+-- webhook uses the service role; dashboard users only see these records when
+-- an admin policy permits it.
+create table if not exists public.authority_responses (
+  id uuid primary key default gen_random_uuid(),
+  report_id uuid not null references public.reports(id) on delete cascade,
+  message_id text unique,
+  sender_email text not null,
+  subject text not null default '',
+  body text not null default '',
+  validation_status text not null default 'needs_review' check (validation_status in ('accepted','needs_review','rejected')),
+  validation_reason text,
+  admin_review_status text not null default 'pending' check (admin_review_status in ('pending','approved','rejected')),
+  received_at timestamptz not null default now(),
+  reviewed_at timestamptz,
+  reviewed_by uuid references auth.users(id) on delete set null
+);
+
+create index if not exists authority_responses_report_idx on public.authority_responses (report_id, received_at desc);
+alter table public.authority_responses enable row level security;
+drop policy if exists "authority responses admin read" on public.authority_responses;
+create policy "authority responses admin read" on public.authority_responses for select using (public.is_admin());
+drop policy if exists "authority responses admin update" on public.authority_responses;
+create policy "authority responses admin update" on public.authority_responses for update using (public.is_admin()) with check (public.is_admin());
+
+-- Campus access is enforced in the database as well as in React. An Amrita
+-- address may be a student subdomain (for example *.students.amrita.edu) or
+-- the staff domain itself; lookalike domains are not accepted.
+create or replace function public.is_amrita_user()
+returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select lower(coalesce(auth.jwt()->>'email', '')) ~ '@([a-z0-9-]+\.)*amrita\.edu$';
+$$;
+
 drop policy if exists "reports public read"   on public.reports;
-create policy "reports public read"   on public.reports for select using (true);
+create policy "reports public read"   on public.reports for select
+  using (scope = 'city' or public.is_amrita_user() or public.is_admin());
 
 drop policy if exists "reports auth insert"   on public.reports;
-create policy "reports auth insert"   on public.reports for insert with check (auth.uid() is not null);
+create policy "reports auth insert"   on public.reports for insert
+  with check (
+    auth.uid() is not null
+    and (scope = 'city' or public.is_amrita_user() or public.is_admin())
+  );
 
 drop policy if exists "reports auth update"   on public.reports;
-create policy "reports auth update"   on public.reports for update using (auth.uid() is not null);
+create policy "reports auth update"   on public.reports for update
+  using (auth.uid() = user_id or public.is_admin())
+  with check (
+    (auth.uid() = user_id or public.is_admin())
+    and (scope = 'city' or public.is_amrita_user() or public.is_admin())
+  );
 
 -- Owners delete their own; admins (is_admin) can take down any post.
 drop policy if exists "reports delete"  on public.reports;

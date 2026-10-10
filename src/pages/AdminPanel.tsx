@@ -13,6 +13,8 @@ import { categoryById } from '@/data/categories';
 import { timeAgo } from '@/utils/format';
 import { cn } from '@/utils/cn';
 import { supabase } from '@/lib/supabase';
+import { AdminRouteEditor } from '@/components/AdminRouteEditor';
+import { AuthorityResponseReview } from '@/components/AuthorityResponseReview';
 
 /** Staff / admin panel — flagged posts, take-downs, user details. */
 export function AdminPanel() {
@@ -217,7 +219,7 @@ export function AdminPanel() {
                           </span>
                         </div>
                         <Link
-                          to={`/report/${rep?.id}`}
+                          to={`/${rep?.scope === 'campus' ? 'amrita/' : ''}report/${rep?.id}`}
                           className="mt-1.5 block text-sm font-bold text-slate-900 hover:text-primary-600 dark:text-white"
                         >
                           {rep?.title ?? 'Unknown post'}
@@ -347,6 +349,10 @@ export function AdminPanel() {
         </div>
 
 ) : null}
+
+        <AuthorityResponseReview />
+
+        {brand === 'amrita' ? <AdminRouteEditor /> : null}
 
         {/* Users (student details) */}
         
