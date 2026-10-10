@@ -20,6 +20,10 @@ export const isEmailJSConfigured = Boolean(
 export const newEscalationRef = (): string =>
   `ESC-${Date.now().toString(36).toUpperCase()}`;
 
+function reportUrl(report: Report): string {
+  return `${window.location.origin}/${report.scope === 'campus' ? 'amrita/' : ''}report/${report.id}`;
+}
+
 /**
  * Send the escalation via EmailJS from the browser. Variable names here must
  * match the EmailJS template (documented in ENVIRONMENT.md).
@@ -32,7 +36,7 @@ export async function sendEscalationViaEmailJS(
   ref: string,
   opts: { slaBreach?: boolean; level?: number } = {},
 ): Promise<void> {
-  const reportUrl = `${window.location.origin}/report/${report.id}`;
+  const reportUrlValue = reportUrl(report);
   const mapsUrl = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
   const mapsDirUrl = `https://www.google.com/maps/dir/?api=1&destination=${report.coordinates.lat},${report.coordinates.lng}`;
   const ai = report.ai;
@@ -57,7 +61,7 @@ export async function sendEscalationViaEmailJS(
       coordinates: `${report.coordinates.lat}, ${report.coordinates.lng}`,
       maps_url: mapsUrl,
       maps_dir_url: mapsDirUrl,
-      report_url: reportUrl,
+       report_url: reportUrlValue,
       image_url: report.image,
       annotated_image_url: ai?.annotatedImage ?? '',
       ai_confidence: ai?.confidence ? Math.round(ai.confidence * 100) + '%' : '',
@@ -164,7 +168,7 @@ export async function buildEscalationPayload(
       locationName: report.locationName,
       coordinates: report.coordinates,
       image: image ?? report.image, // fall back to original ref (URL) if too big
-      url: `${window.location.origin}/report/${report.id}`,
+       url: reportUrl(report),
       author: report.author,
       reporterEmail: reporterEmail ?? undefined,
       scope: report.scope,
@@ -222,7 +226,7 @@ export function escalationEmailText(
   message?: string,
   opts: { slaBreach?: boolean; level?: number } = {},
 ): { subject: string; body: string } {
-  const url = `${window.location.origin}/report/${report.id}`;
+  const url = reportUrl(report);
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const mapsLink = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
   const severityUpper = report.severity.toUpperCase();
@@ -256,7 +260,7 @@ export function escalationWhatsAppTargets(
 ): { number: string; url: string }[] {
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const mapsLink = `https://www.google.com/maps?q=${report.coordinates.lat},${report.coordinates.lng}`;
-  const reportUrl = `${window.location.origin}/report/${report.id}`;
+  const reportUrlValue = reportUrl(report);
   const ai = report.ai;
   const header = opts.slaBreach
     ? `⚠️ SLA BREACH (L${opts.level ?? 1}) — `
@@ -267,7 +271,7 @@ export function escalationWhatsAppTargets(
     `Category: ${report.category} · Severity: ${report.severity.toUpperCase()}`,
     `Location: ${report.locationName}`,
     `Maps: ${mapsLink}`,
-    `Report: ${reportUrl}`,
+    `Report: ${reportUrlValue}`,
     `Original Photo: ${report.image}`,
     ai?.annotatedImage ? `AI Annotated: ${ai.annotatedImage}` : '',
     ai?.summary ? `AI: ${ai.summary} (${ai.confidence ? Math.round(ai.confidence*100)+'%' : ''})` : '',
@@ -287,7 +291,7 @@ export function escalationSmsUrl(
     `${header}${appName} report: ${report.title}`,
     `Category: ${report.category} · Severity: ${report.severity}`,
     `Location: ${report.locationName} (${report.coordinates.lat}, ${report.coordinates.lng})`,
-    `Details: ${window.location.origin}/report/${report.id}`,
+    `Details: ${reportUrl(report)}`,
   ].join('\n');
   return smsLink(authority, text);
 }

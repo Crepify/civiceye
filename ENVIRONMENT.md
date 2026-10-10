@@ -48,6 +48,31 @@ cp .env.example .env     # then edit .env
 
 > 💡 **No-key fallback:** leave the key empty and the app still works — `MapView` renders the built-in vector map (`FallbackMapView`) with the same markers, clustering, heatmap and interactions. This is intentional so judges/demo machines never hit a blank map.
 
+## Server-only authority workflow variables
+
+These variables are used by Vercel API routes and must **not** be prefixed with
+`VITE_` or exposed to the browser:
+
+| Variable | Purpose |
+| --- | --- |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP delivery for authority and resolution emails. |
+| `SMTP_FROM` | CivicEye sender address. |
+| `AMRITA_SMTP_FROM` | Optional Amrita Eye sender address, for example `Amrita Eye <alerts@blr.amrita.edu>`. |
+| `AMRITA_REPLY_EMAIL` | Amrita reply-to and campus authority inbox fallback; defaults to `info@blr.amrita.edu`. |
+| `AUTHORITY_EMAIL_<ID>` | Optional server-side override for an allow-listed authority inbox. |
+| `EMAIL_WEBHOOK_SECRET` | Shared secret used by the resolution-notification route. |
+| `AUTHORITY_INBOUND_SECRET` | Shared secret sent by the selected inbound email provider to `/api/authority-inbound`. |
+| `SUPABASE_URL` | Supabase URL for the inbound authority webhook. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase key for normalising authority replies. Never expose it to Vite. |
+
+The inbound route expects a provider-normalised POST body containing `from`,
+`subject`, `text`, a `CE-XXXXXXXX` report reference, and preferably `messageId`
+for deduplication. Supply the secret in `x-authority-webhook-secret`.
+It stores replies for admin review; email wording alone never resolves a case.
+Provider sender-authentication and automated evidence validation remain pending.
+Apply `supabase/schema.sql`, `supabase/authority_responses.sql` (including the
+atomic review RPC), and `supabase/campus_routes.sql` before enabling these tools.
+
 ## 🔐 Security notes
 
 - `VITE_*` vars are public by design — never put server secrets there.

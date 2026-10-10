@@ -25,12 +25,9 @@ export function AmritaHero() {
     <section
       id="hero"
       aria-labelledby="amrita-hero-title"
-      className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden bg-transparent"
+      className="relative overflow-hidden bg-[#26060f] pb-24 pt-32 lg:pb-36 lg:pt-48 dark:bg-[#140208]"
     >
-      {/* Readability fade over the ASCII backdrop — keeps hero text crisp on
-          any screen size, light or dark. */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/70 dark:from-black/60 dark:via-black/30 dark:to-[#1A030A]/80" aria-hidden="true" />
-      {/* Soft glow to lift the headline off the characters */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#26060f] via-[#4c0d20]/80 to-[#26060f] dark:from-[#140208] dark:via-[#2b0712] dark:to-[#140208]" aria-hidden="true" />
       <div className="pointer-events-none absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-[#E52B50]/20 blur-[120px] dark:bg-[#E52B50]/25" aria-hidden="true" />
 
       <motion.div 
@@ -73,21 +70,21 @@ export function AmritaHero() {
         {/* CTAs */}
         <motion.div variants={itemVariants} className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
           <Link
-            to="/report"
+            to="/amrita/report"
             className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-[#A51636] px-8 text-base font-semibold text-white transition-opacity hover:opacity-90 active:scale-95 dark:bg-[#E52B50]"
           >
             Report an issue
           </Link>
 
           <Link
-            to="/food-hygiene"
+            to="/amrita/food-hygiene"
             className="inline-flex h-14 items-center justify-center gap-2 rounded-full border-2 border-[#A51636] bg-[#fffdf4] px-6 text-sm font-bold uppercase tracking-wider text-[#A51636] shadow-[4px_4px_0_#A51636] transition hover:-translate-y-0.5 hover:bg-[#ffd630] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#A51636]"
           >
             🍛 Mess / Food Hygiene — Anonymous
           </Link>
 
           <Link
-            to="/map"
+            to="/amrita/map"
             className="inline-flex h-14 items-center justify-center rounded-full border border-neutral-300 bg-white px-8 text-base font-semibold text-[#1D1D1F] transition-colors hover:bg-neutral-50 dark:bg-transparent dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-900"
           >
             View campus map

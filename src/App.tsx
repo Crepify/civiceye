@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation, useParams } from 'react-router-dom';
 import { primeComicAudio } from '@/utils/comicSound';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
@@ -32,7 +32,13 @@ import { NotFound } from '@/pages/NotFound';
 import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
 import { TermsOfService } from '@/pages/TermsOfService';
 import { FoodHygienePage } from '@/pages/FoodHygiene';
+import { AmritaFoodHygienePage } from '@/pages/AmritaFoodHygiene';
 import { RequireAdmin } from '@/components/RequireAdmin';
+import { RequireAmrita } from '@/components/RequireAmrita';
+import { AmritaAbout } from '@/pages/AmritaAbout';
+import { AmritaFeatures } from '@/pages/AmritaFeatures';
+import { AmritaContact } from '@/pages/AmritaContact';
+import { AmritaLegalPage } from '@/pages/AmritaLegalPage';
 
 /**
  * CivicEye / Amrita Eye application shell.
@@ -49,8 +55,9 @@ export default function App() {
 
   // Browsers gate audio behind a user gesture; arm it once per visit.
   useEffect(() => {
+    if (isAmrita || location.pathname.startsWith('/amrita')) return;
     primeComicAudio();
-  }, []);
+  }, [isAmrita, location.pathname]);
 
   // Land on the right spot for anchor links like /about#creators.
   useEffect(() => {
@@ -82,10 +89,18 @@ export default function App() {
   // CivicEye, floating pill for Amrita Eye). Pages that manage their own
   // clearance (home, map, amrita landing, auth) are excluded.
   const p = location.pathname;
+  const amritaOwnsNavPad = new Set([
+    '/amrita',
+    '/amrita/map',
+    '/amrita/food-hygiene',
+    '/amrita/features',
+    '/amrita/about',
+    '/amrita/contact',
+  ]).has(p);
   const needsNavPad =
     !isAuthPage &&
     p !== '/' &&
-    !p.startsWith('/amrita') &&
+    !amritaOwnsNavPad &&
     p !== '/map';
 
   // Everything else requires a signed-in user (login-first app).
@@ -95,20 +110,28 @@ export default function App() {
           (koushikkkkkkkkkk.github.io/civiceye design); everyone else gets
           the CivicEye comic landing. */}
       <Route path="/" element={isAmrita ? <AmritaEye /> : <Landing />} />
-      <Route path="/amrita" element={<AmritaEye />} />
-      <Route path="/amrita/map" element={<AmritaMapPage />} />
-      <Route path="/features" element={<Features />} />
-      <Route path="/map" element={<MapPage />} />
-      <Route path="/live" element={<LiveDetection />} />
-      <Route path="/report" element={<ReportPage />} />
-      <Route path="/report/:id" element={<ReportDetails />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/community" element={<Community />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/terms" element={<TermsOfService />} />
-      <Route path="/food-hygiene" element={<FoodHygienePage />} />
+      <Route path="/amrita" element={<RequireAmrita><AmritaEye /></RequireAmrita>} />
+      <Route path="/amrita/map" element={<RequireAmrita><AmritaMapPage /></RequireAmrita>} />
+      <Route path="/amrita/food-hygiene" element={<RequireAmrita><AmritaFoodHygienePage /></RequireAmrita>} />
+      <Route path="/amrita/report" element={<RequireAmrita><ReportPage /></RequireAmrita>} />
+      <Route path="/amrita/report/:id" element={<RequireAmrita><ReportDetails /></RequireAmrita>} />
+      <Route path="/amrita/community" element={<RequireAmrita><Community /></RequireAmrita>} />
+      <Route path="/amrita/dashboard" element={<RequireAmrita><Dashboard /></RequireAmrita>} />
+      <Route path="/amrita/features" element={<RequireAmrita><AmritaFeatures /></RequireAmrita>} />
+      <Route path="/amrita/about" element={<RequireAmrita><AmritaAbout /></RequireAmrita>} />
+      <Route path="/amrita/contact" element={<RequireAmrita><AmritaContact /></RequireAmrita>} />
+      <Route path="/features" element={isAmrita ? <Navigate to="/amrita/features" replace /> : <Features />} />
+      <Route path="/map" element={isAmrita ? <Navigate to="/amrita/map" replace /> : <MapPage />} />
+      <Route path="/live" element={isAmrita ? <Navigate to="/amrita" replace /> : <LiveDetection />} />
+      <Route path="/report" element={isAmrita ? <Navigate to="/amrita/report" replace /> : <ReportPage />} />
+      <Route path="/report/:id" element={isAmrita ? <AmritaReportRedirect /> : <ReportDetails />} />
+      <Route path="/dashboard" element={isAmrita ? <Navigate to="/amrita/dashboard" replace /> : <Dashboard />} />
+      <Route path="/community" element={isAmrita ? <Navigate to="/amrita/community" replace /> : <Community />} />
+      <Route path="/about" element={isAmrita ? <Navigate to="/amrita/about" replace /> : <About />} />
+      <Route path="/contact" element={isAmrita ? <Navigate to="/amrita/contact" replace /> : <Contact />} />
+      <Route path="/privacy" element={isAmrita ? <AmritaLegalPage kind="privacy" /> : <PrivacyPolicy />} />
+      <Route path="/terms" element={isAmrita ? <AmritaLegalPage kind="terms" /> : <TermsOfService />} />
+      <Route path="/food-hygiene" element={isAmrita ? <Navigate to="/amrita/food-hygiene" replace /> : <FoodHygienePage />} />
       <Route path="/admin" element={<RequireAdmin><AdminPanel /></RequireAdmin>} />
       <Route path="/admin/backfill" element={<RequireAdmin><AdminBackfill /></RequireAdmin>} />
       <Route path="/debug" element={<RequireAdmin><Debug /></RequireAdmin>} />
@@ -156,4 +179,9 @@ export default function App() {
       {!isAuthPage ? (amritaChrome ? <FooterAmrita /> : <Footer />) : null}
     </div>
   );
+}
+
+function AmritaReportRedirect() {
+  const { id } = useParams();
+  return <Navigate to={id ? `/amrita/report/${id}` : '/amrita/report'} replace />;
 }

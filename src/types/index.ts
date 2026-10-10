@@ -26,6 +26,13 @@ export type Severity = 'low' | 'medium' | 'high' | 'critical';
 /** Lifecycle of a report. */
 export type ReportStatus = 'pending' | 'verified' | 'in-progress' | 'resolved' | 'rejected';
 
+export type AuthorityVerificationStatus =
+  | 'none'
+  | 'needs_review'
+  | 'automated_resolved'
+  | 'admin_approved'
+  | 'admin_rejected';
+
 /** A geographic point. */
 export interface Coordinates {
   lat: number;
@@ -53,6 +60,11 @@ export interface Report {
   verified: boolean;
   author: string;
   assignedTo?: string;
+  authorityVerificationStatus?: AuthorityVerificationStatus;
+  authorityReplyFrom?: string;
+  authorityReplySubject?: string;
+  authorityReplyReference?: string;
+  authorityRepliedAt?: string;
   userId?: string;
   scope: 'city' | 'campus';
   ai?: {

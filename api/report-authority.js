@@ -55,12 +55,14 @@ function sanitizeString(input, maxLen = 5000) {
  * SMTP_FROM env is the source of truth. If it's not set yet we fall back to
  * the canonical info@ address (SMTP_USER still has to be a real Gmail user
  * for auth, but we set From to the branded address). */
-const BRAND_EMAIL = 'info@civiceye.co.in';
-function fromAddress() {
-  return process.env.SMTP_FROM || `CivicEye <${BRAND_EMAIL}>`;
+const CIVIC_EMAIL = 'info@civiceye.co.in';
+const AMRITA_EMAIL = process.env.AMRITA_REPLY_EMAIL || 'info@blr.amrita.edu';
+function fromAddress(scope) {
+  if (scope === 'campus') return process.env.AMRITA_SMTP_FROM || `Amrita Eye <${AMRITA_EMAIL}>`;
+  return process.env.SMTP_FROM || `CivicEye <${CIVIC_EMAIL}>`;
 }
-function teamReplyTo() {
-  return { replyTo: BRAND_EMAIL };
+function teamReplyTo(scope) {
+  return { replyTo: scope === 'campus' ? AMRITA_EMAIL : CIVIC_EMAIL };
 }
 
 /* Built-in authority directory (id → { name, department, email }).
@@ -74,16 +76,16 @@ const DIRECTORY = {
   bescom: { name: 'BESCOM 1912', department: 'Street Lighting & Power', email: '' },
   'traffic-police': { name: 'Bengaluru Traffic Police', department: 'Traffic & Signals', email: '' },
   'forest-dept': { name: 'BBMP Forest Cell', department: 'Trees & Parks', email: 'comm@bbmp.gov.in' },
-  'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: BRAND_EMAIL },
-  'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: BRAND_EMAIL },
-  'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: BRAND_EMAIL },
+  'amrita-estate': { name: 'Campus Estate & Civil Works', department: 'Campus Infrastructure', email: AMRITA_EMAIL },
+  'amrita-facilities': { name: 'Facilities & Housekeeping', department: 'Sanitation, Water & Electrical', email: AMRITA_EMAIL },
+  'amrita-security': { name: 'Campus Security Control Room', department: 'Safety & Security', email: AMRITA_EMAIL },
   /* SLA-breach higher authorities (city) */
   'bbmp-commissioner': { name: 'BBMP Commissioner', department: 'Office of the Commissioner · Level 1 escalation', email: 'comm@bbmp.gov.in' },
   'bbmp-chief-mayor': { name: 'BBMP Chief Commissioner + Mayor', department: 'Level 2 escalation', email: 'comm@bbmp.gov.in' },
   'ka-udd': { name: 'Karnataka Urban Development Dept', department: 'Principal Secretary UDD · Level 3 escalation', email: 'secyudd@karnataka.gov.in' },
   /* SLA-breach higher authorities (campus) */
-  'amrita-dean': { name: 'Dean / Director Office', department: 'Level 1 escalation — Campus Administration', email: BRAND_EMAIL },
-  'amrita-vc': { name: 'Vice Chancellor Office', department: 'Level 2 escalation', email: BRAND_EMAIL },
+  'amrita-dean': { name: 'Dean / Director Office', department: 'Level 1 escalation — Campus Administration', email: AMRITA_EMAIL },
+  'amrita-vc': { name: 'Vice Chancellor Office', department: 'Level 2 escalation', email: AMRITA_EMAIL },
 };
 
 // Max overall JSON payload (after parsing) — ~9 MB. After base64 overhead this
@@ -137,7 +139,7 @@ function buildEmail({ authority, report, message, ref, origin }) {
   const mapsUrl = hasCoords ? `https://www.google.com/maps?q=${lat},${lng}` : null;
   const mapsDirUrl = hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : null;
   origin = origin || 'https://civiceye.co.in';
-  const reportUrl = report.url || (report.id ? `${origin}/report/${report.id}` : null);
+  const reportUrl = report.url || (report.id ? `${origin}/${report.scope === 'campus' ? 'amrita/' : ''}report/${report.id}` : null);
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
   const isCampus = report.scope === 'campus';
   const severityUpper = String(report.severity || '').toUpperCase();
@@ -261,6 +263,11 @@ export default async function handler(req, res) {
     res.status(400).json({ error: '`report.title` and `report.category` are required.' });
     return;
   }
+  const campusAuthority = authorityId.startsWith('amrita-');
+  if ((report.scope === 'campus') !== campusAuthority) {
+    res.status(403).json({ error: 'Authority scope does not match the report scope.' });
+    return;
+  }
 
   const message = sanitizeString(String(raw.message || ''), 2000);
   const ref = `ESC-${Date.now().toString(36).toUpperCase()}`;
@@ -325,14 +332,14 @@ export default async function handler(req, res) {
     // For data URLs we attach, for http we leave as link (to avoid fetching in serverless)
 
     await transport.sendMail({
-      from: fromAddress(),
+      from: fromAddress(report.scope),
       to,
-      // When the authority hits Reply, it routes to the CivicEye inbox by
-      // default; if the citizen attached their email we include it so the
-      // authority can reply directly to the reporter AND copy us.
+      // When the authority hits Reply, it routes to the active product inbox;
+      // if the citizen attached their email we include it so the authority can
+      // reply directly to the reporter AND copy the team.
       replyTo: report.reporterEmail
-        ? `${String(report.reporterEmail).slice(0, 254)}, ${BRAND_EMAIL}`
-        : BRAND_EMAIL,
+        ? `${String(report.reporterEmail).slice(0, 254)}, ${teamReplyTo(report.scope).replyTo}`
+        : teamReplyTo(report.scope).replyTo,
       subject: mail.subject,
       text: mail.text,
       html: mail.html,

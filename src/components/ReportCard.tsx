@@ -27,6 +27,7 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
   const sla = useMemo(() => getSLAStatus(report), [report]);
   const hasProof = Boolean(report.proof?.afterImage);
   const isEscalated = Boolean(report.escalation && report.escalation.level > 0);
+  const reportPath = `/${report.scope === 'campus' ? 'amrita/' : ''}report/${report.id}`;
 
   return (
     <motion.article
@@ -37,7 +38,7 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
       transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
       className="group card flex flex-col overflow-hidden"
     >
-      <Link to={`/report/${report.id}`} className="relative block overflow-hidden" aria-label={report.title}>
+      <Link to={reportPath} className="relative block overflow-hidden" aria-label={report.title}>
         <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
           <img src={displayImage} alt={report.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         </div>
@@ -92,7 +93,7 @@ export function ReportCard({ report, index = 0 }: ReportCardProps) {
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
-        <Link to={`/report/${report.id}`} className="text-base font-bold leading-snug text-slate-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400">
+        <Link to={reportPath} className="text-base font-bold leading-snug text-slate-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400">
           {report.title}
         </Link>
         <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{report.description}</p>

@@ -28,7 +28,11 @@ import {
 } from 'lucide-react';
 import type { Report, Coordinates } from '@/types';
 import { CAMPUS_GEO } from '@/data/amritaCampus/geo';
-import { CAMPUS_FLOORS } from '@/data/amritaCampus/floors';
+import { CAMPUS_FLOORS } from '@/data/amritaCampus/floorCatalog';
+import { getCampusRouteNetwork, saveCampusRouteNetwork } from '@/data/amritaCampus/routeNetwork';
+import { getOfficialFloorPlan } from '@/data/amritaCampus/officialFloorPlans';
+import { supabase } from '@/lib/supabase';
+import { OFFICIAL_FLOOR_PLANS } from '@/data/amritaCampus/officialFloorPlans';
 import { ALL_FACULTY } from '@/data/amritaCampus/allFaculty';
 import { generateProperFloorPlan, ProperFloorPlanSVG } from '@/tools/amritaFloorPlanTool';
 import { cn } from '@/utils/cn';
@@ -86,9 +90,10 @@ function svgToLatLngString(x: number, y: number) {
 
 // Campus navigation
 type NavNode = CampusPoint;
-const NAV_NODES: NavNode[] = CAMPUS_GEO.nav.nodes as unknown as any;
-const NAV_EDGES: [number, number][] = CAMPUS_GEO.nav.edges as unknown as any;
-const NAV_POIS = CAMPUS_GEO.nav.pois as unknown as any[];
+const CAMPUS_ROUTE_NETWORK = getCampusRouteNetwork();
+const NAV_NODES: NavNode[] = CAMPUS_ROUTE_NETWORK.nodes as unknown as any;
+const NAV_EDGES: [number, number][] = CAMPUS_ROUTE_NETWORK.edges as unknown as any;
+const NAV_POIS = CAMPUS_ROUTE_NETWORK.pois as unknown as any[];
 
 const navAdj: Record<number, number[]> = {};
 NAV_EDGES.forEach(([a, b]) => {
@@ -187,6 +192,11 @@ const SEV_COLOR: Record<string, string> = {
  critical: '#ef4444',
 };
 
+function getOfficialFloorPlanSource(buildingId: string, floorId: string): string {
+ const official = getOfficialFloorPlan(buildingId, floorId);
+ return official?.source || '/floor-plans/block-a-official.pdf';
+}
+
 // Props
 interface AmritaCampusMapProps {
  reports?: Report[];
@@ -233,6 +243,29 @@ export function AmritaCampusMap({
  const [info, setInfo] = useState<any>(null);
  const [infoOpen, setInfoOpen] = useState(false);
 
+ // Pull the latest published admin graph into the local cache. The graph is
+ // loaded before this module's route constants on the next visit; reloading
+ // only when a newer version exists keeps ordinary map use inexpensive.
+ useEffect(() => {
+   if (!supabase) return;
+   void (async () => {
+     const { data } = await supabase
+       .from('campus_route_versions')
+       .select('network')
+       .eq('published', true)
+       .order('created_at', { ascending: false })
+       .limit(1)
+       .maybeSingle();
+     const network = data?.network as ReturnType<typeof getCampusRouteNetwork> | undefined;
+     if (!network || typeof network.version !== 'number') return;
+     const local = getCampusRouteNetwork();
+     if (network.version > local.version) {
+       saveCampusRouteNetwork(network);
+       window.location.reload();
+     }
+   })();
+ }, []);
+
  // Nav
  const [navFrom, setNavFrom] = useState<string>('');
  const [navTo, setNavTo] = useState<string>('');
@@ -273,7 +306,6 @@ export function AmritaCampusMap({
  });
  });
  (CAMPUS_GEO.blocks as unknown as any[]).forEach((b: any) => {
- if (b.part !== 0) return;
  items.push({
  kind: 'block',
  id: `block-${b.block}`,
@@ -310,7 +342,7 @@ export function AmritaCampusMap({
  });
  });
  // Floors spaces
- Object.entries(CAMPUS_FLOORS.buildings as any).forEach(([bid, b]: any) => {
+  Object.entries(CAMPUS_FLOORS.buildings as any).forEach(([bid, b]: any) => {
  b.floors.forEach((fl: any) => {
  fl.spaces.forEach((sp: any) => {
  const isHall = sp.capacity && sp.capacity > 25;
@@ -325,8 +357,8 @@ export function AmritaCampusMap({
  spaceId: sp.id,
  point: [sp.x + sp.w / 2, sp.y + sp.h / 2],
  raw: sp,
- });
- (sp.seats || []).forEach((seat: any) => {
+  });
+  (sp.seats || []).forEach((seat: any) => {
  items.push({
  kind: 'faculty',
  id: seat.id,
@@ -340,11 +372,34 @@ export function AmritaCampusMap({
  point: [seat.x, seat.y],
  raw: { ...seat, space: sp, floor: fl, building: b },
  });
- });
- });
- });
- });
- // Extended faculty without seats
+  });
+  });
+  });
+  });
+  // The official PDF index is searchable even for floors that were not part
+  // of the older generated dataset (notably A-D third floors and E5-E7).
+  // Keep this outside the legacy space loop so each official room appears once.
+  OFFICIAL_FLOOR_PLANS.forEach((plan) => {
+    plan.rooms.forEach((room, index) => {
+      items.push({
+        kind: room.type === 'hall' ? 'hall' : 'building',
+        id: `${plan.floorId}-${room.label}-${index}`,
+        name: room.name,
+        sub: `${room.label} · Block ${plan.buildingId.toUpperCase()} · ${plan.floorName}`,
+        rank: room.type === 'hall' ? 1 : 2,
+        buildingId: plan.buildingId,
+        floorId: plan.floorId,
+        spaceId: `${plan.floorId}-${index}`,
+        raw: {
+          ...room,
+          label: room.label,
+          name: room.name,
+          type: room.type === 'library' ? 'amenity' : room.type === 'washroom' ? 'restroom' : room.type,
+        },
+      });
+    });
+  });
+  // Extended faculty without seats
  ALL_FACULTY.forEach((f: any) => {
  if (!items.some((it) => it.kind === 'faculty' && it.name === f.name)) {
  items.push({
@@ -1090,27 +1145,47 @@ export function AmritaCampusMap({
  <span className="text-slate-600 dark:text-slate-300">
  {view.mode === 'campus' ? `Campus` : `${currentBuilding?.name} › ${currentFloor?.name}`}
  </span>
- {view.mode === 'floor' ? (
- <div className="ml-auto flex gap-1">
- {Object.entries(CAMPUS_FLOORS.buildings as any).map(([bid, b]: any) => (
+  {view.mode === 'floor' ? (
+  <div className="ml-auto flex flex-wrap items-center justify-end gap-1">
+  {Object.entries(CAMPUS_FLOORS.buildings as any).map(([bid, b]: any) => (
  <button
  key={bid}
  onClick={() => setView({ mode: 'floor', buildingId: bid, floorId: b.floors[0].id })}
  className={cn('rounded-full px-2.5 py-1 text-xs font-bold', (view as any).buildingId === bid ? 'bg-[#A51636] text-white' : 'bg-white text-slate-600 dark:bg-white/10 dark:text-slate-300')}
  >
  {b.name.replace('Block ', '')}
- </button>
- ))}
- </div>
+  </button>
+  ))}
+  {currentBuilding ? (
+  <select
+    value={(view as any).floorId}
+    onChange={(event) => setView({ mode: 'floor', buildingId: (view as any).buildingId, floorId: event.target.value })}
+    aria-label="Choose floor"
+    className="ml-1 rounded-full border border-[#A51636]/20 bg-white px-2.5 py-1 text-xs font-bold text-[#A51636] outline-none dark:bg-white/10"
+  >
+    {currentBuilding.floors.map((floor: any) => <option key={floor.id} value={floor.id}>{floor.name}</option>)}
+  </select>
+  ) : null}
+  </div>
  ) : null}
  </div>
 
- {view.mode === 'floor' ? (
- <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2 text-xs text-slate-600 dark:border-white/5 dark:bg-white/5 dark:text-slate-300">
- <Building2 className="h-4 w-4 shrink-0 text-[#A51636]" />
- <span>Floor plan — tap a room to see details</span>
- </div>
- ) : null}
+  {view.mode === 'floor' ? (
+  <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2 text-xs text-slate-600 dark:border-white/5 dark:bg-white/5 dark:text-slate-300">
+  <Building2 className="h-4 w-4 shrink-0 text-[#A51636]" />
+  <span>Floor plan — tap a room to see details</span>
+  {currentFloor ? (
+  <a
+    href={getOfficialFloorPlanSource((view as any).buildingId, (view as any).floorId)}
+    target="_blank"
+    rel="noreferrer"
+    className="ml-auto font-semibold text-[#A51636] underline underline-offset-2"
+  >
+    Original PDF
+  </a>
+  ) : null}
+  </div>
+  ) : null}
 
  <div className="relative flex min-h-0 flex-1">
  {/* Sidebar */}
@@ -1341,7 +1416,7 @@ export function AmritaCampusMap({
  <div className="mb-3">
  <div className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-slate-500">Blocks A–E</div>
  <div className="grid grid-cols-2 gap-2">
- {(CAMPUS_GEO.blocks as unknown as any[]).filter((b: any) => b.part === 0).map((b: any) => (
+ {(CAMPUS_GEO.blocks as unknown as any[]).map((b: any) => (
  <button
  key={b.block}
  onClick={() => {
@@ -1547,8 +1622,9 @@ export function AmritaCampusMap({
  </span>
  <span className="hidden h-3 w-px bg-slate-200 dark:bg-white/10 sm:block" />
  <span className="text-slate-500">{(CAMPUS_GEO.buildings as unknown as any[]).length} Buildings</span>
- <span className="text-slate-500">5 Blocks</span>
- <span className="text-slate-500">155 Faculty</span>
+  <span className="text-slate-500">{Object.keys(CAMPUS_FLOORS.buildings).length} Blocks</span>
+  <span className="text-slate-500">{OFFICIAL_FLOOR_PLANS.length} Floor plans</span>
+  <span className="text-slate-500">{ALL_FACULTY.length} Faculty</span>
  <span className="text-slate-500">{reports.length} Issues</span>
  <span className="ml-auto rounded-full bg-[#A51636] px-3 py-1 font-bold text-white">Campus Map</span>
  </div>

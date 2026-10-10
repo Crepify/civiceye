@@ -52,7 +52,11 @@ export function BrandProvider({ children }: { children: ReactNode }) {
     }
     if (loading) return;
     const routeAmrita = location.pathname.startsWith('/amrita');
-    const q = new URLSearchParams(location.search).get('brand');
+    // Brand query previews are development-only. A production URL must never
+    // let a query parameter bypass the Amrita domain/access boundary.
+    const q = import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true'
+      ? new URLSearchParams(location.search).get('brand')
+      : null;
     let next: BrandId;
     if (q === 'amrita' || q === 'civiceye') {
       next = q;

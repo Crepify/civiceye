@@ -131,7 +131,7 @@ export function MapPopup({ report, onClose }: MapPopupProps) {
             <ArrowBigUp className="h-4 w-4" />
             Support report
           </button>
-          <Link to={`/report/${report.id}`} className="btn-secondary flex-1 !px-3 !py-2 text-xs">
+          <Link to={`/${report.scope === 'campus' ? 'amrita/' : ''}report/${report.id}`} className="btn-secondary flex-1 !px-3 !py-2 text-xs">
             Details
           </Link>
           <a

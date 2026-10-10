@@ -37,6 +37,11 @@ export interface ReportRow {
   rejects: number;
   verified: boolean;
   assigned_to: string | null;
+  authority_verification_status?: Report['authorityVerificationStatus'];
+  authority_replied_at?: string | null;
+  authority_reply_from?: string | null;
+  authority_reply_subject?: string | null;
+  authority_reply_reference?: string | null;
   created_at: string;
 }
 
@@ -62,6 +67,11 @@ export function mapRow(row: ReportRow): Report {
     verified: row.verified,
     author: row.author_name,
     assignedTo: row.assigned_to ?? undefined,
+    authorityVerificationStatus: row.authority_verification_status ?? 'none',
+    authorityRepliedAt: row.authority_replied_at ?? undefined,
+    authorityReplyFrom: row.authority_reply_from ?? undefined,
+    authorityReplySubject: row.authority_reply_subject ?? undefined,
+    authorityReplyReference: row.authority_reply_reference ?? undefined,
     userId: row.user_id ?? undefined,
     ai: (row.ai as any) ?? null,
     proof: (row.proof as any) ?? null,
@@ -317,4 +327,3 @@ export function displayName(profile: Profile | null): string {
 export function scopeForBrand(brand: BrandId): 'city' | 'campus' {
   return brand === 'amrita' ? 'campus' : 'city';
 }
-

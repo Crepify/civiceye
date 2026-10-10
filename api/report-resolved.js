@@ -13,16 +13,19 @@
  *
  * Called by the authorities dashboard (or a Supabase webhook/cron in future)
  * after a report is marked resolved. Sends a thank-you email to the original
- * reporter crediting them for helping keep the city safe.
+ * reporter crediting them for helping improve their city or campus.
  *
  * Same SMTP config and rate-limit as api/report-authority.js.
  */
 
 import nodemailer from 'nodemailer';
 
-const BRAND_EMAIL = 'info@civiceye.co.in';
-function fromAddress() {
-  return process.env.SMTP_FROM || `CivicEye <${BRAND_EMAIL}>`;
+const CIVIC_EMAIL = 'info@civiceye.co.in';
+const AMRITA_EMAIL = process.env.AMRITA_REPLY_EMAIL || 'info@blr.amrita.edu';
+function fromAddress(scope) {
+  return scope === 'campus'
+    ? process.env.AMRITA_SMTP_FROM || `Amrita Eye <${AMRITA_EMAIL}>`
+    : process.env.SMTP_FROM || `CivicEye <${CIVIC_EMAIL}>`;
 }
 
 const rateMap = new Map();
@@ -71,10 +74,13 @@ function originFromReq(req) {
 function buildThanksEmail({ report, origin }) {
   origin = origin || 'https://civiceye.co.in';
   const appName = report.scope === 'campus' ? 'Amrita Eye' : 'CivicEye';
+  const isCampus = report.scope === 'campus';
+  const place = isCampus ? 'your campus' : 'your neighbourhood';
+  const teamEmail = isCampus ? AMRITA_EMAIL : CIVIC_EMAIL;
   const brandColor = report.scope === 'campus' ? '#A51636' : '#4f46e5';
   const reporterName = report.author || 'Citizen';
   const code = report.code || report.id || '';
-  const reportUrl = report.url || (report.id ? `${origin}/report/${report.id}` : origin);
+  const reportUrl = report.url || (report.id ? `${origin}/${isCampus ? 'amrita/' : ''}report/${report.id}` : origin);
   const resolvedAt = report.resolvedAt
     ? new Date(report.resolvedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
     : new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -86,7 +92,7 @@ function buildThanksEmail({ report, origin }) {
     <div style="background:linear-gradient(135deg,${brandColor},#10b981);padding:28px 24px;text-align:center;">
       <div style="font-size:36px;line-height:1;">🎉</div>
       <h1 style="margin:12px 0 0;color:#ffffff;font-size:22px;font-weight:800;">Your report was fixed!</h1>
-      <p style="margin:6px 0 0;color:#ffffff;font-size:14px;opacity:0.9;">Thank you for helping keep the city safe.</p>
+       <p style="margin:6px 0 0;color:#ffffff;font-size:14px;opacity:0.9;">Thank you for helping improve ${isCampus ? 'your campus' : 'your city'}.</p>
     </div>
     <div style="padding:28px 24px;color:#0f172a;">
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">
@@ -99,9 +105,9 @@ function buildThanksEmail({ report, origin }) {
 
       <div style="margin:0 0 20px;padding:16px;background:#ecfdf5;border-left:4px solid #10b981;border-radius:8px;">
         <p style="margin:0;font-size:14px;line-height:1.6;color:#065f46;">
-          🙏 You made a real difference. Civic issues only get fixed when people like you speak up —
-          and your report helped the team prioritise and resolve this issue for everyone in
-          ${esc(report.locationName || 'your neighbourhood')}.
+           🙏 You made a real difference. Issues only get fixed when people speak up —
+           and your report helped the team prioritise and resolve this issue for everyone in
+           ${esc(report.locationName || place)}.
         </p>
       </div>
 
@@ -131,13 +137,13 @@ function buildThanksEmail({ report, origin }) {
       </p>
 
       <p style="margin:0;font-size:13px;line-height:1.6;color:#64748b;">
-        Thanks again for being a civic changemaker. 💚<br/>
+         Thanks again for helping improve ${esc(place)}. 💚<br/>
         — The ${esc(appName)} Team
       </p>
     </div>
     <div style="padding:16px 24px;background:#f8fafc;text-align:center;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;">
       You're receiving this because you submitted a report on ${esc(appName)} (${esc(origin)}).<br/>
-      Questions? Reply to this email or write to <a href="mailto:info@civiceye.co.in" style="color:#64748b;">info@civiceye.co.in</a>.
+       Questions? Reply to this email or write to <a href="mailto:${esc(teamEmail)}" style="color:#64748b;">${esc(teamEmail)}</a>.
     </div>
   </div>
 </body></html>`;
@@ -149,13 +155,13 @@ function buildThanksEmail({ report, origin }) {
     ``,
     `Your report "${report.title}"${code ? ` (${code})` : ''} was marked resolved by ${resolver} on ${resolvedAt}.`,
     ``,
-    `Thank you for helping keep the city safe. Your report made a real difference for ${report.locationName || 'your neighbourhood'}.`,
+    `Thank you for helping improve ${place}. Your report made a real difference for ${report.locationName || place}.`,
     ``,
     `View your report: ${reportUrl}`,
-    `Report another issue: ${origin}/report`,
+    `Report another issue: ${origin}/${isCampus ? 'amrita/' : ''}report`,
     ``,
     `— The ${appName} Team`,
-    `  ${origin} · info@civiceye.co.in`,
+    `  ${origin} · ${teamEmail}`,
   ].join('\n');
 
   return {
@@ -228,9 +234,9 @@ export default async function handler(req, res) {
     const mail = buildThanksEmail({ report, origin });
 
     await transport.sendMail({
-      from: fromAddress(),
-      to: reporterEmail,
-      replyTo: BRAND_EMAIL,
+       from: fromAddress(report.scope),
+       to: reporterEmail,
+       replyTo: report.scope === 'campus' ? AMRITA_EMAIL : CIVIC_EMAIL,
       subject: mail.subject,
       text: mail.text,
       html: mail.html,

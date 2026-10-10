@@ -12,7 +12,7 @@ export function AmritaCTA() {
         </p>
         <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
-            to="/report"
+            to="/amrita/report"
             className="inline-flex h-14 items-center justify-center rounded-full bg-[#A51636] px-10 text-base font-semibold text-white transition-opacity hover:opacity-90 active:scale-95 dark:bg-[#E52B50]"
           >
             Report an issue

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import {
@@ -44,6 +44,7 @@ export function Login() {
   const { isAmrita, setPreviewBrand, meta } = useBrand();
   const toast = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [params] = useSearchParams();
   // Sanitise `next` so we never end up in a /login → /login?next=/login loop
   // (happens if RequireAuth fires from /login itself or if someone bookmarks
@@ -58,6 +59,7 @@ export function Login() {
     blocked.some((p) => rawNext === p || rawNext.startsWith(p + '/') || rawNext.startsWith(p + '?'))
       ? '/'
       : rawNext;
+  const campusLogin = location.pathname.startsWith('/amrita') || next.startsWith('/amrita');
 
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
@@ -113,6 +115,10 @@ export function Login() {
   const validate = () => {
     if (!emailValid(email)) {
       setError('Enter a valid email address (e.g. name@gmail.com).');
+      return false;
+    }
+    if (campusLogin && !isAmritaEmail(email.trim())) {
+      setError('Amrita Eye requires an official Amrita student or staff email address.');
       return false;
     }
     if (mode === 'signin' && password.length < 6) {
