@@ -19,7 +19,8 @@ export interface CampusRouteResult {
   endNode: number;
 }
 
-const STORAGE_KEY = 'amrita-eye:campus-route-network:v1';
+// v2 invalidates drafts made with the old synthetic Block E location.
+const STORAGE_KEY = 'amrita-eye:campus-route-network:v2';
 
 export const DEFAULT_ROUTE_NETWORK: CampusRouteNetwork = {
   nodes: CAMPUS_GEO.nav.nodes as Array<[number, number]>,

@@ -1,3 +1,10 @@
+/floor-plans/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; frame-ancestors 'self'; object-src 'self';
+  Cache-Control: public, max-age=3600
+
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
