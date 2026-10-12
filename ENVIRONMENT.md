@@ -64,6 +64,8 @@ These variables are used by Vercel API routes and must **not** be prefixed with
 | `AUTHORITY_INBOUND_SECRET` | Shared secret sent by the selected inbound email provider to `/api/authority-inbound`. |
 | `SUPABASE_URL` | Supabase URL for the inbound authority webhook. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase key for normalising authority replies. Never expose it to Vite. |
+| `AMRITA_NETWORK_IPS` | Comma-separated campus public egress IPv4 addresses used by `/api/network-context`. |
+| `AMRITA_NETWORK_CIDRS` | Optional comma-separated campus public IPv4 CIDRs, for example `203.0.113.0/24`. |
 
 The inbound route expects a provider-normalised POST body containing `from`,
 `subject`, `text`, a `CE-XXXXXXXX` report reference, and preferably `messageId`
@@ -72,6 +74,11 @@ It stores replies for admin review; email wording alone never resolves a case.
 Provider sender-authentication and automated evidence validation remain pending.
 Apply `supabase/schema.sql`, `supabase/authority_responses.sql` (including the
 atomic review RPC), and `supabase/campus_routes.sql` before enabling these tools.
+
+The browser cannot read the Wi-Fi SSID. When `AMRITA_NETWORK_IPS` or
+`AMRITA_NETWORK_CIDRS` is configured with the campus network's public egress
+address, CivicEye calls `/api/network-context` and offers a one-time Amrita Eye
+switch prompt. If the variables are empty, the prompt stays disabled.
 
 ## 🔐 Security notes
 

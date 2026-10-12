@@ -7,6 +7,7 @@ import { ReportsProvider } from './ReportsContext';
 import { NotificationProvider } from './NotificationContext';
 import { PwaInstallPrompt } from '@/components/PwaInstallPrompt';
 import { AIChatbot } from '@/components/AIChatbot';
+import { AmritaNetworkPrompt } from '@/components/AmritaNetworkPrompt';
 
 /**
  * Composition root for all cross-cutting providers.
@@ -26,6 +27,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
               <NotificationProvider>
                 {children}
                 <PwaInstallPrompt />
+                <AmritaNetworkPrompt />
                 <AIChatbot />
               </NotificationProvider>
             </ReportsProvider>
