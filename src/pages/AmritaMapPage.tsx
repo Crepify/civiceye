@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, MapPin, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Building2, Navigation } from 'lucide-react';
 import { useReports } from '@/hooks/useReports';
 import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
 
@@ -35,9 +35,12 @@ export function AmritaMapPage() {
         </Link>
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-[#A51636]" />
-          <h1 className="text-lg font-bold text-slate-900 dark:text-white">Campus Map</h1>
-        </div>
-        <div className="ml-auto hidden items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:flex">
+         <h1 className="text-lg font-bold text-slate-900 dark:text-white">Campus Map</h1>
+         </div>
+         <Link to="/amrita/route" className="ml-auto flex items-center gap-2 rounded-xl bg-[#A51636] px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#8a1230]">
+           <Navigation className="h-3.5 w-3.5" /> Live directions
+         </Link>
+         <div className="hidden items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 sm:flex">
           <MapPin className="h-3.5 w-3.5" /> Amrita Bengaluru Campus
         </div>
       </div>

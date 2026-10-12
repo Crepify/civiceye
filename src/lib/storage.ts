@@ -6,6 +6,9 @@ import { supabase } from './supabase';
  */
 export async function uploadReportPhoto(dataUrl: string, userId: string): Promise<string> {
   if (!supabase) throw new Error('Supabase is not configured.');
+  const { data: sessionData, error: sessionError } = await supabase.auth.getUser();
+  if (sessionError || !sessionData.user) throw new Error('Your sign-in session expired. Sign in again before uploading a report photo.');
+  if (sessionData.user.id !== userId) throw new Error('Your sign-in session does not match this report. Sign in again and retry.');
   const blob = await (await fetch(dataUrl)).blob();
   const ext = blob.type === 'image/png' ? 'png' : 'jpg';
   const filePath = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -18,7 +21,7 @@ export async function uploadReportPhoto(dataUrl: string, userId: string): Promis
 
   if (error) {
     const detail = typeof error.message === 'string' && error.message ? error.message : `HTTP ${error.statusCode ?? '?'}`;
-    throw new Error(`Photo upload failed (${detail}). Check that the "${BUCKET}" bucket exists and is Public in Supabase → Storage.`);
+    throw new Error(`Photo upload failed (${detail}). Apply supabase/storage-fix.sql and confirm the "${BUCKET}" bucket exists.`);
   }
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
@@ -32,6 +35,8 @@ export async function uploadReportPhoto(dataUrl: string, userId: string): Promis
 export async function uploadAnnotatedPhoto(dataUrl: string, userId: string): Promise<string> {
   if (!supabase) throw new Error('Supabase is not configured.');
   if (!dataUrl || !dataUrl.startsWith('data:')) return dataUrl;
+  const { data: sessionData } = await supabase.auth.getUser();
+  if (!sessionData.user || sessionData.user.id !== userId) return dataUrl;
   const blob = await (await fetch(dataUrl)).blob();
   const ext = blob.type === 'image/png' ? 'png' : 'jpg';
   const filePath = `${userId}/annotated/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;

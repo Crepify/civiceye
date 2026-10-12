@@ -34,7 +34,7 @@ export interface OfficialFloorPlanDefinition {
 }
 
 const source = (building: string, floor?: string) =>
-  floor ? `/floor-plans/block-${building}-${floor}-official.pdf` : `/floor-plans/block-${building}-official.pdf`;
+  `/floor-plans/professional/block-${building}-${floor || 'g'}.pdf`;
 
 const rooms = (...items: Array<OfficialRoom | string>): OfficialRoom[] =>
   items.map((item) => (typeof item === 'string' ? { label: item, name: item } : item));

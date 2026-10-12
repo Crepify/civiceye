@@ -37,8 +37,6 @@ import { Loader } from '@/components/Loader';
 import { useReports } from '@/hooks/useReports';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
-import { TwoFactorGate } from '@/components/TwoFactorGate';
-import { isGuest } from '@/utils/guest';
 import { ANALYSIS_STAGES, analysisTotalMs, runImageAnalysis } from '@/services/aiAnalysisService';
 import { roboflowStatus } from '@/services/roboflowService';
 import { requestLocation } from '@/services/geoService';
@@ -96,8 +94,7 @@ function ReportWizard() {
   const { addReport, getById } = useReports();
   const toast = useToast();
   const navigate = useNavigate();
-  const { user, profile, configured } = useAuth();
-  const [mfaGateOpen, setMfaGateOpen] = useState(false);
+  const { user, profile } = useAuth();
   const { isAmrita } = useBrand();
   const availableCategories = getAvailableCategories(isAmrita);
   const [uploading, setUploading] = useState(false);
@@ -331,14 +328,6 @@ function ReportWizard() {
 
   return (
     <div className="pb-20 pt-[calc(var(--nav-height)+2.5rem)] sm:pt-[calc(var(--nav-height)+3.5rem)]">
-      <TwoFactorGate
-        open={mfaGateOpen}
-        onClose={() => setMfaGateOpen(false)}
-        onVerified={() => {
-          setMfaGateOpen(false);
-          void submit();
-        }}
-      />
       <div className="section-pad">
         <div className="mb-10">
           <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">
@@ -558,11 +547,7 @@ function ReportWizard() {
                   ) : (
                     <button
                       onClick={() => {
-                        if (configured && user && !isGuest()) {
-                          setMfaGateOpen(true);
-                        } else {
-                          void submit();
-                        }
+                        void submit();
                       }}
                       disabled={!canContinue || uploading}
                       className="btn-primary"

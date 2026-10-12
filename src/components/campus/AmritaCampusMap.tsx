@@ -84,8 +84,20 @@ function svgToLatLng(x: number, y: number): Coordinates {
 }
 
 function svgToLatLngString(x: number, y: number) {
- const c = svgToLatLng(x, y);
- return `${c.lat.toFixed(6)}, ${c.lng.toFixed(6)}`;
+  const c = svgToLatLng(x, y);
+  return `${c.lat.toFixed(6)}, ${c.lng.toFixed(6)}`;
+}
+
+function clampCameraPosition(x: number, y: number, k: number, viewportWidth: number, viewportHeight: number, contentWidth: number, contentHeight: number) {
+  const scaledWidth = contentWidth * k;
+  const scaledHeight = contentHeight * k;
+  const horizontal = scaledWidth <= viewportWidth
+    ? (viewportWidth - scaledWidth) / 2
+    : Math.max(viewportWidth - scaledWidth - 80, Math.min(80, x));
+  const vertical = scaledHeight <= viewportHeight
+    ? (viewportHeight - scaledHeight) / 2
+    : Math.max(viewportHeight - scaledHeight - 80, Math.min(80, y));
+  return { x: horizontal, y: vertical };
 }
 
 // Campus navigation
@@ -194,7 +206,7 @@ const SEV_COLOR: Record<string, string> = {
 
 function getOfficialFloorPlanSource(buildingId: string, floorId: string): string {
  const official = getOfficialFloorPlan(buildingId, floorId);
- return official?.source || '/floor-plans/block-a-official.pdf';
+ return official?.source || '/floor-plans/professional/block-a-g.pdf';
 }
 
 // Props
@@ -294,7 +306,7 @@ export function AmritaCampusMap({
  const searchIndex = useMemo(() => {
  const items: SearchItem[] = [];
  // Buildings
- (CAMPUS_GEO.buildings as unknown as any[]).forEach((b: any) => {
+  (CAMPUS_GEO.buildings as unknown as any[]).filter((b: any) => b.kind !== 'academic').forEach((b: any) => {
  items.push({
  kind: 'building',
  id: b.name,
@@ -495,22 +507,20 @@ export function AmritaCampusMap({
  const onPointerMove = (e: PointerEvent) => {
  if (!drag) return;
  setCam((c) => {
- let nx = e.clientX - drag.x;
- let ny = e.clientY - drag.y;
- // Prevent getting lost: clamp panning so campus always visible, limit black space
- if (stageRef.current) {
+  let nx = e.clientX - drag.x;
+  let ny = e.clientY - drag.y;
+  // Keep a small, symmetric amount of breathing room. The previous clamp
+  // inverted its min/max bounds when the content was smaller than the stage,
+  // which forced the camera toward the bottom-left corner.
+  if (stageRef.current) {
  const bw = stageRef.current.clientWidth;
  const bh = stageRef.current.clientHeight;
  const W = view.mode === 'campus' ? WIDTH_M : currentFloor?.width || 1000;
  const H = view.mode === 'campus' ? HEIGHT_M : currentFloor?.height || 460;
  const k = c.k;
- // Allow some overflow but not too much black space
- const minX = bw - W * k - 100;
- const maxX = 100;
- const minY = bh - H * k - 100;
- const maxY = 100;
- nx = Math.max(minX, Math.min(maxX, nx));
- ny = Math.max(minY, Math.min(maxY, ny));
+  const clamped = clampCameraPosition(nx, ny, k, bw, bh, W, H);
+  nx = clamped.x;
+  ny = clamped.y;
  }
  return { ...c, x: nx, y: ny };
  });
@@ -526,11 +536,19 @@ export function AmritaCampusMap({
  const mx = e.clientX - rect.left;
  const my = e.clientY - rect.top;
  const f = e.deltaY < 0 ? 1.12 : 0.89;
- setCam((c) => ({
- x: mx - (mx - c.x) * f,
- y: my - (my - c.y) * f,
- k: Math.max(0.5, Math.min(4, c.k * f)),
- }));
+  setCam((c) => {
+  const k = Math.max(0.5, Math.min(4, c.k * f));
+  const position = clampCameraPosition(
+    mx - (mx - c.x) * f,
+    my - (my - c.y) * f,
+    k,
+    stageRef.current?.clientWidth || 0,
+    stageRef.current?.clientHeight || 0,
+    view.mode === 'campus' ? WIDTH_M : currentFloor?.width || 1000,
+    view.mode === 'campus' ? HEIGHT_M : currentFloor?.height || 460,
+  );
+  return { ...position, k };
+  });
  };
  svg.addEventListener('pointerdown', onPointerDown);
  window.addEventListener('pointermove', onPointerMove);
@@ -566,21 +584,50 @@ export function AmritaCampusMap({
  return;
  }
 
- // Otherwise show lat/lng + copy
- const coords = svgToLatLng(x, y);
+  // Otherwise show lat/lng + copy
+  const coords = svgToLatLng(x, y);
  setInfo({
  type: 'point',
  x,
  y,
  lat: coords.lat,
  lng: coords.lng,
- name: `Pinned Location`,
+  name: `Pinned Location`,
  sub: `${x.toFixed(1)}m, ${y.toFixed(1)}m · ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`,
  });
  setInfoOpen(true);
  },
- [drag, cam, pinDropping, onPinDrop, toast],
- );
+  [drag, cam, pinDropping, onPinDrop, toast],
+  );
+
+  const handleCanvasDoubleClick = useCallback((e: React.MouseEvent) => {
+  if (view.mode !== 'campus' || !stageRef.current || !svgRef.current) return;
+  const target = e.target as Element;
+  if (target.closest('.campus-interactive')) return;
+  const rect = stageRef.current.getBoundingClientRect();
+  const x = (e.clientX - rect.left - cam.x) / cam.k;
+  const y = (e.clientY - rect.top - cam.y) / cam.k;
+  const coords = svgToLatLng(x, y);
+  const candidates = [
+    ...(CAMPUS_GEO.blocks as unknown as any[]).map((block: any) => ({ name: `Block ${block.block}`, point: block.c })),
+    ...NAV_POIS.map((poi: any) => ({ name: poi.name, point: poi.c })),
+  ];
+  const nearest = candidates.reduce<{ name: string; point: CampusPoint; distance: number } | null>((best, candidate) => {
+    const distance = Math.hypot(candidate.point[0] - x, candidate.point[1] - y);
+    return !best || distance < best.distance ? { ...candidate, distance } : best;
+  }, null);
+  setInfo({
+    type: 'point',
+    x,
+    y,
+    lat: coords.lat,
+    lng: coords.lng,
+    name: nearest && nearest.distance < 90 ? `Map point near ${nearest.name}` : 'Campus map point',
+    sub: `${x.toFixed(1)}m, ${y.toFixed(1)}m · ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`,
+    nearest: nearest && nearest.distance < 90 ? { name: nearest.name, distance: nearest.distance } : null,
+  });
+  setInfoOpen(true);
+  }, [cam, view.mode]);
 
  // Navigation
  const goRoute = useCallback(() => {
@@ -747,10 +794,17 @@ export function AmritaCampusMap({
  <div className="text-xs text-slate-500">Campus meters</div>
  <div className="font-mono text-sm">{info.x.toFixed(1)} m, {info.y.toFixed(1)} m</div>
  <div className="mt-2 text-xs text-slate-500">Lat / Lng</div>
- <div className="font-mono text-sm">
- {info.lat.toFixed(6)}, {info.lng.toFixed(6)}
- </div>
- </div>
+  <div className="font-mono text-sm">
+  {info.lat.toFixed(6)}, {info.lng.toFixed(6)}
+  </div>
+  </div>
+  {info.nearest ? (
+  <div className="rounded-xl border border-[#A51636]/15 bg-[#A51636]/5 p-3 text-sm dark:border-[#A51636]/30 dark:bg-[#A51636]/10">
+  <div className="text-xs font-bold uppercase tracking-wider text-[#A51636]">Nearby feature</div>
+  <div className="mt-1 font-semibold">{info.nearest.name}</div>
+  <div className="text-xs text-slate-500">About {Math.round(info.nearest.distance)} m from this point</div>
+  </div>
+  ) : null}
  <div className="grid grid-cols-2 gap-2">
  <button
  onClick={() => {
@@ -1391,7 +1445,7 @@ export function AmritaCampusMap({
  {/* Buildings */}
  <div className="mb-3">
  <div className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-slate-500">Buildings</div>
- {(CAMPUS_GEO.buildings as unknown as any[]).map((b: any) => (
+  {(CAMPUS_GEO.buildings as unknown as any[]).filter((b: any) => b.kind !== 'academic').map((b: any) => (
  <button
  key={b.name}
  onClick={() => {
@@ -1473,7 +1527,7 @@ export function AmritaCampusMap({
  {sidebarOpen ? <div className="absolute inset-0 z-10 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} /> : null}
 
  {/* Stage */}
- <div ref={stageRef} className="relative flex-1 overflow-hidden bg-[#FFF5F7] dark:bg-[#1a0f14]" onClick={handleCanvasClick}>
+  <div ref={stageRef} className="relative flex-1 overflow-hidden bg-[#FFF5F7] dark:bg-[#1a0f14]" onClick={handleCanvasClick} onDoubleClick={handleCanvasDoubleClick}>
  <svg ref={svgRef} className="h-full w-full touch-none select-none" style={{ cursor: drag ? 'grabbing' : 'grab' }}>
  <g ref={gRef}>
  {/* Satellite */}
@@ -1502,7 +1556,7 @@ export function AmritaCampusMap({
  </g>
  ))}
  {/* Buildings */}
- {(CAMPUS_GEO.buildings as unknown as any[]).map((b: any) => (
+  {(CAMPUS_GEO.buildings as unknown as any[]).filter((b: any) => b.kind !== 'academic').map((b: any) => (
  <g key={b.name} className="campus-interactive cursor-pointer">
  <path d={b.d} fill={KIND_COLOR[b.kind] || '#A51636'} fillOpacity={showSat ? 0.85 : 0.15} stroke={KIND_COLOR[b.kind] || '#A51636'} strokeWidth={1.5} onClick={() => { setInfo({ type: 'building', raw: b, name: b.name, sub: `${b.kind}`, point: b.c }); setInfoOpen(true); focusPoint(b.c[0], b.c[1], 100); }} />
  <text x={b.c[0]} y={b.c[1]} textAnchor="middle" fontSize={11 / cam.k} fontWeight={600} fill="#1e293b" style={{ paintOrder: 'stroke', stroke: 'white', strokeWidth: 3 / cam.k }}>
@@ -1621,7 +1675,7 @@ export function AmritaCampusMap({
  <Building2 className="h-3.5 w-3.5 text-[#A51636]" /> Amrita Bengaluru Campus
  </span>
  <span className="hidden h-3 w-px bg-slate-200 dark:bg-white/10 sm:block" />
- <span className="text-slate-500">{(CAMPUS_GEO.buildings as unknown as any[]).length} Buildings</span>
+  <span className="text-slate-500">{(CAMPUS_GEO.buildings as unknown as any[]).filter((building: any) => building.kind !== 'academic').length + CAMPUS_GEO.blocks.length} Buildings</span>
   <span className="text-slate-500">{Object.keys(CAMPUS_FLOORS.buildings).length} Blocks</span>
   <span className="text-slate-500">{OFFICIAL_FLOOR_PLANS.length} Floor plans</span>
   <span className="text-slate-500">{ALL_FACULTY.length} Faculty</span>

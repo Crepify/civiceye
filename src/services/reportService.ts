@@ -117,6 +117,9 @@ export const reportService = {
     ai?: unknown;
   }): Promise<Report> {
     if (!supabase) throw new Error('Supabase is not configured.');
+    const { data: sessionData, error: sessionError } = await supabase.auth.getUser();
+    if (sessionError || !sessionData.user) throw new Error('Your sign-in session expired. Sign in again before submitting the report.');
+    if (sessionData.user.id !== input.userId) throw new Error('Your sign-in session does not match this report. Sign in again and retry.');
     const { data, error } = await supabase
       .from('reports')
       .insert({
@@ -135,7 +138,7 @@ export const reportService = {
       })
       .select()
       .single();
-    if (error) throw error;
+    if (error) throw new Error(`Report save failed (${error.message}). Check the reports table RLS policy and try again.`);
     return mapRow(data as ReportRow);
   },
 
