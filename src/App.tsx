@@ -15,6 +15,7 @@ import { cn } from '@/utils/cn';
 import { Features } from '@/pages/Features';
 import { MapPage } from '@/pages/MapPage';
 import { AmritaMapPage } from '@/pages/AmritaMapPage';
+import { AmritaRoutePage } from '@/pages/AmritaRoutePage';
 import { ReportPage } from '@/pages/ReportPage';
 import { ReportDetails } from '@/pages/ReportDetails';
 import { Dashboard } from '@/pages/Dashboard';
@@ -92,6 +93,7 @@ export default function App() {
   const amritaOwnsNavPad = new Set([
     '/amrita',
     '/amrita/map',
+    '/amrita/route',
     '/amrita/food-hygiene',
     '/amrita/features',
     '/amrita/about',
@@ -112,6 +114,7 @@ export default function App() {
       <Route path="/" element={isAmrita ? <AmritaEye /> : <Landing />} />
       <Route path="/amrita" element={<RequireAmrita><AmritaEye /></RequireAmrita>} />
       <Route path="/amrita/map" element={<RequireAmrita><AmritaMapPage /></RequireAmrita>} />
+      <Route path="/amrita/route" element={<RequireAmrita><AmritaRoutePage /></RequireAmrita>} />
       <Route path="/amrita/food-hygiene" element={<RequireAmrita><AmritaFoodHygienePage /></RequireAmrita>} />
       <Route path="/amrita/report" element={<RequireAmrita><ReportPage /></RequireAmrita>} />
       <Route path="/amrita/report/:id" element={<RequireAmrita><ReportDetails /></RequireAmrita>} />

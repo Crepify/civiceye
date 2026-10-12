@@ -34,7 +34,7 @@ function SceneWithDelayedComposer({ resolution, mousePos }: { resolution: Vector
           if (context && !(context as WebGLRenderingContext).isContextLost?.()) {
             setComposerReady(true)
           }
-        } catch (e) {
+        } catch {
           /* ignore WebGL context errors */
         }
       }, 100)

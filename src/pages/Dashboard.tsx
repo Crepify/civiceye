@@ -25,7 +25,6 @@ import { ReportToAuthority } from '@/components/ReportToAuthority';
 import { MapView } from '@/components/map/MapView';
 import { AmritaCampusMap } from '@/components/campus/AmritaCampusMap';
 import { Leaderboard } from '@/components/Leaderboard';
-import { TwoFactorCard } from '@/components/TwoFactorCard';
 import { BeforeAfterSlider } from '@/components/BeforeAfterSlider';
 import { EstateOfficeDashboard } from '@/components/EstateOfficeDashboard';
 import { getSLAStatus, formatSLATime, getEscalationTarget } from '@/services/slaService';
@@ -235,10 +234,6 @@ export function Dashboard() {
               <RefreshCcw className="h-4 w-4" />
             </button>
           </div>
-        </div>
-
-        <div className="mt-6">
-          <TwoFactorCard />
         </div>
 
         {/* KPI cards */}

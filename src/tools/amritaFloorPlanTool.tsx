@@ -66,6 +66,8 @@ export interface FloorPlan {
   corridor: { x: number; y: number; w: number; h: number; openSide: 'south' | 'north' | 'east' | 'west'; railing: boolean };
   /** Exact PDF-derived visual; room index remains searchable separately. */
   imageSrc?: string;
+  /** Professional floor plan PDF supplied for the Bengaluru campus pilot. */
+  pdfSrc?: string;
 }
 
 function officialRoomType(type: string | undefined): Room['type'] {
@@ -154,6 +156,7 @@ function generateOfficialFloorPlan(buildingId: string, floorId: string): FloorPl
     rooms,
     corridor,
     imageSrc: `/floor-plans/images/block-${definition.buildingId}-${definition.floorId.split('-')[1]}.png`,
+    pdfSrc: definition.source,
   };
 }
 
@@ -561,6 +564,15 @@ export function ProperFloorPlanSVG({ plan, onRoomClick }: { plan: FloorPlan; onR
   return (
     <foreignObject x={0} y={0} width={plan.width} height={plan.height}>
     <div className="relative h-full w-full">
+    {plan.pdfSrc ? (
+      <div className="absolute inset-0 overflow-hidden rounded-xl bg-white">
+        <iframe
+          title={`${plan.name} professional floor plan`}
+          src={plan.pdfSrc}
+          className="h-full w-full border-0 bg-white"
+        />
+      </div>
+    ) : (
     <svg viewBox={`0 0 ${plan.width} ${plan.height}`} className="h-full w-full bg-white">
       <rect x={0} y={0} width={plan.width} height={plan.height} fill="#ffffff" />
       {plan.imageSrc ? (
@@ -647,7 +659,8 @@ export function ProperFloorPlanSVG({ plan, onRoomClick }: { plan: FloorPlan; onR
         );
       }) : null}
     </svg>
-    {plan.imageSrc ? (
+    )}
+    {plan.pdfSrc || plan.imageSrc ? (
       <div className="campus-interactive absolute right-3 top-3 max-h-[calc(100%-1.5rem)] w-52 overflow-auto rounded-xl border border-slate-200/80 bg-white/95 p-2 shadow-lg backdrop-blur dark:border-white/10 dark:bg-slate-950/90">
         <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-[#A51636]">Room index</p>
         <div className="space-y-0.5">

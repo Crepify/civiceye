@@ -14,9 +14,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
-/** 2FA enforcement at sign-in is paused for now. Flip to true to re-enable
- *  the compulsory enroll/code step on this page. */
-const ENFORCE_2FA_AT_LOGIN = false;
 import { useToast } from '@/hooks/useToast';
 import { useBrand } from '@/hooks/useBrand';
 import { isAmritaEmail } from '@/utils/auth';
@@ -65,15 +62,6 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
-  const [mfaStage, setMfaStage] = useState<{
-    kind: 'verify' | 'enroll';
-    factorId: string;
-    challengeId?: string;
-    qr?: string;
-    secret?: string;
-  } | null>(null);
-  const [mfaCode, setMfaCode] = useState('');
-  const [mfaChecking, setMfaChecking] = useState(false);
   const [fullName, setFullName] = useState('');
   const [busy, setBusy] = useState(false);
   const [sentReset, setSentReset] = useState(false);
@@ -82,13 +70,13 @@ export function Login() {
 
   /* --- Auto-redirect if already signed in (hard-reload style) -------- */
   useEffect(() => {
-    if (configured && !loading && user && !mfaStage && !mfaChecking) {
+    if (configured && !loading && user) {
       // Already signed in (e.g. landed on /login via back button) — take
       // them home using a full reload so we don't race any half-mounted
       // state.
       window.location.replace(next);
     }
-  }, [configured, loading, user, next, mfaStage, mfaChecking]);
+  }, [configured, loading, user, next]);
 
   /* --- Instant brand preview while the user types -------------------- */
   useEffect(() => {
@@ -148,50 +136,6 @@ export function Login() {
     }, 450);
   };
 
-
-  const resetMfa = async () => {
-    if (!supabase || busy) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const factors = await supabase.auth.mfa.listFactors();
-      for (const f of factors.data?.totp ?? []) {
-        const { error } = await supabase.auth.mfa.unenroll({ factorId: f.id });
-        if (error) throw error;
-      }
-      // Factors removed — let them in; the compulsory flow re-enrolls next sign-in.
-      hardRedirect(next);
-    } catch {
-      setError('Automatic reset was blocked by the server. Use the "Magic link" tab to sign in via your email, or ask an admin to remove the factor in the Supabase dashboard.');
-      setBusy(false);
-    }
-  };
-
-  const verifyMfa = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!supabase || !mfaStage || busy) return;
-    setBusy(true);
-    setError(null);
-    try {
-      let challengeId = mfaStage.challengeId;
-      if (mfaStage.kind === 'enroll' || !challengeId) {
-        const ch = await supabase.auth.mfa.challenge({ factorId: mfaStage.factorId });
-        if (ch.error) throw ch.error;
-        challengeId = ch.data.id;
-      }
-      const { error } = await supabase.auth.mfa.verify({
-        factorId: mfaStage.factorId,
-        challengeId,
-        code: mfaCode.trim(),
-      });
-      if (error) throw error;
-      hardRedirect(next);
-    } catch {
-      setError('Wrong code — open your authenticator app and try the current 6-digit code.');
-      setBusy(false);
-    }
-  };
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy || !validate()) return;
@@ -204,38 +148,7 @@ export function Login() {
     }
     try {
       if (mode === 'signin') {
-        setMfaChecking(true);
         await signInWithPassword(email, password);
-        // 2FA at sign-in (currently paused — see ENFORCE_2FA_AT_LOGIN).
-        if (ENFORCE_2FA_AT_LOGIN && supabase) {
-          const factors = await supabase.auth.mfa.listFactors();
-          const totp = factors.data?.totp.find((f) => f.status === 'verified');
-          if (totp) {
-            const ch = await supabase.auth.mfa.challenge({ factorId: totp.id });
-            if (!ch.error) {
-              setMfaStage({ kind: 'verify', factorId: totp.id, challengeId: ch.data.id });
-              setMfaCode('');
-              setBusy(false);
-              return;
-            }
-          } else {
-            const en = await supabase.auth.mfa.enroll({
-              factorType: 'totp',
-              friendlyName: 'Authenticator app',
-            });
-            if (!en.error) {
-              setMfaStage({
-                kind: 'enroll',
-                factorId: en.data.id,
-                qr: en.data.totp?.qr_code ?? '',
-                secret: en.data.totp?.secret ?? '',
-              });
-              setMfaCode('');
-              setBusy(false);
-              return;
-            }
-          }
-        }
         hardRedirect(next);
       } else {
         const { session } = await signUp(email, password, fullName);
@@ -494,54 +407,7 @@ export function Login() {
             </div>
           ) : null}
 
-          {mfaStage ? (
-              <div className="mb-4 border-[3px] border-[#172b44] bg-[#fff8e7] p-4 shadow-[3px_3px_0_#172b44]">
-                {mfaStage.kind === 'enroll' ? (
-                  <>
-                    <p className="inline-block border-2 border-[#172b44] bg-[#ef6b59] px-2 py-1 text-[10px] font-black tracking-wide text-[#172b44]">2FA SETUP — REQUIRED</p>
-                    <h2 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">Secure your account first</h2>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      2FA is compulsory. Scan this QR with Google Authenticator / Authy (or type the
-                      secret), then enter the 6-digit code to finish signing in.
-                    </p>
-                    {mfaStage.qr ? (
-                      <img src={mfaStage.qr} alt="Scan with your authenticator app" className="mt-3 h-36 w-36 border-[3px] border-[#172b44] bg-white p-2" />
-                    ) : null}
-                    <code className="mt-2 block break-all text-[10px] font-bold text-slate-500 dark:text-slate-400">{mfaStage.secret}</code>
-                  </>
-                ) : (
-                  <>
-                    <p className="inline-block border-2 border-[#172b44] bg-[#ffd630] px-2 py-1 text-[10px] font-black tracking-wide text-[#172b44]">STEP 2 OF 2</p>
-                    <h2 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">Authenticator code</h2>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      Password accepted. Now enter the 6-digit code from your authenticator app.
-                    </p>
-                  </>
-                )}
-                <form onSubmit={verifyMfa} className="mt-3 flex flex-wrap items-center gap-2">
-                  <input
-                    value={mfaCode}
-                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    inputMode="numeric"
-                    placeholder="••••••"
-                    autoFocus
-                    className="input-base w-32 text-center text-xl font-black tracking-[.3em]"
-                    aria-label="6-digit authenticator code"
-                  />
-                  <button type="submit" disabled={busy || mfaCode.length !== 6} className="btn-primary">
-                    Verify & sign in
-                  </button>
-                </form>
-                <button
-                  type="button"
-                  onClick={() => void resetMfa()}
-                  className="mt-2 text-xs font-bold text-primary-600 underline hover:text-primary-700 dark:text-primary-400"
-                >
-                  Lost your authenticator? Reset 2FA
-                </button>
-              </div>
-            ) : null}
-            <form onSubmit={submit} style={mfaStage ? { display: 'none' } : undefined} className="space-y-4">
+            <form onSubmit={submit} className="space-y-4">
             {mode === 'signup' ? (
               <div>
                 <label htmlFor="name" className="label-base">
@@ -599,10 +465,6 @@ export function Login() {
               </div>
             </div>
 
-            <p className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              2FA available — enable it from your Dashboard after signing in.
-            </p>
             <button type="submit" disabled={busy} className="btn-primary w-full">
               {busy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

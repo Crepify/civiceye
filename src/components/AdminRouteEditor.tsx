@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Check, GitBranch, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/useToast';
+import { CAMPUS_GEO } from '@/data/amritaCampus/geo';
 import {
   DEFAULT_ROUTE_NETWORK,
   checkCampusRouteNetwork,
@@ -42,9 +43,25 @@ export function AdminRouteEditor() {
   }, []);
 
   const nodeOptions = useMemo(
-    () => network.nodes.map((point, index) => ({ index, label: `${index} · ${point[0].toFixed(1)}, ${point[1].toFixed(1)}` })),
-    [network.nodes],
+    () => network.nodes.map((point, index) => {
+      const nearest = network.pois.reduce<{ name: string; distance: number } | null>((best, poi) => {
+        const distance = Math.hypot(poi.c[0] - point[0], poi.c[1] - point[1]);
+        return !best || distance < best.distance ? { name: poi.name, distance } : best;
+      }, null);
+      return { index, label: nearest && nearest.distance < 32 ? `${nearest.name} · node ${index}` : `Walkway point ${index}` };
+    }),
+    [network.nodes, network.pois],
   );
+
+  const chooseNode = (index: number) => {
+    if (from === '' || (from !== '' && to !== '')) {
+      setFrom(String(index));
+      setTo('');
+    } else {
+      setTo(String(index));
+    }
+    setLastCheck(null);
+  };
 
   const addEdge = () => {
     const a = Number(from);
@@ -126,10 +143,20 @@ export function AdminRouteEditor() {
 
       <div className="grid gap-5 p-5 lg:grid-cols-[1fr_1.4fr]">
         <div className="space-y-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Add connection</p>
-          <select value={from} onChange={(event) => setFrom(event.target.value)} className="input-base">
+           <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Add connection</p>
+           <p className="text-xs leading-relaxed text-slate-500">Click one walkway point for the start and one for the end. The selectors below stay available for precise editing.</p>
+           <div className="overflow-hidden rounded-xl border border-slate-200 bg-[#fff7f8] dark:border-white/10 dark:bg-[#1a0f14]">
+             <svg viewBox={`0 0 ${CAMPUS_GEO.meta.width} ${CAMPUS_GEO.meta.height}`} className="h-56 w-full" role="img" aria-label="Visual campus route editor">
+               <rect width={CAMPUS_GEO.meta.width} height={CAMPUS_GEO.meta.height} fill="transparent" />
+               {(CAMPUS_GEO.blocks as unknown as Array<{ block: string; d: string; c: [number, number] }>).map((block) => <g key={block.block}><path d={block.d} fill="#A51636" fillOpacity="0.12" stroke="#A51636" strokeWidth="2" /><text x={block.c[0]} y={block.c[1]} textAnchor="middle" fontSize="12" fontWeight="800" fill="#7b1029">{block.block}</text></g>)}
+               {network.edges.map(([a, b], index) => <line key={`edge-${index}`} x1={network.nodes[a][0]} y1={network.nodes[a][1]} x2={network.nodes[b][0]} y2={network.nodes[b][1]} stroke="#94a3b8" strokeWidth="2" />)}
+               {network.nodes.map((point, index) => <g key={`node-${index}`} className="cursor-pointer" onClick={() => chooseNode(index)}><circle cx={point[0]} cy={point[1]} r={String(index) === from || String(index) === to ? 5 : 2.6} fill={String(index) === from ? '#16a34a' : String(index) === to ? '#dc2626' : '#2563eb'} stroke="white" strokeWidth="1.5" /><title>{nodeOptions[index]?.label}</title></g>)}
+             </svg>
+           </div>
+           <div className="flex gap-2 text-[11px] font-semibold"><span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-700">Start: {from === '' ? 'choose point' : nodeOptions[Number(from)]?.label}</span><span className="rounded-full bg-rose-100 px-2 py-1 text-rose-700">End: {to === '' ? 'choose point' : nodeOptions[Number(to)]?.label}</span></div>
+           <select value={from} onChange={(event) => setFrom(event.target.value)} className="input-base">
             <option value="">From node…</option>
-            {nodeOptions.map((node) => <option key={node.index} value={node.index}>{node.label}</option>)}
+             {nodeOptions.map((node) => <option key={node.index} value={node.index}>{node.label}</option>)}
           </select>
           <select value={to} onChange={(event) => setTo(event.target.value)} className="input-base">
             <option value="">To node…</option>
